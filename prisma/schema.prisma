@@ -1,0 +1,257 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ──────────────────────────────────────────────
+// Enums do Sistema Multi-Vertical
+// ──────────────────────────────────────────────
+// Em SQLite armazenamos strings, mas estruturamos para portabilidade Postgres
+
+// Segmentos de Mercado
+// AUTO, INSURANCE, ACCOUNTING, CLINIC, GENERAL
+
+// Papéis de Usuário (RBAC)
+// SUPER_ADMIN, ADMIN_EMPRESA, VENDEDOR
+
+// ──────────────────────────────────────────────
+// Organization — Tenant Raiz (Isolamento Estrito)
+// ──────────────────────────────────────────────
+model Organization {
+  id              String         @id @default(cuid())
+  nome            String
+  slug            String         @unique
+  segmento        String         @default("GENERAL") // AUTO, INSURANCE, ACCOUNTING, CLINIC, GENERAL
+  logoUrl         String?
+  corPrimaria     String?        @default("#00DDD7")
+  plano           String         @default("pro")     // starter, pro, enterprise
+  statusPlano     String         @default("ativo")   // trial, ativo, atrasado, cancelado
+  whatsappNumber       String?
+  telefoneComercial    String?
+  cnpj                 String?
+  emailNotificacoes    String?
+  instagramHandle      String?
+  
+  // Conexões e Provedores
+  whatsappTipoConexao  String?        @default("QR_CODE") // QR_CODE, META_CLOUD_API
+  whatsappStatus       String?        @default("DISCONNECTED") // CONNECTED, DISCONNECTED, CONNECTING
+  metaPhoneNumberId    String?
+  metaWabaId           String?
+  metaAccessToken      String?
+  
+  instagramConnected   Boolean?       @default(false)
+  instagramKeywordsJson String?       // Array em JSON de palavras-chave do Direct
+  quizConfigJson       String?        // Configuração dinâmica de perguntas e opções do Quiz
+
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  users           User[]
+  leads           Lead[]
+  conversations   Conversation[]
+  appointments    Appointment[]
+  vehicles        Vehicle[]
+  insurancePolicies InsurancePolicy[]
+  taxGuides       TaxGuide[]
+  auditLogs       AuditLog[]
+}
+
+// ──────────────────────────────────────────────
+// User — Usuário com RBAC
+// ──────────────────────────────────────────────
+model User {
+  id             String       @id @default(cuid())
+  organizationId String
+  nome           String
+  email          String       @unique
+  senhaHash      String
+  role           String       @default("ADMIN_EMPRESA") // SUPER_ADMIN, ADMIN_EMPRESA, VENDEDOR
+  avatarUrl      String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignedLeads  Lead[]       @relation("AssignedUser")
+  auditLogs      AuditLog[]
+
+  @@index([organizationId])
+  @@index([email])
+}
+
+// ──────────────────────────────────────────────
+// Lead — Lead com Atribuição de Marketing Total
+// ──────────────────────────────────────────────
+model Lead {
+  id                 String       @id @default(cuid())
+  organizationId     String
+  assignedUserId     String?
+  nome               String
+  telefone           String       // E.164 (+5511999999999)
+  telefoneHash       String       // SHA-256 para deduplicação instantânea
+  email              String?
+  status             String       @default("NOVO") // NOVO, QUALIFICADO, AGENDADO, GANHO, PERDIDO
+  prioridade         String       @default("WARM") // HOT, WARM, COLD
+  score              Int          @default(50)     // 0 a 100
+  scoreJustificativa String?      // Explicação da IA para o score
+  valorNegocio       Float?       @default(0)
+
+  // Atribuição de Marketing Ponta a Ponta
+  origemCanal        String       @default("WHATSAPP") // WHATSAPP, INSTAGRAM_DIRECT, QUIZ, META_ADS, GOOGLE_ADS, CSV
+  utmSource          String?      // ex: instagram_ads, google_search
+  utmCampaign        String?      // ex: campanha_troca_seminovo
+  utmMedium          String?      // ex: stories, cpc, feed
+  directKeyword      String?      // ex: "QUERO", "DESCONTO", "SIMULAR"
+  quizAnswersJson    String?      // Respostas em JSON do Mini-Quiz
+  notasInternasJson  String?      // Histórico de anotações internas da equipe
+  
+  // Metadados flexíveis de contexto do Lead
+  empresa            String?
+  ramoInteresse      String?      // Nome do produto, apólice ou veículo
+  resumoIa           String?      // Resumo executivo da conversa gerado pelo agente
+
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignedUser       User?        @relation("AssignedUser", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  conversations      Conversation[]
+  appointments       Appointment[]
+
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([organizationId, score])
+  @@index([telefoneHash])
+}
+
+// ──────────────────────────────────────────────
+// Conversation & Message — Chat Unificado + PTT
+// ──────────────────────────────────────────────
+model Conversation {
+  id             String       @id @default(cuid())
+  organizationId String
+  leadId         String
+  canal          String       @default("WHATSAPP") // WHATSAPP, INSTAGRAM, WEB
+  status         String       @default("ABERTO")   // ABERTO, FECHADO, AGUARDANDO_CLIENTE
+  ultimoContato  DateTime     @default(now())
+  createdAt      DateTime     @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead           Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  messages       Message[]
+
+  @@index([organizationId])
+  @@index([leadId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  remetenteTipo  String       // LEAD, AGENT_IA, HUMANO, SISTEMA
+  tipoConteudo   String       @default("TEXTO") // TEXTO, AUDIO_PTT, IMAGEM, DOCUMENTO
+  conteudo       String
+  mediaUrl       String?
+  audioDuration  Int?         // Segundos de duração de áudio PTT
+  statusEnvio    String       @default("ENVIADO") // ENVIADO, ENTREGUE, LIDO, FALHA
+  createdAt      DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+}
+
+// ──────────────────────────────────────────────
+// Appointment — Agendamentos Universais
+// (Visita na Concessionária, Consulta Médica, Reunião Contábil)
+// ──────────────────────────────────────────────
+model Appointment {
+  id             String       @id @default(cuid())
+  organizationId String
+  leadId         String
+  titulo         String
+  descricao      String?
+  dataHorario    DateTime
+  status         String       @default("AGENDADO") // AGENDADO, CONFIRMADO, CONCLUIDO, CANCELADO, NO_SHOW
+  tipo           String       @default("VISITA")   // TEST_DRIVE, CONSULTA, REUNIAO_TRIBUTARIA, COTAÇÃO
+  lembreteEnviado Boolean     @default(false)
+  createdAt      DateTime     @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead           Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([organizationId, dataHorario])
+}
+
+// ──────────────────────────────────────────────
+// Extensões Verticais (Preparadas para Etapas 2, 3, 4)
+// ──────────────────────────────────────────────
+model Vehicle {
+  id             String       @id @default(cuid())
+  organizationId String
+  modelo         String
+  marca          String
+  ano            Int
+  preco          Float
+  km             Int
+  placa          String?
+  cor            String?
+  fotosJson      String?      // Array de URLs de fotos do veículo
+  status         String       @default("DISPONIVEL") // DISPONIVEL, RESERVADO, VENDIDO
+  createdAt      DateTime     @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model InsurancePolicy {
+  id              String      @id @default(cuid())
+  organizationId  String
+  numeroApolice   String?
+  seguradora      String
+  ramo            String      // Auto, Vida, Saúde, Fiança
+  premio          Float       @default(0)
+  dataVencimento  DateTime
+  status          String      @default("ATIVA") // ATIVA, VENCENDO, RENOVADA, CANCELADA
+  createdAt       DateTime    @default(now())
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([organizationId, dataVencimento])
+}
+
+model TaxGuide {
+  id              String      @id @default(cuid())
+  organizationId  String
+  titulo          String      // Ex: DAS Simples Nacional - 03/2026
+  valor           Float
+  dataVencimento  DateTime
+  pixCopiaECola   String?
+  codigoBarras    String?
+  status          String      @default("PENDENTE") // PENDENTE, PAGO, ATRASADO
+  createdAt       DateTime    @default(now())
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model AuditLog {
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String?
+  acao           String       // LOGIN, EXPORT_CSV, VIEW_LEAD, DEMO_SWITCH
+  detalhes       String?
+  ipAddress      String?
+  createdAt      DateTime     @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+}
