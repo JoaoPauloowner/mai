@@ -1,43 +1,62 @@
-# DESIGN SYSTEM & ATRIBUIÇÃO MAI (Motor de Atendimento & Inteligência)
+# DESIGN SYSTEM AUTORAL MAI (Motor de Atendimento & Inteligência)
 
-> **Inspiração Visual & UI:** Baseado nas diretrizes de alta autoridade, minimalismo moderno e elegância do projeto [Behance WACT](https://www.behance.net/gallery/255291953/WACT) adaptado integralmente para a marca **MAI**.  
-> **Identidade da Marca:** **MAI** (Motor de Atendimento & Inteligência) — Plataforma SaaS B2B de conversão de tráfego pago, qualificação por IA, áudios humanizados e atribuição comercial.  
-> **Copywriting Engine:** Clayton Makepeace Direct-Response Framework ancorado em velocidade de resposta, lógica financeira e reversão de risco.
+> **Conceito Central:** *"The High-Frequency Engine"* — Infraestrutura de alta autoridade institucional, sofisticação técnica, velocidade extrema (Speed-to-Lead < 30s) e conversão de tráfego pago baseada em dados e inteligência artificial.  
+> **Copywriting Framework:** Clayton Makepeace Direct-Response Framework (Foco em dores reais de mercado, lógica de caixa, prova matemática e reversão de risco).
 
 ---
 
-## 🎨 1. Identidade Visual e Design Tokens (MAI System)
+## 🎨 1. Identidade Visual & Design Tokens Proprietários
 
-### 1.1 Paleta de Cores e Hierarquia Cromática
+### 1.1 Paleta Cromática "Quantum Navy & Pulse"
 
-| Token | Hex Code | Aplicação Principal |
+| Token | Hex Code | Aplicação & Significado |
 | :--- | :--- | :--- |
-| **MAI Lime Accent (Primário)** | `#C3F186` | Botões de conversão CTA (`Ativar Minha Operação`, `Blindar WhatsApp`), badges de destaque, pontos de conversão ativa, gráficos de funil final. |
-| **MAI Lime Hover** | `#B2E372` | Estado de hover nos botões de destaque. |
-| **Sage / Olive Green** | `#7B8F75` | Badges de status secundários, indicadores de qualidade de lead, acentos de gráficos de barras. |
-| **Warm Sand / Cream** | `#EAE2CC` | Superfícies alternativas de cards, banners de alerta suave, fundos de destaques executivos. |
-| **Dark Charcoal / Void** | `#1A1D1A` | Cabeçalhos institucionais, botões escuros, mockups de dashboard, superfícies de alto contraste. |
-| **Surface Off-White** | `#F7F8F6` | Fundo principal da Landing Page e do Dashboard em modo claro moderno. |
-| **Surface Card Warm** | `#FFFFFF` / `#EFF1EE` | Fundo de cartões de métricas, tabelas de atribuição e caixas de diálogo. |
-| **Border Neutral Subtle** | `#E0E3DE` / `#C4C9C2` | Bordas e divisores de tabelas, cartões e inputs. |
-| **Text Primary (Dark)** | `#1A1D1A` | Títulos, métricas principais e textos em alto contraste. |
-| **Text Muted (Olive Slate)** | `#636B61` / `#828B80` | Subtítulos, labels descritivos e metadados de atribuição (UTMs, GCLID). |
+| **Deep Obsidian (Dark Base)** | `#07090E` | Fundo base do Cockpit, terminais de inteligência e modo escuro de alta autoridade. |
+| **Slate Dark (Surface Card)** | `#0F141F` | Superfície dos cards internos, contêineres de dados e cockpits de CRM. |
+| **Electric Cyan (AI Pulse)** | `#00F0FF` / `#00DDD7` | O pulso da IA ativa, waveforms de áudio PTT, badges de velocidade e status ao vivo. |
+| **Emerald Growth (Caixa & ROI)** | `#10B981` / `#059669` | Métricas de faturamento recuperado, scores 90+, cálculos de retorno e garantia blindada. |
+| **Crimson Leak (Gargalo de Vendas)** | `#EF4444` / `#DC2626` | Alertas de vazamento de tráfego, tempo de espera excessivo e perda de leads. |
+| **Titanium Silver (Borders & Lines)** | `#1E2638` & `#E2E8F0` | Linhas de precisão estrutural de 1px com visual de engenharia moderna. |
+| **Pure Surface (Light Mode)** | `#F8FAFC` & `#FFFFFF` | Superfícies limpas e nítidas para máxima legibilidade na Landing Page. |
+| **Text Obsidian & Slate** | `#0B0D12` & `#334155` | Títulos de alto impacto, textos argumentativos e manchetes editoriais. |
 
 ---
 
-## 📊 2. Disposição de Gráficos e Componentes Visuais
+## 🔤 2. Tipografia & Hierarquia Editorial
 
-### 2.1 Funil de Conversão Comercial MAI
-Estrutura horizontal conectada por nós e métricas em tempo real:
-1. **Cliques de Anúncios (Meta / Google Ads)** → Captura automática de UTMs e parâmetros de rastreio
-2. **Atendimento Imediato no WhatsApp** → Início de conversa em menos de 30 segundos
-3. **Qualificação & Triagem por IA** → Mini-Quiz inteligente gerando Lead Score de 0 a 100
-4. **Atribuição Reversa & Fechamento** → Envio da conversão de volta para o Meta CAPI e distribuição para os vendedores
+- **Headlines & Manchetes de Conversão:** `Geist Sans / Outfit` (Tracking `-0.03em`, pesos `700` e `800` para títulos com autoridade de jornal financeiro).
+- **Interface & Leitura Argumentativa:** `Inter / Plus Jakarta Sans` (Espaçamento relaxado `leading-relaxed` para facilitar a leitura de argumentos longos).
+- **Métricas, Códigos & Timers:** `Geist Mono` (Para valores em Reais `R$ 28.500`, contadores de tempo `0:14s`, UTMs e parâmetros de rastreamento).
 
 ---
 
-## 🦅 3. Framework de Vendas Clayton Makepeace para o MAI
+## 📐 3. Componentes Visuais & Disposição de Gráficos
 
-1. **Pre-Headline:** *"A Única Infraestrutura de Atendimento com IA e Atribuição Reversa que Conecta Seus Anúncios do Meta e Google Diretamente às Vendas no WhatsApp em Tempo Real."*
+### 3.1 Cockpit de Speed-to-Lead ao Vivo
+- Widget central com visual de terminal executivo exibindo em tempo real:
+  - Notificação de lead interceptado via Meta/Google Ads.
+  - Timer regressivo: *Tempo de resposta em 14 segundos*.
+  - Mini-Quiz de triagem gerando Lead Score de 0 a 100.
+  - Player interativo de áudio humanizado gravado na hora (PTT nativo).
+
+### 3.2 Diagrama de Fluxo de Conversão (The 4-Stroke Engine)
+1. **Ad Click Interceptor:** Captura instantânea de UTMs e intenção de compra.
+2. **AI Triage & Lead Score:** Quiz de 3 perguntas que elimina 100% dos curiosos.
+3. **Instant Humanized Voice (PTT):** Áudio simulado com voz humana personalizada.
+4. **CAPI Reverse Attribution & Round-Robin:** Envio do evento de compra para o Meta/Google Ads e entrega do lead no colo do vendedor.
+
+### 3.3 Calculadora Interativa de Vazamento de Caixa
+- Sliders dinâmicos de Leads por Dia e Ticket Médio.
+- Comparação matemática instantânea: *Leads Perdidos pela Demora* vs *Contratos Recuperados* vs *Faturamento Líquido Extra*.
+
+---
+
+## 🦅 4. Estrutura de Vendas Clayton Makepeace
+
+1. **Pre-Headline:** *"Alerta de Caixa: 78% dos clientes compram da primeira empresa que responde no WhatsApp."*
 2. **Main Headline:** *"Pare de Queimar Dinheiro em Anúncios. Feche Vendas no WhatsApp em Menos de 30 Segundos."*
-3. **Deck Copy:** *"O MAI intercepta o clique do anúncio, rastreia a campanha de origem com precisão cirúrgica, qualifica o comprador via Mini-Quiz e dispara áudios com voz humana gravados na hora, entregando o cliente pronto no colo do seu vendedor."*
+3. **Deck Copy:** Proposta de valor que explica o mecanismo sem termos técnicos desnecessários.
+4. **Diagnóstico Brutal:** As 3 dores que fazem o empresário perder vendas todos os dias.
+5. **Demonstração Interativa:** Link público para o visitante testar a IA no próprio celular.
+6. **Tabela Comparativa Racional:** Humano Lento vs Bot Genérico vs MAI Engine.
+7. **Garantia Blindada de 7 Dias:** Reversão total de risco com devolução integral.

@@ -1,51 +1,50 @@
 @import "tailwindcss";
 
 :root {
-  /* WACT Design System Palette */
-  --wact-lime: #C3F186;
-  --wact-lime-hover: #B2E372;
-  --wact-sage: #7B8F75;
-  --wact-sand: #EAE2CC;
-  --wact-charcoal: #1A1D1A;
-  --wact-charcoal-light: #2A2F2A;
-  --wact-surface: #F7F8F6;
-  --wact-surface-card: #EFF1EE;
-  --wact-border: #E0E3DE;
-  --wact-border-dark: #343834;
-  --wact-muted: #636B61;
+  /* MAI Autoral Design Tokens (Quantum Navy & Electric Pulse) */
+  --mai-obsidian: #07090e;
+  --mai-slate-dark: #0f141f;
+  --mai-slate-card: #111622;
+  --mai-cyan: #00f0ff;
+  --mai-cyan-glow: #00ddd7;
+  --mai-emerald: #10b981;
+  --mai-emerald-dark: #059669;
+  --mai-crimson: #ef4444;
+  --mai-border: #1e2638;
+  --mai-border-light: #e2e8f0;
 
-  /* Dashboard Dynamic Tokens */
-  --bg-dark: #1A1D1A;
-  --bg-card: #232723;
-  --bg-card-hover: #2D332D;
-  --border-subtle: #343834;
-  --border-focus: #C3F186;
-  --text-main: #F7F8F6;
-  --text-muted: #A3AAA1;
-  --text-dim: #636B61;
+  /* Dashboard Tokens */
+  --bg-dark: #07090e;
+  --bg-card: #0f141f;
+  --bg-card-hover: #161d2d;
+  --border-subtle: #1e2638;
+  --border-focus: #00f0ff;
+  --text-main: #f3f4f6;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
 
   /* Cores Temáticas por Nicho */
-  --accent-general: #C3F186;
-  --accent-auto: #F59E0B;
-  --accent-insurance: #60A5FA;
-  --accent-accounting: #34D399;
-  --accent-clinic: #F472B6;
+  --accent-general: #00f0ff;
+  --accent-auto: #f59e0b;
+  --accent-insurance: #3b82f6;
+  --accent-accounting: #10b981;
+  --accent-clinic: #ec4899;
 
   --sidebar-width: 260px;
   --header-height: 64px;
 }
 
-/* Modo Claro WACT (Light Mode / Landing Page) */
+/* Modo Claro / Landing Page Surfaces */
 html.light,
 [data-theme="light"] {
-  --bg-dark: #F7F8F6;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #EFF1EE;
-  --border-subtle: #E0E3DE;
-  --border-focus: #C3F186;
-  --text-main: #1A1D1A;
-  --text-muted: #636B61;
-  --text-dim: #828B80;
+  --bg-dark: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --border-subtle: #e2e8f0;
+  --border-focus: #00ddd7;
+  --text-main: #0b0d12;
+  --text-muted: #475569;
+  --text-dim: #94a3b8;
 }
 
 * {
@@ -56,43 +55,27 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background-color: #F7F8F6;
-  color: #1A1D1A;
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #ffffff;
+  color: #0b0d12;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Plus Jakarta Sans", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Utilitários WACT */
-.bg-wact-lime {
-  background-color: #C3F186;
+/* Utilitários MAI */
+.bg-mai-obsidian {
+  background-color: #07090e;
 }
 
-.text-wact-lime {
-  color: #C3F186;
+.text-mai-cyan {
+  color: #00f0ff;
 }
 
-.bg-wact-charcoal {
-  background-color: #1A1D1A;
+.border-mai {
+  border-color: #1e2638;
 }
 
-.text-wact-charcoal {
-  color: #1A1D1A;
-}
-
-.bg-wact-surface {
-  background-color: #F7F8F6;
-}
-
-.bg-wact-card {
-  background-color: #EFF1EE;
-}
-
-.border-wact {
-  border-color: #E0E3DE;
-}
-
-.font-serif-wact {
-  font-family: "Neuton", Georgia, "Times New Roman", serif;
+.shadow-mai-glow {
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.15);
 }
