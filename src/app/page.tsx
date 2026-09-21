@@ -42,7 +42,7 @@ export default function LandingPage() {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
-  // Calculo de ROI e Vazamento de Caixa Incontestavel (Clayton Makepeace Proof Framework)
+  // Calculo de ROI e Vazamento de Caixa (Clayton Makepeace Proof Framework)
   const leadsPorMes = leadsPerDay * 30;
   const leadsPerdidosPelaDemora = Math.round(leadsPorMes * 0.45); 
   const vendasRecuperadas = Math.max(1, Math.round(leadsPerdidosPelaDemora * 0.08));
@@ -64,28 +64,28 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#F7F8F6] text-[#1A1D1A] selection:bg-[#C3F186] selection:text-[#1A1D1A] font-sans antialiased">
       
-      {/* 1. Barra de Alerta Superior (Pre-Headline Makepeace Hook com Estilo WACT) */}
+      {/* 1. Barra de Alerta Superior (Pre-Headline Makepeace Hook) */}
       <div className="bg-[#1A1D1A] text-[#F7F8F6] py-3 px-4 text-center text-xs font-medium border-b border-[#343834]">
         <div className="max-w-7xl mx-auto flex items-center justify-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-[#C3F186] animate-pulse" />
           <span>
-            <strong>ATRIBUIÇÃO & CONVERSÃO DE WHATSAPP:</strong> Conecte seus anúncios do Meta e Google Ads diretamente às vendas reais no WhatsApp em menos de 30 segundos.
+            <strong>ALERTA PARA EMPRESAS QUE ANUNCIAM:</strong> 78% dos clientes compram da primeira empresa que responde no WhatsApp. Sua equipe responde em quantos minutos?
           </span>
         </div>
       </div>
 
-      {/* 2. Header / Navbar Estilo WACT (Pill Buttons, Minimalismo de Alta Autoridade) */}
+      {/* 2. Header / Navbar Executiva MAI */}
       <header className="h-20 border-b border-[#E0E3DE] bg-[#F7F8F6]/90 backdrop-blur-xl sticky top-0 z-50 px-6">
         <div className="max-w-7xl mx-auto h-full flex items-center justify-between">
           
-          {/* Logo WACT / MAI */}
+          {/* Logo Oficial MAI */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#1A1D1A] text-[#C3F186] font-bold text-xl flex items-center justify-center shadow-sm">
-              W
+            <div className="w-10 h-10 rounded-2xl bg-[#1A1D1A] text-[#C3F186] font-extrabold text-xl flex items-center justify-center shadow-sm">
+              Ω
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-extrabold tracking-tight text-[#1A1D1A]">
-                WAct <span className="text-[#636B61] text-[10px] font-mono font-medium uppercase px-2 py-0.5 rounded-full bg-[#EAE2CC] border border-[#D7DBE0] ml-1">WhatsApp Attribution</span>
+                MAI <span className="text-[#636B61] text-[10px] font-mono font-medium uppercase px-2 py-0.5 rounded-full bg-[#EAE2CC] border border-[#D7DBE0] ml-1">Motor de Atendimento</span>
               </span>
             </div>
           </div>
@@ -104,49 +104,49 @@ export default function LandingPage() {
               href="/login"
               className="px-5 py-2.5 rounded-full text-xs font-bold text-[#1A1D1A] border border-[#E0E3DE] bg-white hover:bg-[#EFF1EE] transition shadow-sm"
             >
-              Fazer Login
+              Acessar Cockpit
             </Link>
             <Link
               href="/cadastro"
-              className="px-5 py-2.5 rounded-full bg-[#C3F186] hover:bg-[#B2E372] text-[#1A1D1A] text-xs font-bold transition shadow-sm flex items-center gap-1.5"
+              className="px-5 py-2.5 rounded-full bg-[#C3F186] hover:bg-[#B2E372] text-[#1A1D1A] text-xs font-extrabold transition shadow-sm flex items-center gap-1.5"
             >
-              <span>Testar Gratuitamente</span>
+              <span>Ativar Minha Operação</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
       </header>
 
-      {/* 3. HERO SECTION WACT (HEADLINE MAKEPEACE + IDENTIDADE BEHANCE) */}
+      {/* 3. HERO SECTION (COPYWRITING CLAYTON MAKEPEACE + IDENTIDADE VISUAL MAI) */}
       <section className="relative pt-16 pb-20 px-6 max-w-7xl mx-auto space-y-10">
         <div className="text-center space-y-6 max-w-4xl mx-auto">
           
           {/* Eyebrow Pill */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#EAE2CC] border border-[#D7DBE0] text-xs font-bold text-[#1A1D1A]">
             <span className="w-2 h-2 rounded-full bg-[#7B8F75]" />
-            <span className="uppercase tracking-wider">WhatsApp Attribution & Conversion Engine</span>
+            <span className="uppercase tracking-wider">Inteligência Comercial & Atribuição de Tráfego Pago</span>
           </div>
 
-          {/* Main Headline Serif/Sans Makepeace */}
+          {/* Main Headline */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-[#1A1D1A] leading-[1.05]">
-            Transforme Conversas no WhatsApp em{" "}
+            Pare de Queimar Dinheiro em Anúncios.{" "}
             <span className="bg-[#C3F186] px-3 py-1 rounded-2xl inline-block mt-1">
-              Dados Reais de Conversão.
+              Feche Vendas no WhatsApp em 30 Segundos.
             </span>
           </h1>
 
           {/* Deck Copy Clayton Makepeace */}
           <p className="text-base sm:text-xl text-[#636B61] max-w-3xl mx-auto leading-relaxed font-normal">
-            Pare de queimar orçamento de anúncios em cliques que nunca viram receita. O <strong>WAct</strong> conecta seus anúncios do Meta e Google Ads diretamente ao seu WhatsApp: <strong>rastreia a campanha exata (UTM/GCLID)</strong>, qualifica a urgência com <strong>Mini-Quiz dinâmico</strong> e envia <strong>áudios com voz humana</strong> em menos de 30 segundos.
+            Enquanto a sua equipe demora 40 minutos para responder um lead frio, o seu concorrente acabou de fechar o contrato. O <strong>MAI</strong> intercepta o lead no instante exato do clique, aplica um <strong>Mini-Quiz de Triagem</strong>, responde com <strong>áudios humanizados gravados na hora (PTT)</strong> e entrega o cliente pronto para o seu vendedor fechar.
           </p>
 
-          {/* Duplo CTA de Conversão WACT Style */}
+          {/* Duplo CTA de Conversão */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 max-w-lg mx-auto">
             <Link
               href="/cadastro"
               className="w-full sm:w-auto flex-1 min-h-[52px] px-8 rounded-full bg-[#C3F186] hover:bg-[#B2E372] text-[#1A1D1A] font-extrabold text-sm transition shadow-md flex items-center justify-center gap-2"
             >
-              <span>Iniciar Teste de 14 Dias</span>
+              <span>Blindar Meu WhatsApp Agora</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
 
@@ -166,22 +166,22 @@ export default function LandingPage() {
               <CheckCircle2 className="w-4 h-4 text-[#7B8F75]" /> Atribuição Meta CAPI & Google Ads
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#7B8F75]" /> Speed-to-Lead &lt; 30 Segundos
+              <CheckCircle2 className="w-4 h-4 text-[#7B8F75]" /> Resposta Imediata (&lt; 30 Segundos)
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#7B8F75]" /> Sem Taxa de Instalação ou Fidelidade
+              <CheckCircle2 className="w-4 h-4 text-[#7B8F75]" /> Sem Contrato de Fidelidade
             </span>
           </div>
         </div>
 
-        {/* 4. SHOWCASE DE ATRIBUIÇÃO WACT: MOCKUP DO DASHBOARD & NOTIFICAÇÕES */}
+        {/* 4. MOCKUP DO COCKPIT MAI & NOTIFICAÇÃO EM TEMPO REAL */}
         <div className="pt-6 max-w-5xl mx-auto space-y-6">
           
-          {/* Card Flutuante de Notificação em Tempo Real (Estilo Behance WACT) */}
+          {/* Card Flutuante de Notificação */}
           <div className="max-w-xl mx-auto p-4 rounded-3xl bg-white border border-[#E0E3DE] shadow-xl flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-[#1A1D1A] text-[#C3F186] flex items-center justify-center font-bold text-lg">
-                📱
+                Ω
               </div>
               <div className="text-left">
                 <div className="flex items-center gap-2">
@@ -193,12 +193,12 @@ export default function LandingPage() {
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-mono font-bold text-[#1A1D1A] bg-[#C3F186] px-2.5 py-1 rounded-full border border-[#B2E372]">
-                Score 96
+                Score 96 (Alta Urgência)
               </span>
             </div>
           </div>
 
-          {/* Mockup do Dashboard WACT */}
+          {/* Mockup do Dashboard MAI */}
           <div className="rounded-3xl border border-[#E0E3DE] bg-[#1A1D1A] p-4 sm:p-6 shadow-2xl text-white">
             
             {/* Top Bar Cockpit */}
@@ -207,58 +207,58 @@ export default function LandingPage() {
                 <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
                 <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block" />
                 <span className="w-3 h-3 rounded-full bg-[#C3F186] inline-block" />
-                <span className="ml-2 font-bold text-white">WAct Cockpit • Live Attribution Engine</span>
+                <span className="ml-2 font-bold text-white">MAI Cockpit • Engine Comercial Ao Vivo</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#C3F186] animate-pulse" />
-                <span className="text-[#C3F186] font-bold">100% Sincronizado com Meta CAPI</span>
+                <span className="text-[#C3F186] font-bold">Meta CAPI Ativa • Speed-to-Lead: 14s</span>
               </div>
             </div>
 
-            {/* KPI Cards WACT Style */}
+            {/* KPI Cards */}
             <div className="pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
               
               <div className="p-5 rounded-2xl bg-[#232723] border border-[#343834] space-y-2">
                 <div className="flex justify-between items-center text-xs font-mono text-[#A3AAA1]">
-                  <span>QUALIFIED LEADS</span>
+                  <span>LEADS QUALIFICADOS</span>
                   <span className="text-xs text-[#C3F186] font-bold">+18.4% ↑</span>
                 </div>
                 <div className="text-3xl font-extrabold font-mono text-white">180 Leads</div>
-                <p className="text-[11px] text-[#A3AAA1]">Triados com urgência e renda confirmada via Quiz.</p>
+                <p className="text-[11px] text-[#A3AAA1]">Compradores com urgência e orçamento confirmado via Quiz.</p>
               </div>
 
               <div className="p-5 rounded-2xl bg-[#232723] border border-[#343834] space-y-2">
                 <div className="flex justify-between items-center text-xs font-mono text-[#A3AAA1]">
-                  <span>CPL (COST PER LEAD)</span>
+                  <span>CPL (CUSTO POR LEAD)</span>
                   <span className="text-xs text-[#C3F186] font-bold">-24.2% ↓</span>
                 </div>
                 <div className="text-3xl font-extrabold font-mono text-[#C3F186]">R$ 4,20</div>
-                <p className="text-[11px] text-[#A3AAA1]">Redução pelo envio de dados de conversão de volta ao Meta Ads.</p>
+                <p className="text-[11px] text-[#A3AAA1]">Otimização contínua enviando dados de compras fechadas de volta aos anúncios.</p>
               </div>
 
               <div className="p-5 rounded-2xl bg-[#232723] border border-[#343834] space-y-2">
                 <div className="flex justify-between items-center text-xs font-mono text-[#A3AAA1]">
-                  <span>LEAD QUALITY SCORE</span>
-                  <span className="text-xs text-[#C3F186] font-bold">63.8%</span>
+                  <span>QUALIDADE DO ATENDIMENTO</span>
+                  <span className="text-xs text-[#C3F186] font-bold">98.2%</span>
                 </div>
-                <div className="text-3xl font-extrabold font-mono text-white">92 / 100</div>
-                <p className="text-[11px] text-[#A3AAA1]">Áudios humanizados PTT enviados em &lt; 20 segundos.</p>
+                <div className="text-3xl font-extrabold font-mono text-white">95 / 100</div>
+                <p className="text-[11px] text-[#A3AAA1]">Áudios gravados na hora e respostas instantâneas 24 horas por dia.</p>
               </div>
 
             </div>
 
-            {/* Tabela de Fontes de Tráfego / Attribution Feed */}
+            {/* Tabela de Campanhas com Atribuição em Tempo Real */}
             <div className="mt-6 p-4 rounded-2xl bg-[#111411] border border-[#343834] space-y-3">
               <div className="text-xs font-mono text-[#A3AAA1] uppercase font-bold flex justify-between">
-                <span>Campanhas com Atribuição em Tempo Real</span>
-                <span className="text-[#C3F186]">Status: Ativo</span>
+                <span>Atribuição de Vendas por Campanha</span>
+                <span className="text-[#C3F186]">Status: Operação Ativa</span>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                 <div className="p-3 rounded-xl bg-[#1A1D1A] border border-[#343834] flex items-center justify-between">
                   <div>
                     <div className="font-bold text-white">Meta Ads • Stories Fundo Funil</div>
-                    <span className="text-[10px] font-mono text-[#A3AAA1]">GCLID: wact_9821</span>
+                    <span className="text-[10px] font-mono text-[#A3AAA1]">Origem: Instagram Stories</span>
                   </div>
                   <span className="px-2 py-0.5 rounded-full bg-[#C3F186]/20 text-[#C3F186] font-mono font-bold text-[10px]">
                     R$ 28.500 fechados
@@ -267,8 +267,8 @@ export default function LandingPage() {
 
                 <div className="p-3 rounded-xl bg-[#1A1D1A] border border-[#343834] flex items-center justify-between">
                   <div>
-                    <div className="font-bold text-white">Google Ads • Termos de Alta Intenção</div>
-                    <span className="text-[10px] font-mono text-[#A3AAA1]">UTM: search_comprar</span>
+                    <div className="font-bold text-white">Google Ads • Termos de Compra</div>
+                    <span className="text-[10px] font-mono text-[#A3AAA1]">Origem: Google Search</span>
                   </div>
                   <span className="px-2 py-0.5 rounded-full bg-[#C3F186]/20 text-[#C3F186] font-mono font-bold text-[10px]">
                     R$ 14.200 fechados
@@ -277,8 +277,8 @@ export default function LandingPage() {
 
                 <div className="p-3 rounded-xl bg-[#1A1D1A] border border-[#343834] flex items-center justify-between">
                   <div>
-                    <div className="font-bold text-white">WhatsApp Orgânico / Direto</div>
-                    <span className="text-[10px] font-mono text-[#A3AAA1]">Origem: Perfil Insta</span>
+                    <div className="font-bold text-white">WhatsApp Direto / Orgânico</div>
+                    <span className="text-[10px] font-mono text-[#A3AAA1]">Origem: Bio do Instagram</span>
                   </div>
                   <span className="px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 font-mono text-[10px]">
                     R$ 6.800 fechados
@@ -292,19 +292,19 @@ export default function LandingPage() {
 
       </section>
 
-      {/* 5. COMO FUNCIONA O FUNIL DE ATRIBUIÇÃO WACT (4 ETAPAS HORIZONTAIS) */}
+      {/* 5. COMO FUNCIONA O FUNIL MAI (4 ETAPAS HORIZONTAIS) */}
       <section id="atribuicao" className="py-20 px-6 bg-[#EFF1EE] border-t border-[#E0E3DE]">
         <div className="max-w-7xl mx-auto space-y-14">
           
           <div className="text-center space-y-4 max-w-3xl mx-auto">
             <p className="text-xs font-mono uppercase text-[#7B8F75] tracking-wider font-extrabold">
-              Arquitetura de Conversão • Funil de 4 Etapas
+              Arquitetura Comercial • O Funil MAI
             </p>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#1A1D1A]">
               Do Clique no Anúncio ao Dinheiro no Caixa
             </h2>
             <p className="text-base text-[#636B61] leading-relaxed">
-              Veja exatamente como o WAct rastreia e converte cada centavo investido em campanhas de tráfego pago.
+              Veja como o MAI transforma cada real investido em campanhas em reuniões agendadas e contratos assinados.
             </p>
           </div>
 
@@ -317,10 +317,10 @@ export default function LandingPage() {
               </div>
               <h3 className="text-base font-bold text-[#1A1D1A]">1. Clique no Anúncio</h3>
               <p className="text-xs text-[#636B61] leading-relaxed">
-                O lead clica no seu anúncio do Facebook, Instagram ou Google. O WAct captura automaticamente os parâmetros UTMs, GCLID e IP de origem.
+                O lead clica no seu anúncio do Facebook, Instagram ou Google. O MAI captura automaticamente os parâmetros UTMs e a intenção de compra.
               </p>
               <div className="text-[10px] font-mono text-[#7B8F75] bg-[#F7F8F6] p-2 rounded-lg border border-[#E0E3DE]">
-                ✓ Captura 100% transparente
+                ✓ Captura transparente sem perda
               </div>
             </div>
 
@@ -331,10 +331,10 @@ export default function LandingPage() {
               </div>
               <h3 className="text-base font-bold text-[#1A1D1A]">2. Mini-Quiz & Score</h3>
               <p className="text-xs text-[#636B61] leading-relaxed">
-                O lead responde um quiz dinâmico de 3 perguntas no próprio fluxo. A IA analisa renda, urgência e interesse, gerando um Lead Score de 0 a 100.
+                O lead responde um quiz dinâmico de 3 perguntas. A IA identifica na hora o orçamento, urgência e interesse, gerando um Lead Score de 0 a 100.
               </p>
               <div className="text-[10px] font-mono text-[#7B8F75] bg-[#F7F8F6] p-2 rounded-lg border border-[#E0E3DE]">
-                ✓ Filtra curiosos sem dinheiro
+                ✓ Elimina 100% dos curiosos
               </div>
             </div>
 
@@ -345,10 +345,10 @@ export default function LandingPage() {
               </div>
               <h3 className="text-base font-bold text-[#1A1D1A]">3. Áudio Humanizado (PTT)</h3>
               <p className="text-xs text-[#636B61] leading-relaxed">
-                Em menos de 20 segundos, a IA gera e envia um áudio simulado com voz humana personalizada com as preferências do lead, quebrando o ceticismo.
+                Em menos de 20 segundos, a IA gera e envia um áudio simulado com voz humana personalizada com base no que o cliente respondeu.
               </p>
               <div className="text-[10px] font-mono text-[#7B8F75] bg-[#F7F8F6] p-2 rounded-lg border border-[#E0E3DE]">
-                ✓ 85% de taxa de resposta
+                ✓ Mais de 85% de taxa de escuta
               </div>
             </div>
 
@@ -357,12 +357,12 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-2xl bg-[#7B8F75] text-white font-bold flex items-center justify-center text-sm">
                 04
               </div>
-              <h3 className="text-base font-bold text-[#1A1D1A]">4. Atribuição Reversa CAPI</h3>
+              <h3 className="text-base font-bold text-[#1A1D1A]">4. Atribuição & Fechamento</h3>
               <p className="text-xs text-[#636B61] leading-relaxed">
-                Ao fechar a venda no WhatsApp ou balcão, o evento de compra é enviado de volta para o Meta/Google Ads via API de Conversões para baratear o custo por lead.
+                O vendedor recebe o comprador pronto na roleta do CRM e a venda fechada é devolvida ao Meta/Google Ads via CAPI para baratear os anúncios.
               </p>
               <div className="text-[10px] font-mono text-[#7B8F75] bg-[#F7F8F6] p-2 rounded-lg border border-[#E0E3DE]">
-                ✓ Barateia os anúncios
+                ✓ Barateia o custo por lead
               </div>
             </div>
 
@@ -371,14 +371,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 6. A ANATOMIA DO SANGRAMENTO (CLAYTON MAKEPEACE PAIN & PROOF) */}
+      {/* 6. A ANATOMIA DO SANGRAMENTO (DIAGNÓSTICO BRUTAL DE MERCADO) */}
       <section id="diagnostico" className="py-20 px-6 max-w-7xl mx-auto space-y-12">
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <p className="text-xs font-mono uppercase text-red-600 tracking-wider font-extrabold">
-            Diagnóstico de Caixa • O Custo Oculto
+            Diagnóstico Comercial • O Custo Oculto
           </p>
           <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#1A1D1A]">
-            Onde o Seu Dinheiro de Tráfego Está Sendo Queimado?
+            Onde o Seu Dinheiro de Anúncios Está Sendo Queimado?
           </h2>
           <p className="text-base text-[#636B61]">
             Não é o criativo do anúncio. É o que acontece nos primeiros 5 minutos após o clique.
@@ -424,10 +424,10 @@ export default function LandingPage() {
       <section id="calculadora" className="py-20 px-6 max-w-5xl mx-auto space-y-12">
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <p className="text-xs font-mono uppercase text-[#7B8F75] tracking-wider font-extrabold">
-            Simulação Financeira • Dados Reais
+            Simulação Financeira • Retorno de Caixa Real
           </p>
           <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#1A1D1A]">
-            Quanto Faturamento o WAct Recupera Para a Sua Empresa?
+            Quanto Faturamento o MAI Recupera Para a Sua Empresa?
           </h2>
         </div>
 
@@ -486,7 +486,7 @@ export default function LandingPage() {
             </div>
 
             <div className="p-5 rounded-2xl bg-[#EFF1EE] border border-[#E0E3DE] space-y-1">
-              <span className="text-[11px] font-mono uppercase text-[#636B61] font-bold">Vendas Extras Fechadas (WAct)</span>
+              <span className="text-[11px] font-mono uppercase text-[#636B61] font-bold">Vendas Extras Fechadas (MAI)</span>
               <div className="text-3xl font-extrabold font-mono text-[#1A1D1A]">+{vendasRecuperadas} vendas</div>
               <p className="text-[11px] text-[#828B80]">Recuperação com resposta em &lt; 30 segundos.</p>
             </div>
@@ -514,7 +514,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 8. TABELA DE PLANOS DE LICENCIAMENTO WACT */}
+      {/* 8. TABELA DE PLANOS DE LICENCIAMENTO MAI */}
       <section id="planos" className="py-20 px-6 max-w-7xl mx-auto border-t border-[#E0E3DE] space-y-12">
         
         <div className="text-center space-y-4 max-w-3xl mx-auto">
@@ -525,7 +525,7 @@ export default function LandingPage() {
             Escolha o Plano Ideal Para a Sua Operação
           </h2>
           <p className="text-sm text-[#636B61]">
-            Comece com 14 dias de teste sem compromisso. Cancele quando quiser com 1 clique.
+            Comece hoje sem contratos de fidelidade. Cancele quando quiser com 1 clique.
           </p>
         </div>
 
@@ -569,7 +569,7 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          {/* Pro Escala (DESTAQUE WACT LIME) */}
+          {/* Pro Escala (DESTAQUE LIME) */}
           <div className="p-8 rounded-3xl border-2 border-[#1A1D1A] bg-white space-y-6 flex flex-col justify-between shadow-2xl relative">
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#C3F186] text-[#1A1D1A] text-[11px] font-extrabold uppercase tracking-wider shadow-sm border border-[#B2E372]">
               Mais Escolhido por Empresas
@@ -669,16 +669,16 @@ export default function LandingPage() {
         <div className="space-y-4">
           {[
             {
-              q: "O que é o WAct e como ele ajuda a minha empresa?",
-              a: "O WAct é uma plataforma de inteligência e atribuição comercial que conecta seus anúncios do Meta/Google ao WhatsApp. Ele identifica qual anúncio gerou a conversa, qualifica o lead com um mini-quiz rápido e envia áudios humanizados gravados na hora em menos de 30 segundos."
+              q: "O que é o MAI e como ele ajuda a minha empresa?",
+              a: "O MAI é uma plataforma de inteligência comercial e atendimento imediato que conecta seus anúncios do Meta/Google ao WhatsApp. Ele qualifica o lead com um mini-quiz rápido de 3 perguntas e envia áudios humanizados gravados na hora em menos de 30 segundos, entregando o cliente pronto para o seu vendedor fechar."
             },
             {
               q: "Preciso de um número novo de WhatsApp?",
-              a: "Não. Você conecta o número que a sua empresa já utiliza hoje lendo um QR Code em menos de 1 minuto, sem perder suas conversas anteriores."
+              a: "Não. Você conecta o número que a sua empresa já utiliza hoje lendo um QR Code em menos de 1 minuto, sem perder o histórico das suas conversas."
             },
             {
-              q: "Como o WAct reduz o custo por lead (CPL)?",
-              a: "Através da API de Conversões (Meta CAPI), o WAct envia os dados das vendas fechadas de volta para o algoritmo do Facebook/Google, ensinando o algoritmo a buscar apenas pessoas com perfil de compradores reais."
+              q: "Como o MAI reduz o custo por lead (CPL)?",
+              a: "Através da API de Conversões (Meta CAPI), o MAI envia os dados das vendas fechadas de volta para o algoritmo do Facebook/Google, ensinando o algoritmo a buscar apenas pessoas com perfil de compradores reais."
             },
             {
               q: "Existe contrato de fidelidade?",
@@ -703,22 +703,22 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 10. RODAPÉ INSTITUCIONAL WACT */}
+      {/* 10. RODAPÉ INSTITUCIONAL MAI */}
       <footer className="border-t border-[#E0E3DE] bg-[#1A1D1A] text-[#A3AAA1] py-16 px-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 text-xs">
           
           <div className="space-y-4 md:col-span-2">
             <div className="flex items-center gap-3 text-white font-bold text-base">
               <div className="w-8 h-8 rounded-2xl bg-[#C3F186] text-[#1A1D1A] flex items-center justify-center font-extrabold">
-                W
+                Ω
               </div>
-              <span>WAct — WhatsApp Attribution & Conversion</span>
+              <span>MAI — Motor de Atendimento & Inteligência</span>
             </div>
             <p className="text-[#A3AAA1] max-w-sm leading-relaxed">
-              Infraestrutura de alta performance para atribuição de tráfego pago e fechamento de vendas no WhatsApp com inteligência artificial e áudios humanizados.
+              Infraestrutura de alta performance para qualificação de leads de tráfego pago e fechamento de vendas no WhatsApp com inteligência artificial e áudios humanizados.
             </p>
             <div className="text-[11px] text-[#636B61]">
-              &copy; {new Date().getFullYear()} WAct Platform. Todos os direitos reservados.
+              &copy; {new Date().getFullYear()} MAI Platform. Todos os direitos reservados.
             </div>
           </div>
 
@@ -736,7 +736,7 @@ export default function LandingPage() {
             <span className="text-white font-bold text-xs uppercase font-mono tracking-wider">Acesso Direto</span>
             <ul className="space-y-2">
               <li><Link href="/login" className="hover:text-white transition">Login no Cockpit</Link></li>
-              <li><Link href="/cadastro" className="hover:text-white transition">Iniciar Teste de 14 Dias</Link></li>
+              <li><Link href="/cadastro" className="hover:text-white transition">Ativar Operação</Link></li>
               <li><Link href="/quiz/omni-demo" target="_blank" className="hover:text-[#C3F186] transition">Demonstração Interativa</Link></li>
             </ul>
           </div>
