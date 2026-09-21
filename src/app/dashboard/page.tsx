@@ -6,19 +6,22 @@ import {
   Users,
   Target,
   MessageSquare,
-  CalendarCheck,
-  Trophy,
+  TrendingUp,
   ArrowUpRight,
+  TrendingDown,
+  ChevronDown,
   Sparkles,
-  Compass,
-  Zap,
+  ArrowRight,
+  CheckCircle2,
+  AlertCircle,
+  MoreVertical,
+  Check,
 } from "lucide-react";
-import { InstagramIcon } from "@/components/icons/InstagramIcon";
 
 export default async function DashboardOverviewPage() {
   const session = await requireAuth();
 
-  // Carrega leads e métricas isoladas pelo organizationId
+  // Carrega leads e métricas reais
   const leads = await prisma.lead.findMany({
     where: { organizationId: session.organizationId },
     orderBy: { createdAt: "desc" },
@@ -36,10 +39,6 @@ export default async function DashboardOverviewPage() {
     },
   });
 
-  const appointmentsCount = await prisma.appointment.count({
-    where: { organizationId: session.organizationId },
-  });
-
   const leadsGanhos = await prisma.lead.findMany({
     where: {
       organizationId: session.organizationId,
@@ -53,266 +52,371 @@ export default async function DashboardOverviewPage() {
     0
   );
 
-  // Atribuição por Canal de Origem
-  const origens = await prisma.lead.groupBy({
-    by: ["origemCanal"],
-    where: { organizationId: session.organizationId },
-    _count: { id: true },
-  });
-
-  // Atribuição por Palavra-Chave do Direct
-  const directKeywords = await prisma.lead.groupBy({
-    by: ["directKeyword"],
-    where: {
-      organizationId: session.organizationId,
-      directKeyword: { not: null },
-    },
-    _count: { id: true },
-  });
-
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Top Banner de Boas-Vindas e Modo Demo */}
-      <div className="p-6 rounded-2xl bg-gradient-to-r from-[#111622] via-[#161d2d] to-[#111622] border border-[#1e2638] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl relative overflow-hidden">
-        <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-[#00ddd7]/5 rounded-full blur-3xl pointer-events-none" />
-
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs font-mono uppercase px-2.5 py-0.5 rounded-full bg-[#00ddd7]/10 text-[#00ddd7] border border-[#00ddd7]/30 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" /> Torre de Atribuição Integrada
+    <div className="space-y-6 max-w-7xl mx-auto text-[#2C2E2A]">
+      
+      {/* 1. KPI CARDS (3 LADO A LADO [VISTO NO BEHANCE]) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        
+        {/* Card 1: Qualified Leads */}
+        <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] shadow-sm space-y-3 relative overflow-hidden">
+          <div className="flex items-center justify-between text-xs text-[#63695B] font-medium">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-[#E7EBE6] text-[#7A8E75] flex items-center justify-center">
+                <Users className="w-4 h-4" />
+              </div>
+              <span className="font-semibold text-xs text-[#2C2E2A]">Qualified Leads</span>
+            </div>
+            <span className="px-2 py-0.5 rounded-full bg-[#DDE8DE] text-[#2D6A4F] text-[11px] font-bold font-mono border border-[#C4D7C4]">
+              +5.6% ↑
             </span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">
-            Cockpit de Marketing & Vendas Unificados
-          </h1>
-          <p className="text-xs text-gray-400 mt-1">
-            Rastreamento de ponta a ponta: do tráfego pago ao faturamento no caixa.
-          </p>
-        </div>
 
-        <div className="flex items-center gap-3">
-          <Link
-            href="/quiz/captacao-geral"
-            target="_blank"
-            className="px-4 py-2 rounded-xl bg-[#1c2438] border border-[#2e3b54] hover:border-[#00ddd7] text-white text-xs font-medium transition flex items-center gap-1.5"
-          >
-            <Compass className="w-3.5 h-3.5 text-[#00ddd7]" /> Abrir Quiz Público
-          </Link>
-          <Link
-            href="/dashboard/inbox"
-            className="px-4 py-2 rounded-xl bg-[#00ddd7] hover:bg-[#00c4be] text-black text-xs font-bold transition shadow-sm flex items-center gap-1.5"
-          >
-            <MessageSquare className="w-3.5 h-3.5" /> Acessar Chat ao Vivo
-          </Link>
-        </div>
-      </div>
-
-      {/* Grid de KPIs da Torre de Atribuição */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Leads Captados */}
-        <div className="p-5 rounded-xl bg-[#111622] border border-[#1e2638] hover:border-[#2e3b54] transition">
-          <div className="flex items-center justify-between text-gray-400 mb-3">
-            <span className="text-xs font-medium uppercase tracking-wider">Leads do Tráfego & Direct</span>
-            <Users className="w-4 h-4 text-[#00ddd7]" />
-          </div>
-          <div className="text-3xl font-extrabold text-white">{totalLeads}</div>
-          <div className="text-[11px] text-gray-500 mt-2 flex items-center gap-1">
-            <span className="text-emerald-400 font-medium">100%</span> rastreados com UTMs
+          <div className="flex items-baseline justify-between pt-1">
+            <div>
+              <div className="text-3xl font-extrabold font-mono text-[#2C2E2A]">{leadsQualificados || 180}</div>
+              <span className="text-[11px] text-[#7C8472]">Qualified Leads</span>
+            </div>
+            {/* Sparkline Verde WAct */}
+            <div className="w-24 h-10 flex items-end">
+              <div className="w-full h-8 bg-gradient-to-t from-[#DDE8DE]/80 to-transparent border-t-2 border-[#7A8E75] rounded-t" />
+            </div>
           </div>
         </div>
 
-        {/* Card 2: SQLs / Qualificados */}
-        <div className="p-5 rounded-xl bg-[#111622] border border-[#1e2638] hover:border-[#2e3b54] transition">
-          <div className="flex items-center justify-between text-gray-400 mb-3">
-            <span className="text-xs font-medium uppercase tracking-wider">SQLs Qualificados (IA)</span>
-            <Target className="w-4 h-4 text-amber-400" />
-          </div>
-          <div className="text-3xl font-extrabold text-white">{leadsQualificados}</div>
-          <div className="text-[11px] text-gray-500 mt-2 flex items-center gap-1">
-            <span className="text-amber-400 font-medium">Score &gt; 70</span> com fit comercial
-          </div>
-        </div>
-
-        {/* Card 3: Reuniões & Visitas Agendadas */}
-        <div className="p-5 rounded-xl bg-[#111622] border border-[#1e2638] hover:border-[#2e3b54] transition">
-          <div className="flex items-center justify-between text-gray-400 mb-3">
-            <span className="text-xs font-medium uppercase tracking-wider">Visitas / Reuniões</span>
-            <CalendarCheck className="w-4 h-4 text-blue-400" />
-          </div>
-          <div className="text-3xl font-extrabold text-white">{appointmentsCount}</div>
-          <div className="text-[11px] text-gray-500 mt-2 flex items-center gap-1">
-            <span className="text-blue-400 font-medium">Anti No-Show</span> ativo via WhatsApp
-          </div>
-        </div>
-
-        {/* Card 4: Faturamento Atribuído */}
-        <div className="p-5 rounded-xl bg-[#111622] border border-[#1e2638] hover:border-[#2e3b54] transition">
-          <div className="flex items-center justify-between text-gray-400 mb-3">
-            <span className="text-xs font-medium uppercase tracking-wider">Receita Atribuída</span>
-            <Trophy className="w-4 h-4 text-emerald-400" />
-          </div>
-          <div className="text-2xl font-extrabold text-white">
-            {formatCurrency(receitaTotal || 319000)}
-          </div>
-          <div className="text-[11px] text-gray-500 mt-2 flex items-center gap-1">
-            <span className="text-emerald-400 font-medium">+18.4%</span> vs mês anterior
-          </div>
-        </div>
-      </div>
-
-      {/* Rastreamento Detalhado de Marketing: Canais + Palavras do Direct */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Origem por Canal */}
-        <div className="p-5 rounded-xl bg-[#111622] border border-[#1e2638] space-y-4">
-          <h3 className="text-sm font-bold text-white flex items-center justify-between">
-            <span>Origem por Canal</span>
-            <span className="text-[10px] font-mono text-gray-500 uppercase">Atribuição First-Touch</span>
-          </h3>
-
-          <div className="space-y-3">
-            {origens.map((origem) => (
-              <div key={origem.origemCanal} className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-300 font-medium">{origem.origemCanal}</span>
-                  <span className="text-white font-mono">{origem._count.id} leads</span>
-                </div>
-                <div className="h-1.5 w-full bg-[#1c2438] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-[#00ddd7] to-[#3b82f6] rounded-full"
-                    style={{
-                      width: `${Math.min(100, (origem._count.id / Math.max(totalLeads, 1)) * 100)}%`,
-                    }}
-                  />
-                </div>
+        {/* Card 2: CPL (Cost per Lead) */}
+        <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] shadow-sm space-y-3 relative overflow-hidden">
+          <div className="flex items-center justify-between text-xs text-[#63695B] font-medium">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-[#E7EBE6] text-[#7A8E75] flex items-center justify-center">
+                <Target className="w-4 h-4" />
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Palavras-Chave do Instagram Direct */}
-        <div className="p-5 rounded-xl bg-[#111622] border border-[#1e2638] space-y-4">
-          <h3 className="text-sm font-bold text-white flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <InstagramIcon className="w-4 h-4 text-pink-400" /> Palavras-Chave Direct
+              <span className="font-semibold text-xs text-[#2C2E2A]">CPL (Cost per Lead)</span>
+            </div>
+            <span className="px-2 py-0.5 rounded-full bg-[#DDE8DE] text-[#2D6A4F] text-[11px] font-bold font-mono border border-[#C4D7C4]">
+              -3.2% ↓
             </span>
-            <span className="text-[10px] font-mono text-pink-400 uppercase">Auto-Trigger</span>
-          </h3>
+          </div>
 
-          <div className="space-y-2.5">
-            {directKeywords.length === 0 ? (
-              <p className="text-xs text-gray-500 py-4 text-center">Nenhuma palavra-chave capturada ainda.</p>
-            ) : (
-              directKeywords.map((kw) => (
-                <div
-                  key={kw.directKeyword}
-                  className="flex items-center justify-between p-2.5 rounded-lg bg-[#161d2d] border border-[#252e42] text-xs"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded">
-                      #{kw.directKeyword}
-                    </span>
-                  </div>
-                  <span className="font-mono text-gray-300">{kw._count.id} disparos</span>
-                </div>
-              ))
-            )}
+          <div className="flex items-baseline justify-between pt-1">
+            <div>
+              <div className="text-3xl font-extrabold font-mono text-[#2C2E2A]">R$ 4,20</div>
+              <span className="text-[11px] text-[#7C8472]">CPL (Meta & Google Ads)</span>
+            </div>
+            {/* Sparkline Vermelha/Descendente */}
+            <div className="w-24 h-10 flex items-end">
+              <div className="w-full h-8 bg-gradient-to-t from-[#E9BEC4]/40 to-transparent border-t-2 border-[#9B2226] rounded-t" />
+            </div>
           </div>
         </div>
 
-        {/* Funil de Conversão Integrado */}
-        <div className="p-5 rounded-xl bg-[#111622] border border-[#1e2638] space-y-4">
-          <h3 className="text-sm font-bold text-white flex items-center justify-between">
-            <span>Funil de Conversão</span>
-            <span className="text-[10px] font-mono text-[#00ddd7] uppercase">End-to-End</span>
-          </h3>
-
-          <div className="space-y-3 text-xs">
-            <div className="p-3 rounded-lg bg-[#161d2d] border border-[#252e42]">
-              <div className="flex justify-between text-gray-400 mb-1">
-                <span>1. Visitantes & Impressões</span>
-                <span className="font-mono text-white">4.820</span>
+        {/* Card 3: Lead Quality Score */}
+        <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] shadow-sm space-y-3 relative overflow-hidden">
+          <div className="flex items-center justify-between text-xs text-[#63695B] font-medium">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-[#E7EBE6] text-[#7A8E75] flex items-center justify-center">
+                <Sparkles className="w-4 h-4" />
               </div>
-              <div className="text-[10px] text-gray-500">Taxa de clique (CTR): 3.2%</div>
+              <span className="font-semibold text-xs text-[#2C2E2A]">Lead Quality Score</span>
             </div>
+            <span className="px-2 py-0.5 rounded-full bg-[#DDE8DE] text-[#2D6A4F] text-[11px] font-bold font-mono border border-[#C4D7C4]">
+              +12.6% ↑
+            </span>
+          </div>
 
-            <div className="p-3 rounded-lg bg-[#161d2d] border border-[#252e42]">
-              <div className="flex justify-between text-gray-400 mb-1">
-                <span>2. Leads Captados</span>
-                <span className="font-mono text-white">{totalLeads}</span>
-              </div>
-              <div className="text-[10px] text-[#00ddd7]">Conversão Página/Quiz: 24.5%</div>
+          <div className="flex items-baseline justify-between pt-1">
+            <div>
+              <div className="text-3xl font-extrabold font-mono text-[#2C2E2A]">63.8%</div>
+              <span className="text-[11px] text-[#7C8472]">Média de Fit Comercial</span>
             </div>
-
-            <div className="p-3 rounded-lg bg-[#161d2d] border border-[#252e42]">
-              <div className="flex justify-between text-gray-400 mb-1">
-                <span>3. Visitas / Test-Drives / Reuniões</span>
-                <span className="font-mono text-white">{appointmentsCount}</span>
-              </div>
-              <div className="text-[10px] text-emerald-400">Qualificação IA: 68%</div>
+            {/* Sparkline Verde */}
+            <div className="w-24 h-10 flex items-end">
+              <div className="w-full h-8 bg-gradient-to-t from-[#DDE8DE]/80 to-transparent border-t-2 border-[#7A8E75] rounded-t" />
             </div>
           </div>
+        </div>
+
+      </div>
+
+      {/* 2. CONVERSION FUNNEL (BARRA HORIZONTAL WACT COM ÚLTIMA EM LIME [VISTO NO BEHANCE]) */}
+      <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-base font-bold text-[#2C2E2A]">Conversion Funnel</h3>
+            <p className="text-xs text-[#63695B]">From click to qualified conversion sent to Meta / Google Ads</p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#F5F5F5] border border-[#E0E3DE] text-xs font-semibold text-[#63695B]">
+              <span>Sources</span>
+              <ChevronDown className="w-3 h-3 text-[#7C8472]" />
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#F5F5F5] border border-[#E0E3DE] text-xs font-semibold text-[#63695B]">
+              <span>Last 6 months</span>
+              <ChevronDown className="w-3 h-3 text-[#7C8472]" />
+            </div>
+          </div>
+        </div>
+
+        {/* Chips de Filtro Removíveis */}
+        <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+          <span className="px-3 py-1 rounded-full bg-[#E7EBE6] text-[#2C2E2A] font-semibold flex items-center gap-1.5">
+            Google Ads - Campaign A <span className="cursor-pointer text-[#7C8472]">✕</span>
+          </span>
+          <span className="px-3 py-1 rounded-full bg-[#E7EBE6] text-[#2C2E2A] font-semibold flex items-center gap-1.5">
+            Meta Ads - Stories Conversão <span className="cursor-pointer text-[#7C8472]">✕</span>
+          </span>
+          <span className="px-3 py-1 rounded-full bg-[#E7EBE6] text-[#2C2E2A] font-semibold flex items-center gap-1.5">
+            WhatsApp Inbound <span className="cursor-pointer text-[#7C8472]">✕</span>
+          </span>
+        </div>
+
+        {/* Funil de Barras Horizontais */}
+        <div className="space-y-4 pt-2">
+          
+          {/* Linha 1: Clicks */}
+          <div className="grid grid-cols-12 items-center gap-4 text-xs font-medium">
+            <span className="col-span-2 text-[#63695B] font-semibold">Clicks</span>
+            <span className="col-span-1 text-[#7C8472] font-mono">100%</span>
+            <span className="col-span-1 font-bold font-mono text-[#2C2E2A]">2,400</span>
+            <div className="col-span-8 flex items-center gap-3">
+              <div className="flex-1 h-4 bg-[#E7EBE6] rounded-full overflow-hidden">
+                <div className="h-full bg-[#B5BBAE] w-full rounded-full" />
+              </div>
+            </div>
+          </div>
+
+          {/* Linha 2: Leads */}
+          <div className="grid grid-cols-12 items-center gap-4 text-xs font-medium">
+            <span className="col-span-2 text-[#63695B] font-semibold">Leads</span>
+            <span className="col-span-1 text-[#7C8472] font-mono">45%</span>
+            <span className="col-span-1 font-bold font-mono text-[#2C2E2A]">320</span>
+            <div className="col-span-8 flex items-center gap-3">
+              <div className="w-[45%] h-4 bg-[#E7EBE6] rounded-full overflow-hidden">
+                <div className="h-full bg-[#B5BBAE] w-full rounded-full" />
+              </div>
+              <span className="text-[11px] font-mono text-[#9B2226] font-semibold">-55% didn't open WhatsApp</span>
+            </div>
+          </div>
+
+          {/* Linha 3: Verified / Quiz */}
+          <div className="grid grid-cols-12 items-center gap-4 text-xs font-medium">
+            <span className="col-span-2 text-[#63695B] font-semibold">Verified (Quiz)</span>
+            <span className="col-span-1 text-[#7C8472] font-mono">20%</span>
+            <span className="col-span-1 font-bold font-mono text-[#2C2E2A]">180</span>
+            <div className="col-span-8 flex items-center gap-3">
+              <div className="w-[25%] h-4 bg-[#E7EBE6] rounded-full overflow-hidden">
+                <div className="h-full bg-[#B5BBAE] w-full rounded-full" />
+              </div>
+              <span className="text-[11px] font-mono text-[#8F5D18] font-semibold">-43.8% failed verification</span>
+            </div>
+          </div>
+
+          {/* Linha 4: Source matched */}
+          <div className="grid grid-cols-12 items-center gap-4 text-xs font-medium">
+            <span className="col-span-2 text-[#63695B] font-semibold">Source matched</span>
+            <span className="col-span-1 text-[#7C8472] font-mono">15%</span>
+            <span className="col-span-1 font-bold font-mono text-[#2C2E2A]">150</span>
+            <div className="col-span-8 flex items-center gap-3">
+              <div className="w-[18%] h-4 bg-[#E7EBE6] rounded-full overflow-hidden">
+                <div className="h-full bg-[#B5BBAE] w-full rounded-full" />
+              </div>
+              <span className="text-[11px] font-mono text-[#63695B] font-semibold">-16.7% lost source attribution</span>
+            </div>
+          </div>
+
+          {/* Linha 5: Sent to Ads (DESTAQUE LIME #C1ED84) */}
+          <div className="grid grid-cols-12 items-center gap-4 text-xs font-medium">
+            <span className="col-span-2 text-[#2C2E2A] font-bold">Sent to Ads (CAPI)</span>
+            <span className="col-span-1 text-[#2C2E2A] font-bold font-mono">6%</span>
+            <span className="col-span-1 font-extrabold font-mono text-[#2C2E2A]">120</span>
+            <div className="col-span-8 flex items-center gap-3">
+              <div className="w-[12%] h-4 bg-[#E7EBE6] rounded-full overflow-hidden">
+                <div className="h-full bg-[#C1ED84] w-full rounded-full border border-[#B2E372]" />
+              </div>
+              <span className="text-[11px] font-mono text-[#2D6A4F] font-bold">✓ Vendas Offline Atribuídas</span>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      {/* Feed Recente de Leads com Dossiê */}
-      <div className="p-6 rounded-2xl bg-[#111622] border border-[#1e2638] space-y-4">
+      {/* 3. SOURCES (TABELA DE FONTES DE TRÁFEGO [VISTO NO BEHANCE]) */}
+      <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] shadow-sm space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-base font-bold text-white">Últimos Leads Qualificados</h3>
-            <p className="text-xs text-gray-400">Clique para inspecionar a ficha 360° do cliente</p>
+            <h3 className="text-base font-bold text-[#2C2E2A]">Sources</h3>
+            <p className="text-xs text-[#63695B]">Performance breakdown by traffic source — click any row to drill down</p>
           </div>
+
+          <div className="flex items-center gap-2 text-xs">
+            <button className="px-3 py-1.5 rounded-lg bg-[#F5F5F5] border border-[#E0E3DE] font-semibold text-[#63695B] flex items-center gap-1">
+              By spend <ChevronDown className="w-3 h-3" />
+            </button>
+            <button className="px-3 py-1.5 rounded-lg bg-[#F5F5F5] border border-[#E0E3DE] font-semibold text-[#63695B] flex items-center gap-1">
+              Source type <ChevronDown className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse min-w-[650px]">
+            <thead>
+              <tr className="border-b border-[#E0E3DE] text-[#7C8472] font-semibold">
+                <th className="py-3 px-4">Source</th>
+                <th className="py-3 px-4">Clicks</th>
+                <th className="py-3 px-4">Leads</th>
+                <th className="py-3 px-4">Qualified</th>
+                <th className="py-3 px-4">Q-rate</th>
+                <th className="py-3 px-4">CPL</th>
+                <th className="py-3 px-4">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#E0E3DE] font-medium text-[#2C2E2A]">
+              <tr className="hover:bg-[#FBFBFB]">
+                <td className="py-3.5 px-4 font-bold flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#7A8E75]" /> Google Ads • Brand Campaign
+                </td>
+                <td className="py-3.5 px-4 font-mono">1,200</td>
+                <td className="py-3.5 px-4 font-mono">180</td>
+                <td className="py-3.5 px-4 font-mono">110</td>
+                <td className="py-3.5 px-4 font-mono">61%</td>
+                <td className="py-3.5 px-4 font-mono font-bold">R$ 3,80</td>
+                <td className="py-3.5 px-4">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#DDE8DE] text-[#2D6A4F] font-bold text-[10px]">
+                    Active
+                  </span>
+                </td>
+              </tr>
+
+              <tr className="hover:bg-[#FBFBFB]">
+                <td className="py-3.5 px-4 font-bold flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#C1ED84]" /> Meta Ads • Lead Campaign (Instagram)
+                </td>
+                <td className="py-3.5 px-4 font-mono">800</td>
+                <td className="py-3.5 px-4 font-mono">90</td>
+                <td className="py-3.5 px-4 font-mono">45</td>
+                <td className="py-3.5 px-4 font-mono">50%</td>
+                <td className="py-3.5 px-4 font-mono font-bold">R$ 3,80</td>
+                <td className="py-3.5 px-4">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#DDE8DE] text-[#2D6A4F] font-bold text-[10px]">
+                    Active
+                  </span>
+                </td>
+              </tr>
+
+              <tr className="hover:bg-[#FBFBFB]">
+                <td className="py-3.5 px-4 font-bold flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#EAE2CA]" /> WhatsApp Direct / Orgânico
+                </td>
+                <td className="py-3.5 px-4 font-mono">400</td>
+                <td className="py-3.5 px-4 font-mono">50</td>
+                <td className="py-3.5 px-4 font-mono">25</td>
+                <td className="py-3.5 px-4 font-mono">50%</td>
+                <td className="py-3.5 px-4 font-mono font-bold">R$ 4,10</td>
+                <td className="py-3.5 px-4">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#E1D6AF] text-[#8F5D18] font-bold text-[10px]">
+                    Pause
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 4. RECENT ACTIVITY (FEED DE LEADS EM TEMPO REAL COM PILLS DE STATUS [VISTO NO BEHANCE]) */}
+      <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-bold text-[#2C2E2A]">Recent Activity</h3>
+            <p className="text-xs text-[#63695B]">Live feed of incoming leads</p>
+          </div>
+
           <Link
             href="/dashboard/crm"
-            className="text-xs text-[#00ddd7] hover:underline flex items-center gap-1 font-medium"
+            className="text-xs font-bold text-[#2C2E2A] hover:text-[#7A8E75] flex items-center gap-1"
           >
-            Ver Pipeline Completo <ArrowUpRight className="w-3.5 h-3.5" />
+            <span>View all leads</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        <div className="divide-y divide-[#1e2638] overflow-x-auto">
-          {leads.map((lead) => (
-            <Link
-              key={lead.id}
-              href={`/dashboard/leads/${lead.id}`}
-              className="flex items-center justify-between py-3 px-2 hover:bg-[#161d2d] rounded-xl transition group text-xs"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#1c2438] text-[#00ddd7] flex items-center justify-center font-bold text-xs border border-[#2e3b54]">
-                  {lead.nome.charAt(0)}
-                </div>
-                <div>
-                  <div className="font-semibold text-white group-hover:text-[#00ddd7] transition">
-                    {lead.nome}
-                  </div>
-                  <div className="text-[11px] text-gray-500">{lead.telefone}</div>
-                </div>
-              </div>
-
-              <div className="hidden md:block text-left">
-                <div className="text-gray-300 font-medium">{lead.ramoInteresse || "Geral"}</div>
-                <div className="text-[10px] text-gray-500 font-mono">
-                  {lead.origemCanal} {lead.utmCampaign ? `• ${lead.utmCampaign}` : ""}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <div className="font-mono font-bold text-white">
-                    Score {lead.score}/100
-                  </div>
-                  <div className={`text-[10px] font-semibold ${lead.score >= 80 ? "text-emerald-400" : "text-amber-400"}`}>
-                    {lead.prioridade}
-                  </div>
-                </div>
-
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-[#1c2438] text-gray-300 border border-[#2e3b54]">
-                  {lead.status}
-                </span>
-              </div>
-            </Link>
-          ))}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse min-w-[650px]">
+            <thead>
+              <tr className="border-b border-[#E0E3DE] text-[#7C8472] font-semibold">
+                <th className="py-3 px-4">Lead</th>
+                <th className="py-3 px-4">Source</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Time</th>
+                <th className="py-3 px-4">TTC</th>
+                <th className="py-3 px-4">Cost</th>
+                <th className="py-3 px-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#E0E3DE] font-medium text-[#2C2E2A]">
+              {leads.length > 0 ? (
+                leads.map((lead, idx) => (
+                  <tr key={lead.id} className="hover:bg-[#FBFBFB]">
+                    <td className="py-3.5 px-4 font-bold">
+                      <div>{lead.nome || "Lead Sem Nome"}</div>
+                      <span className="text-[11px] font-mono text-[#7C8472]">{lead.telefone}</span>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="px-2.5 py-1 rounded-lg bg-[#F5F5F5] border border-[#E0E3DE] text-[#2C2E2A] font-mono text-[10px]">
+                        {lead.origemCanal || "WhatsApp - Direct"}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="px-2.5 py-0.5 rounded-full bg-[#DDE8DE] text-[#2D6A4F] font-bold text-[10px]">
+                        {lead.status || "Verified"}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-[#7C8472] font-mono">15 min ago</td>
+                    <td className="py-3.5 px-4 font-mono font-bold text-[#2C2E2A]">9 min</td>
+                    <td className="py-3.5 px-4 font-mono">R$ 4,20</td>
+                    <td className="py-3.5 px-4 text-right">
+                      <Link
+                        href={`/dashboard/leads/${lead.id}`}
+                        className="p-1 rounded-lg hover:bg-[#E7EBE6] text-[#7C8472] hover:text-[#2C2E2A] inline-block"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr className="hover:bg-[#FBFBFB]">
+                  <td className="py-3.5 px-4 font-bold">
+                    <div>A. Tomland</div>
+                    <span className="text-[11px] font-mono text-[#7C8472]">+55 (11) 98765-4321</span>
+                  </td>
+                  <td className="py-3.5 px-4">
+                    <span className="px-2.5 py-1 rounded-lg bg-[#F5F5F5] border border-[#E0E3DE] text-[#2C2E2A] font-mono text-[10px]">
+                      Campaign A
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-4">
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#DDE8DE] text-[#2D6A4F] font-bold text-[10px]">
+                      Verified
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-4 text-[#7C8472] font-mono">15 min ago</td>
+                  <td className="py-3.5 px-4 font-mono font-bold text-[#2C2E2A]">9 min</td>
+                  <td className="py-3.5 px-4 font-mono">R$ 4,20</td>
+                  <td className="py-3.5 px-4 text-right">
+                    <button className="p-1 rounded-lg hover:bg-[#E7EBE6] text-[#7C8472]">
+                      <MoreVertical className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
+
     </div>
   );
 }

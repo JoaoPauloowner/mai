@@ -1,62 +1,80 @@
-# DESIGN SYSTEM AUTORAL MAI (Motor de Atendimento & Inteligência)
+# ds.md — Design System WAct / MAI
 
-> **Conceito Central:** *"The High-Frequency Engine"* — Infraestrutura de alta autoridade institucional, sofisticação técnica, velocidade extrema (Speed-to-Lead < 30s) e conversão de tráfego pago baseada em dados e inteligência artificial.  
-> **Copywriting Framework:** Clayton Makepeace Direct-Response Framework (Foco em dores reais de mercado, lógica de caixa, prova matemática e reversão de risco).
+Fonte: Screenshot e especificações completas do case no Behance (Dima Strizhak).
+Produto: Plataforma de inteligência comercial e atribuição de leads do WhatsApp. Rastreia tráfego pago até a conversa, qualifica com IA e devolve os leads qualificados ao Meta/Google Ads como conversão offline.
+Três camadas de design: Identidade, Site de Marketing e Dashboard do Produto.
 
----
-
-## 🎨 1. Identidade Visual & Design Tokens Proprietários
-
-### 1.1 Paleta Cromática "Quantum Navy & Pulse"
-
-| Token | Hex Code | Aplicação & Significado |
-| :--- | :--- | :--- |
-| **Deep Obsidian (Dark Base)** | `#07090E` | Fundo base do Cockpit, terminais de inteligência e modo escuro de alta autoridade. |
-| **Slate Dark (Surface Card)** | `#0F141F` | Superfície dos cards internos, contêineres de dados e cockpits de CRM. |
-| **Electric Cyan (AI Pulse)** | `#00F0FF` / `#00DDD7` | O pulso da IA ativa, waveforms de áudio PTT, badges de velocidade e status ao vivo. |
-| **Emerald Growth (Caixa & ROI)** | `#10B981` / `#059669` | Métricas de faturamento recuperado, scores 90+, cálculos de retorno e garantia blindada. |
-| **Crimson Leak (Gargalo de Vendas)** | `#EF4444` / `#DC2626` | Alertas de vazamento de tráfego, tempo de espera excessivo e perda de leads. |
-| **Titanium Silver (Borders & Lines)** | `#1E2638` & `#E2E8F0` | Linhas de precisão estrutural de 1px com visual de engenharia moderna. |
-| **Pure Surface (Light Mode)** | `#F8FAFC` & `#FFFFFF` | Superfícies limpas e nítidas para máxima legibilidade na Landing Page. |
-| **Text Obsidian & Slate** | `#0B0D12` & `#334155` | Títulos de alto impacto, textos argumentativos e manchetes editoriais. |
+Legenda de confiança:
+- `[VISTO]` está legível no case.
+- `[MEDIDO]` cor amostrada por pixel na imagem (compressão JPEG, margem de erro de uns ±3 por canal).
+- `[ESTIMADO]` medida visual aproximada (raio, espaçamento).
 
 ---
 
-## 🔤 2. Tipografia & Hierarquia Editorial
+## 1. Ideia central `[VISTO]`
 
-- **Headlines & Manchetes de Conversão:** `Geist Sans / Outfit` (Tracking `-0.03em`, pesos `700` e `800` para títulos com autoridade de jornal financeiro).
-- **Interface & Leitura Argumentativa:** `Inter / Plus Jakarta Sans` (Espaçamento relaxado `leading-relaxed` para facilitar a leitura de argumentos longos).
-- **Métricas, Códigos & Timers:** `Geist Mono` (Para valores em Reais `R$ 28.500`, contadores de tempo `0:14s`, UTMs e parâmetros de rastreamento).
-
----
-
-## 📐 3. Componentes Visuais & Disposição de Gráficos
-
-### 3.1 Cockpit de Speed-to-Lead ao Vivo
-- Widget central com visual de terminal executivo exibindo em tempo real:
-  - Notificação de lead interceptado via Meta/Google Ads.
-  - Timer regressivo: *Tempo de resposta em 14 segundos*.
-  - Mini-Quiz de triagem gerando Lead Score de 0 a 100.
-  - Player interativo de áudio humanizado gravado na hora (PTT nativo).
-
-### 3.2 Diagrama de Fluxo de Conversão (The 4-Stroke Engine)
-1. **Ad Click Interceptor:** Captura instantânea de UTMs e intenção de compra.
-2. **AI Triage & Lead Score:** Quiz de 3 perguntas que elimina 100% dos curiosos.
-3. **Instant Humanized Voice (PTT):** Áudio simulado com voz humana personalizada.
-4. **CAPI Reverse Attribution & Round-Robin:** Envio do evento de compra para o Meta/Google Ads e entrega do lead no colo do vendedor.
-
-### 3.3 Calculadora Interativa de Vazamento de Caixa
-- Sliders dinâmicos de Leads por Dia e Ticket Médio.
-- Comparação matemática instantânea: *Leads Perdidos pela Demora* vs *Contratos Recuperados* vs *Faturamento Líquido Extra*.
+- Uma linguagem visual única, do primeiro anúncio ao fluxo diário de leads.
+- O balão de chat verde-menta/lime do logo vira ícone e aparece nos momentos-chave da UI.
+- Site: construído em torno da história da atribuição, não de lista de features.
+- Dashboard: cada tela responde uma pergunta: *"Os leads estão entrando a um custo aceitável e algo está quebrado?"*
+- Identidade: formas mínimas, layouts estruturados, sinal claro. Toda conversa de WhatsApp deve ter uma origem clara.
 
 ---
 
-## 🦅 4. Estrutura de Vendas Clayton Makepeace
+## 2. Cores Oficiais & Tokens
 
-1. **Pre-Headline:** *"Alerta de Caixa: 78% dos clientes compram da primeira empresa que responde no WhatsApp."*
-2. **Main Headline:** *"Pare de Queimar Dinheiro em Anúncios. Feche Vendas no WhatsApp em Menos de 30 Segundos."*
-3. **Deck Copy:** Proposta de valor que explica o mecanismo sem termos técnicos desnecessários.
-4. **Diagnóstico Brutal:** As 3 dores que fazem o empresário perder vendas todos os dias.
-5. **Demonstração Interativa:** Link público para o visitante testar a IA no próprio celular.
-6. **Tabela Comparativa Racional:** Humano Lento vs Bot Genérico vs MAI Engine.
-7. **Garantia Blindada de 7 Dias:** Reversão total de risco com devolução integral.
+### Marca `[MEDIDO]`
+
+| Token | Hex | Uso |
+|---|---|---|
+| `--lime` | `#C1ED84` (≈ `#C3F186`) | Destaque, CTA, barra final do funil, ícones sobre sage, palavra-chave em headline |
+| `--sage` | `#7A8E75` | Cor de marca escura, cards promocionais, série principal de gráfico |
+| `--cream` | `#EAE2CA` | Cards sociais, fundo de mobile, fim do gradiente |
+| `--ink` | `#2C2E2A` | Texto principal, logo sobre lime |
+
+### Escala Neutra Esverdeada (Sage Scale) `[MEDIDO]`
+```
+950 #2C2E2A   900 #393E36   800 #4E5447   700 #63695B   600 #7C8472
+500 #969F8E   400 #B5BBAE   300 #D0D5CD   200 #E7EBE6   100 #F7F7F6
+```
+
+### Produto (Dashboard Interno) `[MEDIDO]`
+```css
+--canvas:      #EAEAEA;   /* fundo ao redor da tela */
+--app-bg:      #F5F5F5;   /* fundo principal do app */
+--card:        #FFFFFF;   /* fundo dos cards de métricas e tabelas */
+--card-subtle: #FBFBFB;   /* variação sutil de superfície */
+--sage-card:   #7A8D74;   /* card promocional/destaque na sidebar */
+--border:      #E0E3DE;   /* bordas sutis e divisores */
+```
+
+### Status (Pills & Badges) `[MEDIDO]`
+| Estado | Fundo | Texto |
+|---|---|---|
+| Active / Verified | `#DDE8DE` | Verde Médio (`#2D6A4F`) |
+| Disabled / Rejected · Duplicate | `#E9BEC4` | Vermelho Escuro (`#9B2226`) |
+| Paused / Phone Unverified | `#E1D6AF` | Âmbar Escuro (`#8F5D18`) |
+
+Deltas nos KPIs: chip com contorno fino, verde para melhora, vermelho para piora. Sparkline com área em degradê suave da mesma cor.
+
+---
+
+## 3. Tipografia `[VISTO]`
+
+- **Headings & Títulos de Seção:** `Neuton` (Bold, Medium) ou Serif editorial moderno.
+- **Body & Interface (UI):** `Inter` (Bold, Semibold, Medium, Regular). Tabelas, rótulos, números.
+- **Números de KPI:** Inter Semibold 28–32px. Rótulos em Inter Regular 11–12px, cor `--sage-600`.
+
+---
+
+## 4. Estrutura do Dashboard Interno `[VISTO]`
+
+### Shell & Layout
+- **Sidebar Limpa:** Logo com tile lime + seletor de workspace + telefone; Grupos de menu: *General* (Dashboard, Leads, Campaigns, Conversations), *Analytics* (Reports, Attribution), *Workspace Settings* (Connections, Integrations, Tracking, Auto-replies, Team & Roles). Item ativo em card branco com leve sombra. Card promocional sage no rodapé com botão lime.
+- **Header:** Título da página + subtítulo descritivo, segmented control de período (`7d`, `30d` ativo escuro, `3m`, `6m`, `1y`), dropdown "All sources", botão Export.
+
+### Módulos Principais
+1. **KPI Cards (3 lado a lado):** Qualified Leads (`180`), CPL (`$4.20`), Lead Quality Score (`63.8%`). Cada um com ícone no topo, número grande, rótulo, chip de delta e sparkline com área degradê suave.
+2. **Conversion Funnel (Funil Horizontal):** Linhas: *Clicks*, *Leads*, *Verified*, *Source matched*, *Sent to Ads*, com contagem e anotação de perda/ganho ao lado. Barras horizontais em cinza neutro e **apenas a última barra (Sent to Ads / Venda) em lime (`#C1ED84`)**.
+3. **Sources (Tabela de Origens):** Colunas Source, Clicks, Leads, Qualified, Q-rate, CPL, Status. Checkbox, ícone da plataforma, pill de status.
+4. **Recent Activity (Feed ao Vivo de Leads):** Colunas Lead (Nome + Telefone), Source (pill cinza), Status (pill colorida de status), Time, TTC, Cost e menu de ações.

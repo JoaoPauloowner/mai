@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { DemoSwitcher } from "./DemoSwitcher";
-import { Sun, Moon } from "lucide-react";
+import { ChevronDown, Download, Calendar } from "lucide-react";
 
 interface HeaderProps {
   userName: string;
@@ -21,86 +21,62 @@ export function Header({
   orgNome,
   isDemoMode,
 }: HeaderProps) {
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
-
-  useEffect(() => {
-    const saved = localStorage.getItem("omni-theme") as "dark" | "light" | null;
-    if (saved) {
-      setTheme(saved);
-      if (saved === "light") {
-        document.documentElement.classList.add("light");
-        document.documentElement.setAttribute("data-theme", "light");
-      } else {
-        document.documentElement.classList.remove("light");
-        document.documentElement.removeAttribute("data-theme");
-      }
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    localStorage.setItem("omni-theme", next);
-
-    if (next === "light") {
-      document.documentElement.classList.add("light");
-      document.documentElement.setAttribute("data-theme", "light");
-    } else {
-      document.documentElement.classList.remove("light");
-      document.documentElement.removeAttribute("data-theme");
-    }
-  };
+  const [periodo, setPeriodo] = useState<"7d" | "30d" | "3m" | "6m" | "1y">("30d");
 
   return (
-    <header className="h-16 border-b border-[#1e2638] bg-[#0a0d14]/90 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
-      <div className="flex items-center gap-4">
-        <div>
-          <h2 className="text-sm font-bold text-white flex items-center gap-2">
-            <span>{orgNome}</span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live System
-            </span>
-          </h2>
-        </div>
+    <header className="h-16 border-b border-[#E0E3DE] bg-[#F5F5F5] px-6 flex items-center justify-between sticky top-0 z-30">
+      {/* Título & Status */}
+      <div className="flex items-center gap-3">
+        <h2 className="text-base font-bold text-[#2C2E2A] flex items-center gap-2">
+          <span>{orgNome}</span>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] bg-[#DDE8DE] text-[#2D6A4F] font-bold font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2D6A4F] animate-pulse" /> Live Attribution
+          </span>
+        </h2>
       </div>
 
+      {/* Controles WAct [VISTO NO BEHANCE: Segmented Period, Sources Dropdown, Export] */}
       <div className="flex items-center gap-3">
-        {/* Toggle Modo Claro / Escuro */}
-        <button
-          type="button"
-          onClick={toggleTheme}
-          title={theme === "dark" ? "Ativar Modo Claro" : "Ativar Modo Escuro"}
-          className="p-2 rounded-xl bg-[#111622] border border-[#1e2638] hover:border-[#00ddd7] text-gray-400 hover:text-white transition flex items-center gap-1.5 text-xs shadow-sm"
-        >
-          {theme === "dark" ? (
-            <>
-              <Sun className="w-4 h-4 text-amber-400" />
-              <span className="hidden sm:inline text-gray-300">Modo Claro</span>
-            </>
-          ) : (
-            <>
-              <Moon className="w-4 h-4 text-blue-400" />
-              <span className="hidden sm:inline text-gray-700">Modo Escuro</span>
-            </>
-          )}
+        
+        {/* Segmented Control de Período (com item ativo escuro) */}
+        <div className="hidden sm:flex items-center bg-[#E7EBE6] p-1 rounded-xl text-xs font-semibold text-[#63695B] border border-[#D0D5CD]">
+          {(["7d", "30d", "3m", "6m", "1y"] as const).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriodo(p)}
+              className={`px-3 py-1 rounded-lg transition ${
+                periodo === p
+                  ? "bg-[#2C2E2A] text-white font-bold shadow-sm"
+                  : "hover:text-[#2C2E2A]"
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+
+        {/* Dropdown All Sources */}
+        <button className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-[#E0E3DE] text-xs font-semibold text-[#2C2E2A] hover:bg-[#FBFBFB] shadow-sm">
+          <span>All sources</span>
+          <ChevronDown className="w-3.5 h-3.5 text-[#7C8472]" />
         </button>
 
-        {/* Seletor de Demonstracao (Exibido para Super Admin) */}
+        {/* Botão Export */}
+        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#E0E3DE] text-xs font-bold text-[#2C2E2A] hover:bg-[#FBFBFB] shadow-sm">
+          <Download className="w-3.5 h-3.5 text-[#7A8E75]" />
+          <span>Export</span>
+        </button>
+
+        {/* Seletor de Demonstração (Super Admin) */}
         {userRole === "SUPER_ADMIN" && (
           <DemoSwitcher currentSlug={orgSlug} currentSegmento={orgSegmento} />
         )}
 
-        {/* Perfil */}
-        <div className="h-4 w-px bg-[#1e2638] mx-1" />
-
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#111622] border border-[#1e2638] text-xs">
-          <div className="w-6 h-6 rounded-full bg-[#00ddd7]/20 text-[#00ddd7] flex items-center justify-center font-bold text-xs">
-            {userName.charAt(0)}
-          </div>
-          <div className="text-left hidden md:block">
-            <div className="text-xs font-medium text-white">{userName}</div>
-          </div>
+        {/* Avatar */}
+        <div className="w-8 h-8 rounded-full bg-[#C1ED84] text-[#2C2E2A] flex items-center justify-center font-bold text-xs border border-[#B2E372] shadow-sm">
+          {userName.charAt(0)}
         </div>
+
       </div>
     </header>
   );

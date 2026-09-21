@@ -1,50 +1,53 @@
 @import "tailwindcss";
 
 :root {
-  /* MAI Autoral Design Tokens (Quantum Navy & Electric Pulse) */
-  --mai-obsidian: #07090e;
-  --mai-slate-dark: #0f141f;
-  --mai-slate-card: #111622;
-  --mai-cyan: #00f0ff;
-  --mai-cyan-glow: #00ddd7;
-  --mai-emerald: #10b981;
-  --mai-emerald-dark: #059669;
-  --mai-crimson: #ef4444;
-  --mai-border: #1e2638;
-  --mai-border-light: #e2e8f0;
+  /* WAct / MAI Design System Tokens [MEDIDO] */
+  --lime: #C1ED84;
+  --lime-hover: #B2E372;
+  --sage: #7A8E75;
+  --cream: #EAE2CA;
+  --ink: #2C2E2A;
 
-  /* Dashboard Tokens */
-  --bg-dark: #07090e;
-  --bg-card: #0f141f;
-  --bg-card-hover: #161d2d;
-  --border-subtle: #1e2638;
-  --border-focus: #00f0ff;
-  --text-main: #f3f4f6;
-  --text-muted: #94a3b8;
-  --text-dim: #64748b;
+  /* Escala Neutra Esverdeada (Sage Scale) */
+  --sage-950: #2C2E2A;
+  --sage-900: #393E36;
+  --sage-800: #4E5447;
+  --sage-700: #63695B;
+  --sage-600: #7C8472;
+  --sage-500: #969F8E;
+  --sage-400: #B5BBAE;
+  --sage-300: #D0D5CD;
+  --sage-200: #E7EBE6;
+  --sage-100: #F7F7F6;
 
-  /* Cores Temáticas por Nicho */
-  --accent-general: #00f0ff;
-  --accent-auto: #f59e0b;
-  --accent-insurance: #3b82f6;
-  --accent-accounting: #10b981;
-  --accent-clinic: #ec4899;
+  /* Dashboard Shell & Surfaces [MEDIDO] */
+  --canvas: #EAEAEA;
+  --app-bg: #F5F5F5;
+  --card: #FFFFFF;
+  --card-subtle: #FBFBFB;
+  --sage-card: #7A8D74;
+  --border: #E0E3DE;
+
+  /* Status Colors */
+  --status-active-bg: #DDE8DE;
+  --status-active-text: #2D6A4F;
+  --status-disabled-bg: #E9BEC4;
+  --status-disabled-text: #9B2226;
+  --status-paused-bg: #E1D6AF;
+  --status-paused-text: #8F5D18;
+
+  /* Global Fallbacks */
+  --bg-dark: #F5F5F5;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F7F7F6;
+  --border-subtle: #E0E3DE;
+  --border-focus: #C1ED84;
+  --text-main: #2C2E2A;
+  --text-muted: #63695B;
+  --text-dim: #7C8472;
 
   --sidebar-width: 260px;
   --header-height: 64px;
-}
-
-/* Modo Claro / Landing Page Surfaces */
-html.light,
-[data-theme="light"] {
-  --bg-dark: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f1f5f9;
-  --border-subtle: #e2e8f0;
-  --border-focus: #00ddd7;
-  --text-main: #0b0d12;
-  --text-muted: #475569;
-  --text-dim: #94a3b8;
 }
 
 * {
@@ -55,27 +58,50 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background-color: #ffffff;
-  color: #0b0d12;
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Plus Jakarta Sans", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--app-bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Utilitários MAI */
-.bg-mai-obsidian {
-  background-color: #07090e;
+/* Utilitários WAct */
+.bg-wact-lime {
+  background-color: var(--lime);
 }
 
-.text-mai-cyan {
-  color: #00f0ff;
+.text-wact-lime {
+  color: var(--lime);
 }
 
-.border-mai {
-  border-color: #1e2638;
+.bg-wact-sage {
+  background-color: var(--sage);
 }
 
-.shadow-mai-glow {
-  box-shadow: 0 0 30px rgba(0, 240, 255, 0.15);
+.text-wact-sage {
+  color: var(--sage);
+}
+
+.bg-wact-cream {
+  background-color: var(--cream);
+}
+
+.bg-wact-app {
+  background-color: var(--app-bg);
+}
+
+.bg-wact-card {
+  background-color: var(--card);
+}
+
+.border-wact {
+  border-color: var(--border);
+}
+
+.text-wact-ink {
+  color: var(--ink);
+}
+
+.text-wact-muted {
+  color: var(--sage-700);
 }
