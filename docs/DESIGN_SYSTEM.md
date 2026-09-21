@@ -1,65 +1,59 @@
-# 🎨 Design System & Padrões Visuais Semânticos
-### Omni Service SaaS — Interface Institucional de Alta Densidade
+# 🏛️ DESIGN SYSTEM — MAI (Motor de Atendimento & Inteligência)
+### Inspirado na Arquitetura Visual de Alta Autoridade (Estilo Geist / Viver de IA / Wall Street Tech)
+
+Este documento estabelece as diretrizes visuais, tokens cromáticos, tipografia executiva e regras de interface do ecossistema **MAI**.
 
 ---
 
-## 1. Filosofia Estética & Princípios Visuais
+## 🎨 1. Paleta de Cores de Alta Autoridade B2B
 
-A interface foi concebida para transmitir **confiança financeira, velocidade operacional e densidade de informação**, inspirada nos melhores softwares B2B do mundo (Linear, Raycast, Stripe e Bloomberg Terminal):
+O design system abandona o excesso visual amador e foca em **autoridade, solidez e contraste de alto ticket**.
 
-* **Dark Mode Nativo com Glassmorphism Sutil:** Superfícies escuras profundas (`#0a0e13` e `#121820`) combinadas com bordas translúcidas sutis e desfoque de fundo (`backdrop-blur-md`).
-* **Tipografia Dupla Estruturada:**
-  * **Textos e Rótulos:** Fonte moderna sem serifa (`Inter` / `Poppins`) para máxima legibilidade.
-  * **Dados, Valores e Prazos:** Fonte monospaçada tabular (`JetBrains Mono` com `tabular-nums`) para que tabelas de preços, contadores regressivos e scores nunca oscilem visualmente.
-* **Microinterações Táteis:** Feedback de clique instantâneo (`active:scale-[0.98]`), transições suaves de 150ms e botões com foco acessível.
+### Tons Primários & Neutros (Modo Claro & Modo Escuro):
 
----
-
-## 2. Paleta de Cores e Tokens Globais
-
-```css
-:root {
-  /* Superfícies */
-  --bg-page: #0a0e13;
-  --bg-surface: #121820;
-  --bg-elevated: #1a222d;
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-active: rgba(255, 255, 255, 0.18);
-
-  /* Textos */
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-
-  /* Cores Semânticas de Estado */
-  --color-success: #10b981; /* Verde esmeralda (Ganho, Pago, Confirmado) */
-  --color-warning: #f59e0b; /* Âmbar (A vencer, Em qualificação) */
-  --color-danger: #ef4444;  /* Vermelho (Perdido, Vencido, No-show) */
-  --color-info: #0ea5e9;    /* Azul elétrico (Novo lead, WhatsApp) */
-}
-```
+| Token | Hexadecimal | Papel Psicológico & Uso |
+| :--- | :---: | :--- |
+| `--navy-deep` | `#0A1F3B` | **Azul Institucional de Alta Cúpula** — Botões primários, cabeçalhos executivos e destaques de autoridade. |
+| `--navy-glow` | `#13325B` | **Azul Elevado / Hover** — Estados ativos e sombras de profundidade. |
+| `--slate-dark` | `#0B0D12` | **Grafite Profundo** — Textos de títulos e fundo do modo escuro. |
+| `--slate-muted`| `#344054` | **Cinza Corporativo** — Subtítulos e ênfases suaves. |
+| `--slate-body` | `#5F6673` | **Texto de Leitura Contínua** — Parágrafos longos, descrições e metadados. |
+| `--cyan-electric`| `#00DDD7` | **Acento Tecnológico de IA** — Selos de status ativo, tags de IA e pontos focais de conversão. |
+| `--bg-light` | `#FFFFFF` | **Branco Cirúrgico** — Fundo do modo executivo claro. |
+| `--bg-card` | `#F8FAFC` | **Cinza Off-White** — Fundo de cards no modo claro. |
+| `--border-subtle`| `#D7DBE0` | **Bordas Ultra-Finas (1px)** — Separação limpa sem peso visual. |
 
 ---
 
-## 3. Identidade de Cores Adaptativa por Segmento
+## ✍️ 2. Tipografia Executiva
 
-A barra lateral e os acentos visuais adaptam-se suavemente para refletir a identidade do nicho selecionado:
+O sistema adota uma dualidade estrita:
 
-| Segmento | Cor de Acento Principal | Propósito Visual |
-|---|---|---|
-| 🚗 **Automotivo** | `#f59e0b` (Âmbar / Laranja Velocidade) | Energia comercial, dinamismo de pátio e agilidade. |
-| 🛡️ **Seguros** | `#00ddd7` (Ciano / Azul Institucional) | Segurança patrimonial, solidez e precisão financeira. |
-| 📊 **Contábil** | `#10b981` (Esmeralda / Verde Fiscal) | Conformidade tributária, auditoria e sucesso contábil. |
-| 🏥 **Clínicas** | `#06b6d4` (Turquesa Saúde / Violeta) | Higiene, tranquilidade e cuidado com o paciente. |
-| 💼 **Geral B2B** | `#6366f1` (Índigo Tecnológico) | Versatilidade, inteligência artificial e sofisticação. |
+1. **Fonte Principal de Navegação e Textos:** `'Geist'`, `'Inter'`, `-apple-system`, `sans-serif`
+   * **Títulos:** `font-weight: 600` ou `700`, `letter-spacing: -0.03em` (compacto e assertivo).
+   * **Subtítulos:** `font-weight: 400` ou `500`, `line-height: 1.55`.
+2. **Fonte de Dados e Engenharia (Monospace):** `'Geist Mono'`, `ui-monospace`, `'JetBrains Mono'`, `monospace`
+   * **Uso:** Selos de topo de seção (`TEXT-TRANSFORM: UPPERCASE`), tags de Lead Score, timestamps de WhatsApp, UTMs e métricas financeiras.
 
 ---
 
-## 4. Componentes Chave
+## 📐 3. Componentes & Geometria
 
-1. **Lead Score Badge (`LeadScoreBadge.tsx`):**
-   * Exibe a pontuação de 0 a 100 com coloração semântica (Vermelho < 40, Amarelo 40-70, Verde > 70) acompanhado da justificativa gerada pela IA em tooltip ou subtítulo.
-2. **Reprodutor de Áudio PTT (`AudioPlayerPTT.tsx`):**
-   * Visual idêntico ao WhatsApp: botão de play circular, onda sonora verde estilizada, duração em minutos/segundos e foto de perfil do remetente.
-3. **Seletor de Demonstração (`DemoSwitcher.tsx`):**
-   * Pílula flutuante no topo com alternância rápida entre os 5 segmentos, exibida estritamente para usuários com perfil `SUPER_ADMIN`.
+* **Bordas e Cantos Arredondados:**
+  * Botões de Ação Primária: `border-radius: 8px` ou `10px` (estilo executivo sóbrio).
+  * Cards e Dossiês: `border-radius: 16px` a `24px`.
+* **Sombras (Elevation):**
+  * `box-shadow: 0 18px 48px rgba(10, 31, 59, 0.12)` — sensação de elevação suave sobre a mesa.
+* **Espaço Negativo (Negative Space):**
+  * Padding generoso em seções (mínimo de `80px` a `120px` entre grandes blocos).
+
+---
+
+## 🧠 4. Filosofia de Copywriting (Clayton Makepeace Framework)
+
+1. **Ataque Direto à Dor Financeira:** O cliente não compra "recursos de IA", ele compra a **eliminação do desperdício de dinheiro com leads que esfriam no WhatsApp**.
+2. **Especificidade Brutal:** Trocar "atendimento rápido" por *"resposta em menos de 30 segundos com áudio gravado na hora"*.
+3. **Justificativa de Preço pelo ROI:** Cada plano deve provar que se paga com apenas 1 ou 2 vendas extras no mês.
+4. **Chamadas Claras de Duplo Ataque:**
+   * Ataque Direto (Ação Imediata): *"Começar Teste Sem Riscos"*
+   * Ataque Lógico (Validação): *"Ver Demonstração ao Vivo"*

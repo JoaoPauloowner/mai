@@ -19,160 +19,164 @@ import {
   Phone,
   BarChart3,
   Flame,
+  Check,
+  X,
+  Building2,
+  Lock,
 } from "lucide-react";
-import { InstagramIcon } from "@/components/icons/InstagramIcon";
 
 export default function LandingPage() {
-  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
-  const [leadsPerDay, setLeadsPerDay] = useState(25);
+  const [leadsPerDay, setLeadsPerDay] = useState(30);
 
-  // Calculo de ROI estimado
-  const extraSalesPerMonth = Math.round(leadsPerDay * 30 * 0.04); // 4% de conversao extra pela velocidade
-  const avgTicket = 1500;
+  // Calculo de ROI Estimado baseado no valor que o cliente deixa na mesa
+  const extraSalesPerMonth = Math.round(leadsPerDay * 30 * 0.05); // 5% de conversao extra pela velocidade < 30s
+  const avgTicket = 2000;
   const extraRevenue = extraSalesPerMonth * avgTicket;
 
   return (
-    <div className="min-h-screen bg-[#07090e] text-white selection:bg-[#00ddd7] selection:text-black">
-      {/* 1. Header / Navbar */}
-      <header className="h-20 border-b border-[#1e2638]/70 bg-[#07090e]/80 backdrop-blur-xl sticky top-0 z-50 px-6 max-w-7xl mx-auto flex items-center justify-between">
+    <div className="min-h-screen bg-white text-[#0B0D12] selection:bg-[#0A1F3B] selection:text-white font-sans">
+      {/* 1. Barra de Alerta Superior (Clayton Makepeace Hook) */}
+      <div className="bg-[#0A1F3B] text-white py-2.5 px-4 text-center text-xs font-medium border-b border-[#13325B]">
+        <span className="inline-flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[#00DDD7] animate-pulse" />
+          <span><strong>Alerta para Empresários:</strong> 78% dos clientes compram da primeira empresa que responde no WhatsApp. Sua equipe responde em quanto tempo?</span>
+        </span>
+      </div>
+
+      {/* 2. Header / Navbar Executiva */}
+      <header className="h-20 border-b border-[#D7DBE0]/60 bg-white/90 backdrop-blur-xl sticky top-0 z-50 px-6 max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#00ddd7] to-[#3b82f6] text-black font-black text-xl flex items-center justify-center shadow-[0_0_20px_rgba(0,221,215,0.35)]">
+          <div className="w-10 h-10 rounded-xl bg-[#0A1F3B] text-white font-bold text-xl flex items-center justify-center shadow-md">
             Ω
           </div>
-          <span className="text-xl font-black tracking-tight text-white">
-            MAI <span className="text-[#00ddd7] text-xs font-mono font-normal uppercase ml-1 px-2 py-0.5 rounded-full bg-[#00ddd7]/10 border border-[#00ddd7]/30">Service SaaS</span>
-          </span>
+          <div className="flex flex-col">
+            <span className="text-xl font-bold tracking-tight text-[#0B0D12]">
+              MAI <span className="text-[#0A1F3B] text-[10px] font-mono font-semibold uppercase px-2 py-0.5 rounded bg-gray-100 border border-gray-200 ml-1">B2B Platform</span>
+            </span>
+          </div>
         </div>
 
-        <nav className="hidden md:flex items-center gap-8 text-xs font-medium text-gray-300">
-          <a href="#solucoes" className="hover:text-[#00ddd7] transition">Recursos</a>
-          <a href="#como-funciona" className="hover:text-[#00ddd7] transition">Como Funciona</a>
-          <a href="#roi" className="hover:text-[#00ddd7] transition">Simulador de ROI</a>
-          <a href="#planos" className="hover:text-[#00ddd7] transition">Planos & Preços</a>
+        <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-[#5F6673]">
+          <a href="#diagnostico" className="hover:text-[#0A1F3B] transition">O Gargalo Invisível</a>
+          <a href="#solucoes" className="hover:text-[#0A1F3B] transition">Como o MAI Vende</a>
+          <a href="#roi" className="hover:text-[#0A1F3B] transition">Calculadora de Caixa</a>
+          <a href="#planos" className="hover:text-[#0A1F3B] transition">Planos & Licenciamento</a>
         </nav>
 
         <div className="flex items-center gap-3">
           <Link
             href="/login"
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-[#161d2d] transition"
+            className="px-4 py-2 rounded-lg text-xs font-semibold text-[#344054] hover:text-[#0A1F3B] hover:bg-gray-100 transition"
           >
-            Entrar
+            Acessar Painel
           </Link>
           <Link
             href="/cadastro"
-            className="px-5 py-2.5 rounded-xl bg-[#00ddd7] hover:bg-[#00c4be] text-black text-xs font-bold transition shadow-lg shadow-[#00ddd7]/20 flex items-center gap-1.5"
+            className="px-6 py-2.5 rounded-lg bg-[#0A1F3B] hover:bg-[#13325B] text-white text-xs font-semibold transition shadow-md flex items-center gap-1.5"
           >
-            <span>Testar Grátis</span>
+            <span>Iniciar Operação</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </header>
 
-      {/* 2. Hero Section */}
-      <section className="relative pt-20 pb-24 px-6 max-w-7xl mx-auto text-center space-y-8 overflow-hidden">
-        {/* Glow de Fundo */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[#00ddd7]/15 blur-[120px] pointer-events-none rounded-full" />
-
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#111622] border border-[#252e42] text-xs font-mono text-gray-300 shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-[#00ddd7] animate-pulse" />
-          <span>Atendimento com IA em menos de 30 segundos no WhatsApp & Instagram</span>
+      {/* 3. Hero Section (Copywriting Clayton Makepeace) */}
+      <section className="relative pt-16 pb-20 px-6 max-w-7xl mx-auto text-center space-y-7">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-100 border border-gray-200 text-xs font-mono text-[#344054]">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          <span className="uppercase tracking-wider">Implementação Comercial de IA para Empresas</span>
         </div>
 
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.1] max-w-5xl mx-auto">
-          Transforme Leads de Tráfego Pago em{" "}
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00ddd7] via-cyan-300 to-[#3b82f6]">
-            Vendas Fechadas no WhatsApp
-          </span>
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-[#0B0D12] leading-[1.08] max-w-5xl mx-auto">
+          Pare de Queimar Dinheiro em Anúncios.{" "}
+          <span className="text-[#344054]">Feche Vendas no WhatsApp em 30 Segundos.</span>
         </h1>
 
-        <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
-          O <strong>MAI</strong> combina Mini-Quizzes de alta conversão, atendimento com áudios humanizados de IA e um CRM Kanban que rastreia qual anúncio do Meta ou Google gerou o lucro da sua empresa.
+        <p className="text-base sm:text-xl text-[#5F6673] max-w-3xl mx-auto leading-relaxed font-normal">
+          Enquanto a sua equipe demora 40 minutos para responder um lead frio, o seu concorrente acabou de fechar o contrato. O <strong>MAI</strong> intercepta os cliques do Meta e Google Ads, qualifica a urgência com Mini-Quizzes e responde com <strong>áudios humanizados gravados na hora</strong>.
         </p>
 
-        {/* CTA Principal */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+        {/* Duplo Ataque de Decisão (Makepeace Framework) */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 max-w-md mx-auto">
           <Link
             href="/cadastro"
-            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#00ddd7] hover:bg-[#00c4be] text-black font-extrabold text-sm transition shadow-[0_0_30px_rgba(0,221,215,0.35)] flex items-center justify-center gap-2"
+            className="w-full sm:w-auto flex-1 min-h-[52px] px-8 rounded-lg bg-[#0A1F3B] hover:bg-[#13325B] text-white font-semibold text-sm transition shadow-xl flex items-center justify-center gap-2"
           >
-            <span>Criar Conta e Começar Agora</span>
+            <span>Blindar Meu WhatsApp Agora</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
 
           <Link
             href="/quiz/omni-demo"
             target="_blank"
-            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#111622] hover:bg-[#161d2d] border border-[#252e42] hover:border-[#00ddd7] text-white font-bold text-sm transition flex items-center justify-center gap-2"
+            className="w-full sm:w-auto flex-1 min-h-[52px] px-8 rounded-lg border border-[#D7DBE0] bg-white hover:bg-gray-50 text-[#0B0D12] font-semibold text-sm transition flex items-center justify-center gap-2 shadow-sm"
           >
-            <Play className="w-4 h-4 text-[#00ddd7]" />
-            <span>Ver Demonstração ao Vivo</span>
+            <Play className="w-4 h-4 text-[#0A1F3B]" />
+            <span>Ver em Ação ao Vivo</span>
           </Link>
         </div>
 
-        {/* Provas e Selos */}
-        <div className="pt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-12 text-xs text-gray-400 font-mono">
+        {/* Barra de Provas Imediatas */}
+        <div className="pt-10 flex flex-wrap items-center justify-center gap-8 sm:gap-14 text-xs font-semibold text-[#5F6673]">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>Resposta em &lt; 30 Segundos</span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <span>Resposta Imediata (&lt; 30 Segundos)</span>
           </div>
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-[#00ddd7]" />
-            <span>Atribuição Total Meta & Google Ads</span>
+            <CheckCircle2 className="w-4 h-4 text-[#0A1F3B]" />
+            <span>Atribuição Exata de ROI (Meta/Google Ads)</span>
           </div>
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-purple-400" />
-            <span>Áudios Gravados na Hora (PTT)</span>
+            <CheckCircle2 className="w-4 h-4 text-purple-600" />
+            <span>Áudios Humanizados com Voz Natural (PTT)</span>
           </div>
         </div>
 
-        {/* Mockup Preview do Dashboard */}
-        <div className="pt-12 relative max-w-5xl mx-auto">
-          <div className="p-3 rounded-3xl bg-[#0a0d14] border border-[#1e2638] shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
-            <div className="rounded-2xl bg-[#111622] border border-[#1e2638] overflow-hidden">
-              {/* Top Bar Preview */}
-              <div className="h-10 bg-[#0c101a] border-b border-[#1e2638] px-4 flex items-center justify-between">
+        {/* Mockup Central de Alta Autoridade (Design Geist) */}
+        <div className="pt-10 max-w-5xl mx-auto">
+          <div className="rounded-2xl border border-[#D7DBE0] bg-[#0A1F3B] p-3 shadow-[0_25px_60px_rgba(10,31,59,0.18)]">
+            <div className="rounded-xl bg-[#0B0D12] text-white overflow-hidden border border-[#1e2638]">
+              {/* Top bar */}
+              <div className="h-10 bg-[#07090e] border-b border-[#1e2638] px-4 flex items-center justify-between text-xs font-mono text-gray-400">
                 <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-red-500/80" />
-                  <span className="w-3 h-3 rounded-full bg-amber-500/80" />
-                  <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
                 </div>
-                <span className="text-[10px] font-mono text-gray-400">app.mai-service.com.br/dashboard</span>
-                <span className="text-[10px] font-mono text-emerald-400">● Live System</span>
+                <span>MAI Enterprise Cockpit • Live System</span>
+                <span className="text-emerald-400">● 98.4% de Eficiência Comercial</span>
               </div>
 
-              {/* Grid Interno do Preview */}
+              {/* Grid Interno do Dashboard */}
               <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-                {/* Card 1: Lead Score */}
-                <div className="p-4 rounded-xl bg-[#161d2d] border border-[#252e42] space-y-2">
-                  <div className="flex items-center justify-between text-xs text-gray-400">
-                    <span>Lead Score IA</span>
+                <div className="p-4 rounded-xl bg-[#111622] border border-[#1e2638] space-y-2">
+                  <div className="flex justify-between items-center text-xs text-gray-400 font-mono">
+                    <span>TRIAGEM DE LEAD IA</span>
                     <Flame className="w-4 h-4 text-emerald-400" />
                   </div>
-                  <div className="text-3xl font-black text-emerald-400 font-mono">95/100</div>
-                  <p className="text-[11px] text-gray-300">Alta urgência de compra identificada no Mini-Quiz.</p>
+                  <div className="text-3xl font-bold font-mono text-emerald-400">Score 95/100</div>
+                  <p className="text-xs text-gray-300">Cliente preencheu Quiz com urgência imediata e orçamento aprovado.</p>
                 </div>
 
-                {/* Card 2: WhatsApp Chat */}
-                <div className="p-4 rounded-xl bg-[#161d2d] border border-[#252e42] space-y-2">
-                  <div className="flex items-center justify-between text-xs text-gray-400">
-                    <span>Chat WhatsApp com PTT</span>
-                    <MessageSquare className="w-4 h-4 text-[#00ddd7]" />
+                <div className="p-4 rounded-xl bg-[#111622] border border-[#1e2638] space-y-2">
+                  <div className="flex justify-between items-center text-xs text-gray-400 font-mono">
+                    <span>ÁUDIO HUMANIZADO (PTT)</span>
+                    <MessageSquare className="w-4 h-4 text-[#00DDD7]" />
                   </div>
-                  <div className="text-xs bg-[#0c101a] p-2 rounded-lg border border-[#1e2638] text-gray-300">
-                    🎙️ <em>"Olá Carlos! Já separei a condição exclusiva pra você..."</em>
+                  <div className="text-xs bg-[#0c101a] p-2.5 rounded-lg border border-[#1e2638] text-gray-200">
+                    🎙️ <em>"Olá Roberto! Separei aqui a proposta que você solicitou no anúncio..."</em>
                   </div>
-                  <span className="text-[10px] text-[#00ddd7] font-mono block">Enviado em 14 segundos</span>
+                  <span className="text-[10px] font-mono text-[#00DDD7] block">Disparado em 12 segundos</span>
                 </div>
 
-                {/* Card 3: Atribuição */}
-                <div className="p-4 rounded-xl bg-[#161d2d] border border-[#252e42] space-y-2">
-                  <div className="flex items-center justify-between text-xs text-gray-400">
-                    <span>Atribuição de Campanha</span>
+                <div className="p-4 rounded-xl bg-[#111622] border border-[#1e2638] space-y-2">
+                  <div className="flex justify-between items-center text-xs text-gray-400 font-mono">
+                    <span>ATRIBUIÇÃO DE CAMPANHA</span>
                     <Target className="w-4 h-4 text-purple-400" />
                   </div>
-                  <div className="text-sm font-bold text-white truncate">reels_lancamento_q1</div>
-                  <span className="text-[10px] text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                    ROI 14.8x Confirmado
+                  <div className="text-sm font-bold text-white">meta_stories_fundo_funil</div>
+                  <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 inline-block">
+                    Contrato Fechado: R$ 15.000
                   </span>
                 </div>
               </div>
@@ -181,82 +185,117 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 3. Seção dos 4 Grandes Pilares */}
-      <section id="solucoes" className="py-20 px-6 max-w-7xl mx-auto border-t border-[#1e2638]/60 space-y-12">
+      {/* 4. O Diagnóstico Brutal (Por Que as Empresas Perdem Vendas) */}
+      <section id="diagnostico" className="py-20 px-6 max-w-7xl mx-auto border-t border-[#D7DBE0]/60 space-y-12">
         <div className="text-center space-y-3">
-          <span className="text-xs font-mono uppercase text-[#00ddd7] tracking-wider">A Solução Completa</span>
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight">
-            Por que o MAI Fecha Mais Vendas que um Atendente Comum?
+          <p className="text-xs font-mono uppercase text-[#0A1F3B] tracking-wider font-semibold">O Custo Oculto da Ineficiência</p>
+          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#0B0D12]">
+            Onde o Seu Dinheiro de Anúncios Está Vazando
           </h2>
-          <p className="text-sm text-gray-400 max-w-2xl mx-auto">
-            Eliminamos os 4 maiores gargalos que fazem empresas perderem vendas todos os dias no WhatsApp.
+          <p className="text-sm text-[#5F6673] max-w-2xl mx-auto">
+            Não é o seu anúncio que é ruim. É o que acontece nos primeiros 5 minutos após o clique.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Card 1 */}
-          <div className="p-6 rounded-2xl bg-[#111622] border border-[#1e2638] hover:border-[#00ddd7] transition space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-[#00ddd7]/10 border border-[#00ddd7]/30 text-[#00ddd7] flex items-center justify-center">
-              <Zap className="w-6 h-6" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="p-7 rounded-2xl border border-red-200 bg-red-50/50 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center font-bold">
+              <X className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-white">Speed-to-Lead Imediato</h3>
-            <p className="text-xs text-gray-400 leading-relaxed">
-              O lead manda mensagem e recebe resposta qualificada em menos de 30 segundos, 24 horas por dia, 7 dias por semana.
+            <h3 className="text-base font-bold text-[#0B0D12]">A Morte pelo Tempo de Resposta</h3>
+            <p className="text-xs text-[#5F6673] leading-relaxed">
+              O lead clica no anúncio querendo comprar agora. Se o atendente demora 20 minutos, o interesse cai em 80% e o lead chama o próximo anunciante.
             </p>
           </div>
 
-          {/* Card 2 */}
-          <div className="p-6 rounded-2xl bg-[#111622] border border-[#1e2638] hover:border-purple-500 transition space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400 flex items-center justify-center">
-              <MessageSquare className="w-6 h-6" />
+          <div className="p-7 rounded-2xl border border-red-200 bg-red-50/50 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center font-bold">
+              <X className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-white">Áudios Humanizados PTT</h3>
-            <p className="text-xs text-gray-400 leading-relaxed">
-              A IA envia áudios simulados com a voz natural do vendedor para explicar condições, tirar dúvidas e quebrar o gelo.
+            <h3 className="text-base font-bold text-[#0B0D12]">Vendedores Perdendo Tempo com Curiosos</h3>
+            <p className="text-xs text-[#5F6673] leading-relaxed">
+              Sua equipe gasta 7 horas por dia conversando com pessoas sem orçamento ou sem pressa, deixando os compradores de alto ticket esperando na fila.
             </p>
           </div>
 
-          {/* Card 3 */}
-          <div className="p-6 rounded-2xl bg-[#111622] border border-[#1e2638] hover:border-amber-500 transition space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center">
-              <BarChart3 className="w-6 h-6" />
+          <div className="p-7 rounded-2xl border border-red-200 bg-red-50/50 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center font-bold">
+              <X className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-white">CRM Kanban & Distribuição</h3>
-            <p className="text-xs text-gray-400 leading-relaxed">
-              Organize os clientes por etapas com Drag & Drop e distribua os novos leads automaticamente entre a sua equipe de vendas.
-            </p>
-          </div>
-
-          {/* Card 4 */}
-          <div className="p-6 rounded-2xl bg-[#111622] border border-[#1e2638] hover:border-emerald-500 transition space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
-              <Target className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-white">Atribuição de ROI Ads</h3>
-            <p className="text-xs text-gray-400 leading-relaxed">
-              Saiba exatamente qual anúncio do Facebook, Instagram ou Google gerou o lead que fechou a compra no final do mês.
+            <h3 className="text-base font-bold text-[#0B0D12]">Cegueira Total de Métricas (Sem ROI)</h3>
+            <p className="text-xs text-[#5F6673] leading-relaxed">
+              O gestor de tráfego diz que o anúncio "gerou muitos cliques", mas você não sabe qual campanha colocou dinheiro de verdade na sua conta bancária.
             </p>
           </div>
         </div>
       </section>
 
-      {/* 4. Simulador de ROI Interativo */}
-      <section id="roi" className="py-20 px-6 max-w-5xl mx-auto border-t border-[#1e2638]/60 space-y-10">
+      {/* 5. Como o MAI Resolve (Os 4 Pilares da Máquina) */}
+      <section id="solucoes" className="py-20 px-6 max-w-7xl mx-auto border-t border-[#D7DBE0]/60 space-y-12">
         <div className="text-center space-y-3">
-          <span className="text-xs font-mono uppercase text-emerald-400 tracking-wider">Calculadora de Retorno</span>
-          <h2 className="text-3xl sm:text-4xl font-black">Quanto Dinheiro a sua Empresa Deixa na Mesa?</h2>
-          <p className="text-xs text-gray-400 max-w-xl mx-auto">
-            Descubra quanto você pode faturar a mais acelerando o tempo de resposta dos seus leads de anúncios.
-          </p>
+          <p className="text-xs font-mono uppercase text-[#0A1F3B] tracking-wider font-semibold">A Engenharia de Fechamento</p>
+          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#0B0D12]">
+            Uma Operação Comercial Blindada de Ponta a Ponta
+          </h2>
         </div>
 
-        <div className="p-8 rounded-3xl bg-[#111622] border border-[#1e2638] shadow-2xl space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="p-6 rounded-2xl border border-[#D7DBE0] bg-white hover:border-[#0A1F3B] transition space-y-4 shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-[#0A1F3B] text-white flex items-center justify-center">
+              <Zap className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-[#0B0D12]">1. Mini-Quiz de Qualificação</h3>
+            <p className="text-xs text-[#5F6673] leading-relaxed">
+              Filtra renda, urgência e necessidade em 30 segundos antes do lead falar com qualquer pessoa.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl border border-[#D7DBE0] bg-white hover:border-[#0A1F3B] transition space-y-4 shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-[#0A1F3B] text-white flex items-center justify-center">
+              <MessageSquare className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-[#0B0D12]">2. Áudios Humanizados (PTT)</h3>
+            <p className="text-xs text-[#5F6673] leading-relaxed">
+              A IA envia áudios naturais simulados para gerar proximidade, quebrar objeções e marcar reuniões.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl border border-[#D7DBE0] bg-white hover:border-[#0A1F3B] transition space-y-4 shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-[#0A1F3B] text-white flex items-center justify-center">
+              <BarChart3 className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-[#0B0D12]">3. CRM Kanban & Distribuição</h3>
+            <p className="text-xs text-[#5F6673] leading-relaxed">
+              Distribui os compradores qualificados automaticamente entre os seus vendedores em fila circular.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl border border-[#D7DBE0] bg-white hover:border-[#0A1F3B] transition space-y-4 shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-[#0A1F3B] text-white flex items-center justify-center">
+              <Target className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-[#0B0D12]">4. Atribuição Reversa (CAPI)</h3>
+            <p className="text-xs text-[#5F6673] leading-relaxed">
+              Devolve as vendas fechadas para o algoritmo do Facebook/Google para baratear o custo por lead.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Calculadora de Retorno / ROI Interativa */}
+      <section id="roi" className="py-20 px-6 max-w-5xl mx-auto border-t border-[#D7DBE0]/60 space-y-10">
+        <div className="text-center space-y-3">
+          <p className="text-xs font-mono uppercase text-emerald-700 tracking-wider font-semibold">Simulação de Impacto Financeiro</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#0B0D12]">O Retorno Real no Caixa da Sua Empresa</h2>
+        </div>
+
+        <div className="p-8 rounded-2xl border border-[#D7DBE0] bg-gray-50 shadow-xl space-y-8">
           <div>
             <div className="flex justify-between items-center mb-3">
-              <label className="text-sm font-bold text-white">
-                Quantos leads chegam no seu WhatsApp por dia?
+              <label className="text-sm font-bold text-[#0B0D12]">
+                Quantos leads chegam no seu WhatsApp por dia através de anúncios?
               </label>
-              <span className="font-mono text-xl font-black text-[#00ddd7] bg-[#161d2d] px-4 py-1 rounded-xl border border-[#252e42]">
+              <span className="font-mono text-xl font-bold text-[#0A1F3B] bg-white px-4 py-1 rounded-lg border border-[#D7DBE0]">
                 {leadsPerDay} leads / dia
               </span>
             </div>
@@ -267,145 +306,145 @@ export default function LandingPage() {
               step={5}
               value={leadsPerDay}
               onChange={(e) => setLeadsPerDay(Number(e.target.value))}
-              className="w-full h-2 bg-[#1c2438] rounded-lg appearance-none cursor-pointer accent-[#00ddd7]"
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#0A1F3B]"
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-[#1e2638]">
-            <div className="p-5 rounded-2xl bg-[#161d2d] border border-[#252e42] space-y-1">
-              <span className="text-[11px] text-gray-400 uppercase font-mono">Vendas Extras Estimadas</span>
-              <div className="text-3xl font-black text-white font-mono">+{extraSalesPerMonth} vendas / mês</div>
-              <p className="text-[10px] text-gray-500">Recuperando leads que desistem pela demora no atendimento.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-gray-200">
+            <div className="p-5 rounded-xl bg-white border border-gray-200 space-y-1">
+              <span className="text-xs text-gray-500 uppercase font-mono">Vendas Extras Recuperadas</span>
+              <div className="text-3xl font-bold text-[#0B0D12] font-mono">+{extraSalesPerMonth} vendas / mês</div>
+              <p className="text-xs text-gray-400">Clientes que comprariam do concorrente pela demora no primeiro contato.</p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-500/30 space-y-1">
-              <span className="text-[11px] text-emerald-400 uppercase font-mono">Faturamento Adicional Estimado</span>
-              <div className="text-3xl font-black text-emerald-400 font-mono">
+            <div className="p-5 rounded-xl bg-emerald-50 border border-emerald-300 space-y-1">
+              <span className="text-xs text-emerald-800 uppercase font-mono font-semibold">Faturamento Adicional Estimado</span>
+              <div className="text-3xl font-bold text-emerald-700 font-mono">
                 +R$ {extraRevenue.toLocaleString("pt-BR")},00
               </div>
-              <p className="text-[10px] text-gray-400">O sistema se paga logo nos primeiros dias de uso.</p>
+              <p className="text-xs text-emerald-800">A mensalidade do MAI representa menos de 5% do lucro que ele devolve.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 5. Tabela de Planos & Preços */}
-      <section id="planos" className="py-20 px-6 max-w-7xl mx-auto border-t border-[#1e2638]/60 space-y-12">
+      {/* 7. Tabela de Planos de Licenciamento */}
+      <section id="planos" className="py-20 px-6 max-w-7xl mx-auto border-t border-[#D7DBE0]/60 space-y-12">
         <div className="text-center space-y-3">
-          <span className="text-xs font-mono uppercase text-[#00ddd7] tracking-wider">Planos Transparentes</span>
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight">
-            Escolha o Plano Ideal para a sua Operação
+          <p className="text-xs font-mono uppercase text-[#0A1F3B] tracking-wider font-semibold">Investimento Transparente</p>
+          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#0B0D12]">
+            Planos sem Contrato de Fidelidade
           </h2>
-          <p className="text-xs text-gray-400 max-w-xl mx-auto">
-            Sem fidelidade. Cancele ou mude de plano a qualquer momento com total liberdade.
+          <p className="text-sm text-[#5F6673] max-w-xl mx-auto">
+            Mude de plano ou cancele a qualquer momento com apenas 1 clique.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Plano 1: Starter */}
-          <div className="p-8 rounded-3xl bg-[#111622] border border-[#1e2638] space-y-6 flex flex-col justify-between">
+          {/* Starter */}
+          <div className="p-8 rounded-2xl border border-[#D7DBE0] bg-white space-y-6 flex flex-col justify-between shadow-sm">
             <div className="space-y-4">
-              <div className="text-xs font-mono uppercase tracking-wider text-gray-400">Starter</div>
+              <div className="text-xs font-mono uppercase tracking-wider text-gray-500 font-semibold">Starter</div>
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-black text-white">R$ 497</span>
-                <span className="text-xs text-gray-400">/ mês</span>
+                <span className="text-4xl font-bold text-[#0B0D12]">R$ 497</span>
+                <span className="text-xs text-gray-500">/ mês</span>
               </div>
-              <p className="text-xs text-gray-400">Ideal para corretores individuais, consultórios e lojas com 1 atendente.</p>
+              <p className="text-xs text-gray-500">Para corretores individuais, consultórios e pequenas lojas com 1 atendente.</p>
               
-              <ul className="space-y-2.5 text-xs text-gray-300 pt-4 border-t border-[#1e2638]">
+              <ul className="space-y-2.5 text-xs text-[#344054] pt-4 border-t border-gray-100">
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#00ddd7]" /> Até 2.500 mensagens de IA / mês
+                  <Check className="w-4 h-4 text-emerald-600" /> Até 2.500 mensagens de IA / mês
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#00ddd7]" /> 1 Conexão de WhatsApp
+                  <Check className="w-4 h-4 text-emerald-600" /> 1 Conexão de WhatsApp (QR Code)
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#00ddd7]" /> CRM Kanban Completo
+                  <Check className="w-4 h-4 text-emerald-600" /> Pipeline CRM Kanban Completo
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#00ddd7]" /> Mini-Quiz de Captação
+                  <Check className="w-4 h-4 text-emerald-600" /> Mini-Quiz de Captação Público
                 </li>
               </ul>
             </div>
 
             <Link
               href="/cadastro"
-              className="w-full py-3 rounded-xl bg-[#161d2d] hover:bg-[#1e2638] border border-[#252e42] hover:border-[#00ddd7] text-white font-bold text-xs transition text-center"
+              className="w-full py-3 rounded-lg border border-[#D7DBE0] bg-gray-50 hover:bg-gray-100 text-[#0B0D12] font-semibold text-xs transition text-center"
             >
-              Começar com Starter
+              Iniciar com Starter
             </Link>
           </div>
 
-          {/* Plano 2: Pro (Destaque) */}
-          <div className="p-8 rounded-3xl bg-gradient-to-b from-[#111622] to-[#0c101a] border-2 border-[#00ddd7] shadow-[0_0_40px_rgba(0,221,215,0.2)] space-y-6 flex flex-col justify-between relative">
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#00ddd7] text-black text-[10px] font-extrabold uppercase tracking-wider">
-              Mais Popular
+          {/* Pro (Destaque Institucional) */}
+          <div className="p-8 rounded-2xl border-2 border-[#0A1F3B] bg-white space-y-6 flex flex-col justify-between shadow-2xl relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-0.5 rounded-full bg-[#0A1F3B] text-white text-[10px] font-bold uppercase tracking-wider">
+              Mais Escolhido por Empresas
             </div>
 
             <div className="space-y-4">
-              <div className="text-xs font-mono uppercase tracking-wider text-[#00ddd7]">Pro Escala</div>
+              <div className="text-xs font-mono uppercase tracking-wider text-[#0A1F3B] font-bold">Pro Escala</div>
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-black text-white">R$ 997</span>
-                <span className="text-xs text-gray-400">/ mês</span>
+                <span className="text-4xl font-bold text-[#0B0D12]">R$ 997</span>
+                <span className="text-xs text-gray-500">/ mês</span>
               </div>
-              <p className="text-xs text-gray-400">Para imobiliárias, lojas de veículos e clínicas com equipe de vendas ativa.</p>
+              <p className="text-xs text-gray-500">Para imobiliárias, lojas de seminovos e clínicas com equipe de vendas.</p>
               
-              <ul className="space-y-2.5 text-xs text-gray-200 pt-4 border-t border-[#1e2638]">
+              <ul className="space-y-2.5 text-xs text-[#344054] pt-4 border-t border-gray-100">
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#00ddd7]" /> Até 7.500 mensagens de IA / mês
+                  <Check className="w-4 h-4 text-[#0A1F3B]" /> Até 7.500 mensagens de IA / mês
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#00ddd7]" /> WhatsApp + Instagram Direct
+                  <Check className="w-4 h-4 text-[#0A1F3B]" /> WhatsApp + Instagram Direct
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#00ddd7]" /> Áudios PTT Humanizados Ilimitados
+                  <Check className="w-4 h-4 text-[#0A1F3B]" /> Áudios Humanizados PTT Ilimitados
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#00ddd7]" /> Equipe & Vendedores Ilimitados
+                  <Check className="w-4 h-4 text-[#0A1F3B]" /> Equipe & Vendedores Ilimitados
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#00ddd7]" /> Distribuição Round-Robin Automática
+                  <Check className="w-4 h-4 text-[#0A1F3B]" /> Distribuição Automática Round-Robin
                 </li>
               </ul>
             </div>
 
             <Link
               href="/cadastro"
-              className="w-full py-3.5 rounded-xl bg-[#00ddd7] hover:bg-[#00c4be] text-black font-extrabold text-xs transition text-center shadow-lg shadow-[#00ddd7]/20"
+              className="w-full py-3 rounded-lg bg-[#0A1F3B] hover:bg-[#13325B] text-white font-semibold text-xs transition text-center shadow-lg"
             >
               Assinar Plano Pro
             </Link>
           </div>
 
-          {/* Plano 3: Enterprise */}
-          <div className="p-8 rounded-3xl bg-[#111622] border border-[#1e2638] space-y-6 flex flex-col justify-between">
+          {/* Enterprise */}
+          <div className="p-8 rounded-2xl border border-[#D7DBE0] bg-white space-y-6 flex flex-col justify-between shadow-sm">
             <div className="space-y-4">
-              <div className="text-xs font-mono uppercase tracking-wider text-purple-400">Enterprise</div>
+              <div className="text-xs font-mono uppercase tracking-wider text-purple-700 font-semibold">Enterprise</div>
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-black text-white">R$ 1.997</span>
-                <span className="text-xs text-gray-400">/ mês</span>
+                <span className="text-4xl font-bold text-[#0B0D12]">R$ 1.997</span>
+                <span className="text-xs text-gray-500">/ mês</span>
               </div>
-              <p className="text-xs text-gray-400">Para grandes operações com alto tráfego pago no Meta & Google Ads.</p>
+              <p className="text-xs text-gray-500">Para grandes operações com alto volume de investimento em tráfego pago.</p>
               
-              <ul className="space-y-2.5 text-xs text-gray-300 pt-4 border-t border-[#1e2638]">
+              <ul className="space-y-2.5 text-xs text-[#344054] pt-4 border-t border-gray-100">
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-purple-400" /> 15.000+ mensagens de IA / mês
+                  <Check className="w-4 h-4 text-purple-600" /> 15.000+ mensagens de IA / mês
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-purple-400" /> Meta Conversions API (CAPI) Ativa
+                  <Check className="w-4 h-4 text-purple-600" /> Meta Conversions API (CAPI) Ativa
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-purple-400" /> Visão Computacional (Análise de Fotos)
+                  <Check className="w-4 h-4 text-purple-600" /> Visão Computacional (Fotos & Docs)
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-purple-400" /> Suporte e Onboarding Dedicado
+                  <Check className="w-4 h-4 text-purple-600" /> Onboarding & Suporte VIP
                 </li>
               </ul>
             </div>
 
             <Link
               href="/cadastro"
-              className="w-full py-3 rounded-xl bg-[#161d2d] hover:bg-[#1e2638] border border-[#252e42] hover:border-purple-400 text-white font-bold text-xs transition text-center"
+              className="w-full py-3 rounded-lg border border-[#D7DBE0] bg-gray-50 hover:bg-gray-100 text-[#0B0D12] font-semibold text-xs transition text-center"
             >
               Falar com Especialista
             </Link>
@@ -413,23 +452,23 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 6. Footer */}
-      <footer className="border-t border-[#1e2638] bg-[#05070a] py-12 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-gray-500">
-          <div className="flex items-center gap-2 text-white font-bold">
-            <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#00ddd7] to-[#3b82f6] text-black flex items-center justify-center text-xs">
+      {/* 8. Rodapé Institucional B2B */}
+      <footer className="border-t border-[#D7DBE0] bg-gray-50 py-12 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-[#5F6673]">
+          <div className="flex items-center gap-2 text-[#0B0D12] font-bold">
+            <div className="w-6 h-6 rounded-lg bg-[#0A1F3B] text-white flex items-center justify-center text-xs">
               Ω
             </div>
-            <span>MAI — Service-as-a-Software</span>
+            <span>MAI — Motor de Atendimento & Inteligência</span>
           </div>
 
           <div>
             &copy; {new Date().getFullYear()} MAI Platform. Todos os direitos reservados.
           </div>
 
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="hover:text-white transition">Acessar Painel</Link>
-            <Link href="/cadastro" className="hover:text-white transition">Criar Conta</Link>
+          <div className="flex items-center gap-6 font-semibold">
+            <Link href="/login" className="hover:text-[#0A1F3B] transition">Acessar Cockpit</Link>
+            <Link href="/cadastro" className="hover:text-[#0A1F3B] transition">Criar Conta Comercial</Link>
           </div>
         </div>
       </footer>
