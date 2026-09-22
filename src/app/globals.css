@@ -106,3 +106,27 @@ body {
 .shoppers-theme .border-orange-200 { border-color: #BFDBFE !important; }
 .shoppers-theme .border-orange-300 { border-color: #93C5FD !important; }
 .shoppers-theme .accent-orange-500 { accent-color: #2563EB !important; }
+
+
+/* WACT experience: editorial green theme layered over the shared dashboard core. */
+.experience-wact {
+  --experience-accent: #C1ED84;
+  --experience-accent-strong: #9BBE62;
+  --experience-accent-soft: #E7EBE6;
+  --experience-canvas: #F5F5F2;
+}
+.experience-wact .bg-\[\#FF6A2A\] { background-color: var(--experience-accent) !important; }
+.experience-wact .bg-\[\#EB5417\] { background-color: var(--experience-accent-strong) !important; }
+.experience-wact .bg-\[\#F4F4F2\] { background-color: var(--experience-canvas) !important; }
+.experience-wact .text-\[\#FF6A2A\] { color: #6F874F !important; }
+.experience-wact .text-\[\#EB5417\] { color: #4E5447 !important; }
+.experience-wact .border-\[\#FF6A2A\] { border-color: var(--experience-accent) !important; }
+.experience-wact [class*="bg-[#FF6A2A]"] { background-color: var(--experience-accent) !important; }
+.experience-wact [class*="text-[#FF6A2A]"] { color: #6F874F !important; }
+.experience-wact [class*="border-[#FF6A2A]"] { border-color: var(--experience-accent) !important; }
+.experience-wact .hover\:bg-\[\#EB5417\]:hover { background-color: var(--experience-accent-strong) !important; }
+.experience-wact h1,
+.experience-wact h2,
+.experience-wact h3 {
+  letter-spacing: -0.035em;
+}
