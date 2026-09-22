@@ -10,7 +10,7 @@ export default async function DashboardLayout({
   const session = await requireAuth();
 
   return (
-    <div className="flex min-h-screen bg-[#F5F5F5] text-[#2C2E2A]">
+    <div className="flex min-h-screen bg-[#F4F4F2] text-[#171717]">
       {/* Sidebar WAct Lateral */}
       <Sidebar
         segmento={session.organizationSegmento}
@@ -29,7 +29,7 @@ export default async function DashboardLayout({
           isDemoMode={Boolean(session.isDemoMode)}
         />
 
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto bg-[#F5F5F5]">
+        <main className="flex-1 p-5 md:p-7 overflow-y-auto bg-[#F4F4F2]">
           {children}
         </main>
       </div>
