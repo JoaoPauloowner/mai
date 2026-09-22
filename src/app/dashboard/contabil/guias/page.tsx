@@ -65,34 +65,34 @@ export default function GuiasContabilPage() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div>
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#DDE8DE] text-[#2D6A4F] text-xs font-bold border border-[#C4D7C4] mb-2">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EAF7EF] text-[#247A4A] text-xs font-bold border border-[#C8E5D1] mb-2">
           <ReceiptText className="w-3.5 h-3.5" /> Módulo Contábil & Fiscal
         </div>
-        <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C2E2A]">
+        <h1 className="font-serif text-2xl font-bold tracking-tight text-[#171717]">
           Emissão de Guias Tributárias com PIX Copia e Cola
         </h1>
-        <p className="text-xs text-[#63695B] mt-1">
+        <p className="text-xs text-[#6F6F6F] mt-1">
           Disparo automático de DAS, DARF e FGTS pelo WhatsApp com código de barras, PIX instantâneo e régua de lembretes D-3, D-0 e D+1.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl bg-white border border-[#E0E3DE] shadow-xs">
-          <div className="text-xs text-[#7C8472] uppercase font-mono mb-1">Guias Disparadas</div>
-          <div className="text-2xl font-serif font-bold text-[#2C2E2A]">{guias.length}</div>
-          <p className="text-[11px] text-[#2D6A4F] mt-1">Régua D-3 em andamento</p>
+        <div className="p-4 rounded-2xl bg-white border border-[#E7E7E4] shadow-xs">
+          <div className="text-xs text-[#8A8A84] uppercase font-mono mb-1">Guias Disparadas</div>
+          <div className="text-2xl font-serif font-bold text-[#171717]">{guias.length}</div>
+          <p className="text-[11px] text-[#247A4A] mt-1">Régua D-3 em andamento</p>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-[#E0E3DE] shadow-xs">
-          <div className="text-xs text-[#7C8472] uppercase font-mono mb-1">Volume Tributário</div>
-          <div className="text-2xl font-serif font-bold text-[#2D6A4F]">
+        <div className="p-4 rounded-2xl bg-white border border-[#E7E7E4] shadow-xs">
+          <div className="text-xs text-[#8A8A84] uppercase font-mono mb-1">Volume Tributário</div>
+          <div className="text-2xl font-serif font-bold text-[#247A4A]">
             R$ {guias.reduce((acc, g) => acc + g.valor, 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
           </div>
-          <p className="text-[11px] text-[#63695B] mt-1">Neste fechamento</p>
+          <p className="text-[11px] text-[#6F6F6F] mt-1">Neste fechamento</p>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-[#E0E3DE] shadow-xs">
-          <div className="text-xs text-[#7C8472] uppercase font-mono mb-1">Pagos via PIX Instantâneo</div>
-          <div className="text-2xl font-serif font-bold text-[#8F5D18]">68%</div>
-          <p className="text-[11px] text-[#63695B] mt-1">Zero juros para o cliente</p>
+        <div className="p-4 rounded-2xl bg-white border border-[#E7E7E4] shadow-xs">
+          <div className="text-xs text-[#8A8A84] uppercase font-mono mb-1">Pagos via PIX Instantâneo</div>
+          <div className="text-2xl font-serif font-bold text-[#A15C00]">68%</div>
+          <p className="text-[11px] text-[#6F6F6F] mt-1">Zero juros para o cliente</p>
         </div>
       </div>
 
@@ -103,22 +103,22 @@ export default function GuiasContabilPage() {
         </CardHeader>
 
         <CardContent>
-          <div className="divide-y divide-[#E0E3DE]">
+          <div className="divide-y divide-[#E7E7E4]">
             {guias.map((guia) => (
               <div key={guia.id} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-xs bg-[#2C2E2A] text-white px-2 py-0.5 rounded">
+                    <span className="font-mono font-bold text-xs bg-[#171717] text-white px-2 py-0.5 rounded">
                       {guia.tipo}
                     </span>
-                    <span className="font-bold text-sm text-[#2C2E2A]">{guia.empresa}</span>
+                    <span className="font-bold text-sm text-[#171717]">{guia.empresa}</span>
                     <span
                       className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold border ${
                         guia.status === "PAGO_CONFIRMADO"
-                          ? "bg-[#DDE8DE] text-[#2D6A4F] border-[#C4D7C4]"
+                          ? "bg-[#EAF7EF] text-[#247A4A] border-[#C8E5D1]"
                           : guia.status === "VISUALIZADO"
-                          ? "bg-[#E1D6AF] text-[#8F5D18] border-[#D0C496]"
-                          : "bg-[#E7EBE6] text-[#2C2E2A] border-[#D0D5CD]"
+                          ? "bg-[#FFF3D6] text-[#A15C00] border-[#E8D5A8]"
+                          : "bg-[#F4F4F2] text-[#171717] border-[#D9D9D5]"
                       }`}
                     >
                       {guia.status === "PAGO_CONFIRMADO"
@@ -128,15 +128,15 @@ export default function GuiasContabilPage() {
                         : "✉️ Enviado no WhatsApp"}
                     </span>
                   </div>
-                  <p className="text-[#63695B] text-xs">
+                  <p className="text-[#6F6F6F] text-xs">
                     Competência: <strong>{guia.competencia}</strong> • Vencimento: <strong>{guia.vencimento}</strong>
                   </p>
                 </div>
 
                 <div className="flex items-center gap-4 text-right shrink-0">
                   <div>
-                    <span className="text-[10px] text-[#7C8472] uppercase font-mono block">Valor da Guia</span>
-                    <span className="text-base font-bold font-mono text-[#2D6A4F]">
+                    <span className="text-[10px] text-[#8A8A84] uppercase font-mono block">Valor da Guia</span>
+                    <span className="text-base font-bold font-mono text-[#247A4A]">
                       R$ {guia.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                     </span>
                   </div>
@@ -160,7 +160,7 @@ export default function GuiasContabilPage() {
                       )} com vencimento em ${guia.vencimento}. Pague via PIX Copia e Cola: ${guia.pixCopiaECola}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="px-3 py-1.5 rounded-xl bg-[#C1ED84] text-[#2C2E2A] font-bold text-xs hover:bg-[#B2E372] transition border border-[#A5DC60] inline-flex items-center gap-1.5"
+                      className="px-3 py-1.5 rounded-xl bg-[#FF6A2A] text-[#171717] font-bold text-xs hover:bg-[#EB5417] transition border border-[#A5DC60] inline-flex items-center gap-1.5"
                     >
                       <Send className="w-3.5 h-3.5" /> WhatsApp
                     </a>
