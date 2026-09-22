@@ -14,13 +14,13 @@ export default async function CrmPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto text-[#2C2E2A]">
+    <div className="space-y-6 max-w-7xl mx-auto text-[#171717]">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[#2C2E2A]">
+          <h1 className="text-xl font-bold tracking-tight text-[#171717]">
             Pipeline CRM Inteligente (Lead Scored)
           </h1>
-          <p className="text-xs text-[#63695B]">
+          <p className="text-xs text-[#6F6F6F]">
             Acompanhamento das oportunidades por estágio com nota de qualificação automática por IA.
           </p>
         </div>
@@ -28,7 +28,7 @@ export default async function CrmPage() {
         <div className="flex items-center gap-3">
           <Link href="/quiz/captacao-geral" target="_blank">
             <Button variant="secondary" size="sm">
-              <Compass className="w-3.5 h-3.5 text-[#7A8E75]" />
+              <Compass className="w-3.5 h-3.5 text-[#FF6A2A]" />
               <span>Gerar Lead via Mini-Quiz</span>
             </Button>
           </Link>
