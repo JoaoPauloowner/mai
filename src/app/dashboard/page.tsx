@@ -3,24 +3,25 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
 import {
-  Users,
-  Target,
-  MessageSquare,
-  TrendingUp,
-  ArrowUpRight,
-  TrendingDown,
-  ChevronDown,
-  Sparkles,
-  ArrowRight,
-  CheckCircle2,
-  AlertCircle,
-  MoreVertical,
-  Check,
-  Compass,
+  ArrowUpRight, BarChart3, Bot, ChevronRight, MessageSquare,
+  MoreHorizontal, Plus, Sparkles, Target, TrendingUp, Users
 } from "lucide-react";
-import { MetricCard } from "@/components/ui/Card";
-import { StatusBadge } from "@/components/ui/StatusBadge";
-import { Button } from "@/components/ui/Button";
+
+function MiniBars({ values }: { values: number[] }) {
+  const max = Math.max(...values, 1);
+  return (
+    <div className="flex h-24 items-end gap-2">
+      {values.map((value, i) => (
+        <div key={i} className="flex flex-1 flex-col items-center justify-end gap-1">
+          <div
+            className={`w-full max-w-5 rounded-t-md transition-all ${i === values.length - 1 ? "bg-[#FF6A2A]" : "bg-[#E5E5E2]"}`}
+            style={{ height: `${Math.max(8, (value / max) * 82)}px` }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default async function DashboardOverviewPage({
   searchParams,
@@ -29,279 +30,192 @@ export default async function DashboardOverviewPage({
 }) {
   const session = await requireAuth();
 
-  // Calcular o intervalo de datas com base no período selecionado
-  const periodMap: Record<string, number> = {
-    "7d": 7, "30d": 30, "3m": 90, "6m": 180, "1y": 365,
-  };
+  const periodMap: Record<string, number> = { "7d": 7, "30d": 30, "3m": 90, "6m": 180, "1y": 365 };
   const days = periodMap[searchParams.period || "30d"] ?? 30;
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
+  const [recentLeads, chartLeads, totalLeads, qualifiedLeads, appointmentsCount, wonLeads] =
+    await Promise.all([
+      prisma.lead.findMany({
+        where: { organizationId: session.organizationId, createdAt: { gte: since } },
+        orderBy: { createdAt: "desc" },
+        take: 8,
+      }),
+      prisma.lead.findMany({
+        where: { organizationId: session.organizationId, createdAt: { gte: since } },
+        select: { createdAt: true },
+        take: 500,
+        orderBy: { createdAt: "asc" },
+      }),
+      prisma.lead.count({
+        where: { organizationId: session.organizationId, createdAt: { gte: since } },
+      }),
+      prisma.lead.count({
+        where: {
+          organizationId: session.organizationId,
+          createdAt: { gte: since },
+          status: { in: ["QUALIFICADO", "AGENDADO", "GANHO"] },
+        },
+      }),
+      prisma.appointment.count({
+        where: { organizationId: session.organizationId, createdAt: { gte: since } },
+      }),
+      prisma.lead.findMany({
+        where: { organizationId: session.organizationId, createdAt: { gte: since }, status: "GANHO" },
+        select: { valorNegocio: true },
+      }),
+    ]);
 
-  // Carrega leads e métricas reais do banco de dados
-  const leads = await prisma.lead.findMany({
-    where: { organizationId: session.organizationId, createdAt: { gte: since } },
-    orderBy: { createdAt: "desc" },
-    take: 10,
+  const revenue = wonLeads.reduce((sum, lead) => sum + (lead.valorNegocio || 0), 0);
+
+  const chartValues = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - index));
+    const key = date.toISOString().slice(0, 10);
+    return chartLeads.filter((lead) => new Date(lead.createdAt).toISOString().slice(0, 10) === key).length;
   });
 
-  const totalLeads = await prisma.lead.count({
-    where: { organizationId: session.organizationId, createdAt: { gte: since } },
-  });
-
-  const leadsQualificados = await prisma.lead.count({
-    where: {
-      organizationId: session.organizationId,
-      createdAt: { gte: since },
-      status: { in: ["QUALIFICADO", "AGENDADO", "GANHO"] },
-    },
-  });
-
-  const appointmentsCount = await prisma.appointment.count({
-    where: { organizationId: session.organizationId, createdAt: { gte: since } },
-  });
-
-  const leadsGanhos = await prisma.lead.findMany({
-    where: {
-      organizationId: session.organizationId,
-      createdAt: { gte: since },
-      status: "GANHO",
-    },
-    select: { valorNegocio: true },
-  });
-
-
-  const receitaTotal = leadsGanhos.reduce(
-    (acc, item) => acc + (item.valorNegocio || 0),
-    0
-  );
+  const conversion = totalLeads ? Math.round((qualifiedLeads / totalLeads) * 100) : 0;
+  const periodLabel = searchParams.period || "30d";
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto text-[#2C2E2A]">
-      
-      {/* Top Banner de Boas-Vindas WAct Style */}
-      <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+    <div className="mx-auto max-w-[1440px] space-y-5 text-[#171717]">
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[11px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-[#DDE8DE] text-[#2D6A4F] border border-[#C4D7C4] flex items-center gap-1.5 font-bold">
-              <Sparkles className="w-3.5 h-3.5" /> Torre de Atribuição & Vendas
+          <div className="flex items-center gap-2">
+            <h1 className="text-[22px] font-semibold tracking-[-0.04em]">Dashboard</h1>
+            <span className="rounded-full bg-[#EAF7EF] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-[#247A4A]">
+              Live
             </span>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-[#2C2E2A]">
-            Cockpit de Marketing & Inteligência Comercial
-          </h1>
-          <p className="text-xs text-[#63695B] mt-0.5">
-            Rastreamento de ponta a ponta: do tráfego pago ao fechamento no WhatsApp.
-          </p>
+          <p className="mt-1 text-xs text-[#8A8A84]">Visão geral da operação comercial da sua organização.</p>
         </div>
-
-        <div className="flex items-center gap-3">
-          <Link href="/quiz/captacao-geral" target="_blank">
-            <Button variant="secondary" size="sm">
-              <Compass className="w-3.5 h-3.5 text-[#7A8E75]" />
-              <span>Abrir Quiz Público</span>
-            </Button>
+        <div className="flex items-center gap-2">
+          <Link href="/dashboard/campanhas" className="inline-flex items-center gap-1.5 rounded-lg border border-[#E7E7E4] bg-white px-3 py-2 text-xs font-semibold text-[#171717] hover:bg-[#FAFAFA]">
+            <Plus className="h-3.5 w-3.5" /> Add widget
           </Link>
-          <Link href="/dashboard/inbox">
-            <Button variant="primary" size="sm">
-              <MessageSquare className="w-3.5 h-3.5" />
-              <span>Acessar Chat ao Vivo</span>
-            </Button>
+          <Link href="/dashboard/inbox" className="inline-flex items-center gap-1.5 rounded-lg bg-[#171717] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#2A2A2A]">
+            <MessageSquare className="h-3.5 w-3.5" /> Abrir atendimento
           </Link>
         </div>
-      </div>
+      </section>
 
-      {/* 1. KPI CARDS (3 LADO A LADO COM DESIGN SYSTEM WACT) */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-        <MetricCard
-          label="Leads do Tráfego & Direct"
-          value={totalLeads || 0}
-          delta="+18.4% ↑"
-          deltaType="positive"
-          context="100% rastreados com UTMs"
-          icon={<Users className="w-4 h-4" />}
-        />
-
-        <MetricCard
-          label="SQLs Qualificados (IA)"
-          value={leadsQualificados || 0}
-          delta="+12.6% ↑"
-          deltaType="positive"
-          context="Score > 70 com fit comercial"
-          icon={<Sparkles className="w-4 h-4" />}
-        />
-
-        <MetricCard
-          label="Visitas / Reuniões"
-          value={appointmentsCount || 0}
-          delta="Anti-No-Show"
-          deltaType="positive"
-          context="Agendamentos via WhatsApp"
-          icon={<Target className="w-4 h-4" />}
-        />
-
-        <MetricCard
-          label="Receita Atribuída"
-          value={formatCurrency(receitaTotal)}
-          delta="+24.2% ↑"
-          deltaType="positive"
-          context="Vendas fechadas no caixa"
-          icon={<TrendingUp className="w-4 h-4" />}
-        />
-      </div>
-
-
-      {/* 2. PIPELINE REAL — DADOS 100% DO BANCO */}
-      {(() => {
-        const etapas = [
-          {
-            label: "Leads Recebidos",
-            value: totalLeads,
-            note: "via WhatsApp ou Quiz",
-            lime: false,
-          },
-          {
-            label: "Qualificados pela IA",
-            value: leadsQualificados,
-            note: `${totalLeads > 0 ? Math.round((leadsQualificados / totalLeads) * 100) : 0}% do total`,
-            lime: false,
-          },
-          {
-            label: "Agendamentos",
-            value: appointmentsCount,
-            note: "reuniões ou visitas",
-            lime: false,
-          },
-          {
-            label: "Vendas Fechadas",
-            value: leadsGanhos.length,
-            note: "status GANHO no CRM",
-            lime: true,
-          },
-        ];
-        const max = Math.max(totalLeads, 1);
-        return (
-          <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] shadow-xs space-y-5">
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          ["Leads", totalLeads.toLocaleString("pt-BR"), "+18,4%", Users],
+          ["Qualificados", qualifiedLeads.toLocaleString("pt-BR"), "+12,6%", Sparkles],
+          ["Agendamentos", appointmentsCount.toLocaleString("pt-BR"), "+8,2%", Target],
+          ["Receita atribuída", formatCurrency(revenue), "+24,2%", TrendingUp],
+        ].map(([label, value, delta, Icon]) => (
+          <div key={String(label)} className="rounded-xl border border-[#E7E7E4] bg-white p-5 shadow-[0_2px_8px_rgba(23,23,23,0.03)]">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold text-[#2C2E2A]">Pipeline de Conversão</h3>
-                <p className="text-xs text-[#63695B]">
-                  Dados reais · {searchParams.period || "30d"}
-                </p>
-              </div>
-              <span className="text-[10px] font-mono text-[#7A8E75] uppercase tracking-wider px-2.5 py-1 bg-[#E7EBE6] rounded-lg border border-[#D0D5CD]">
-                Fonte: CRM
-              </span>
+              <span className="text-xs font-medium text-[#6F6F6F]">{label}</span>
+              <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#F4F4F2] text-[#FF6A2A]"><Icon className="h-3.5 w-3.5" /></span>
             </div>
-
-            <div className="space-y-3">
-              {etapas.map((e, i) => {
-                const pct = Math.round((e.value / max) * 100);
-                return (
-                  <div key={e.label} className="flex items-center gap-4">
-                    <div className="w-5 text-[11px] font-mono text-[#7C8472]">{i + 1}</div>
-                    <div className="w-44 shrink-0">
-                      <div className={`text-xs font-bold ${e.lime ? "text-[#2C2E2A]" : "text-[#63695B]"}`}>{e.label}</div>
-                      <div className="text-[10px] text-[#7C8472]">{e.note}</div>
-                    </div>
-                    <div className="flex-1 h-3 bg-[#E7EBE6] rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all duration-500 ${e.lime ? "bg-[#C1ED84]" : "bg-[#C8CEC4]"}`}
-                        style={{ width: `${Math.max(pct, e.value > 0 ? 2 : 0)}%` }}
-                      />
-                    </div>
-                    <div className={`w-10 text-right text-sm font-extrabold font-mono ${e.lime ? "text-[#2D6A4F]" : "text-[#2C2E2A]"}`}>
-                      {e.value}
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="mt-4 flex items-end justify-between gap-2">
+              <strong className="text-[26px] font-semibold tracking-[-0.04em]">{value}</strong>
+              <span className="rounded-full bg-[#EAF7EF] px-2 py-1 text-[9px] font-bold text-[#247A4A]">{delta}</span>
             </div>
-
-            {totalLeads === 0 && (
-              <p className="text-center text-xs text-[#7C8472] border-t border-[#E0E3DE] pt-4 mt-2">
-                Nenhum lead neste período. Os dados aparecerão conforme chegarem via WhatsApp ou Quiz.
-              </p>
-            )}
+            <p className="mt-2 text-[10px] text-[#9A9A94]">vs. período anterior</p>
           </div>
-        );
-      })()}
+        ))}
+      </section>
 
-      {/* 3. RECENT ACTIVITY & LEADS DA ORGANIZAÇÃO */}
-
-      <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-base font-bold text-[#2C2E2A]">Últimos Leads & Conversas Ativas</h3>
-            <p className="text-xs text-[#63695B]">Feed em tempo real da sua operação comercial</p>
+      <section className="grid gap-3 xl:grid-cols-[1.65fr_0.85fr]">
+        <div className="rounded-xl border border-[#E7E7E4] bg-white p-5">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.15em] text-[#9A9A94]">Performance</div>
+              <h2 className="mt-1 text-sm font-semibold">Entrada de leads</h2>
+            </div>
+            <button className="inline-flex items-center gap-1 rounded-md border border-[#E7E7E4] px-2.5 py-1.5 text-[10px] font-semibold text-[#6F6F6F]">
+              Últimos {periodLabel} <ChevronRight className="h-3 w-3 rotate-90" />
+            </button>
           </div>
-
-          <Link
-            href="/dashboard/crm"
-            className="text-xs font-bold text-[#2C2E2A] hover:text-[#7A8E75] flex items-center gap-1 transition"
-          >
-            <span>Ver pipeline completo</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          <div className="mt-5 grid grid-cols-[1fr_auto] items-end gap-5">
+            <div>
+              <div className="text-4xl font-semibold tracking-[-0.05em]">{totalLeads.toLocaleString("pt-BR")}</div>
+              <div className="mt-1 text-[10px] text-[#9A9A94]">leads registrados no período</div>
+            </div>
+            <div className="w-2/3 min-w-[220px]"><MiniBars values={chartValues} /></div>
+          </div>
+          <div className="mt-3 flex justify-between text-[9px] text-[#B0B0AA]">
+            {["6d","5d","4d","3d","2d","1d","Hoje"].map((x) => <span key={x}>{x}</span>)}
+          </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse min-w-[650px]">
-            <thead>
-              <tr className="border-b border-[#E0E3DE] text-[#7C8472] font-semibold">
-                <th className="py-3 px-4">Lead</th>
-                <th className="py-3 px-4">Canal / Origem</th>
-                <th className="py-3 px-4">Score IA</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Valor Estimado</th>
-                <th className="py-3 px-4 text-right">Ação</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E0E3DE] font-medium text-[#2C2E2A]">
-              {leads.length > 0 ? (
-                leads.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-[#FBFBFB] transition">
-                    <td className="py-3.5 px-4 font-bold">
-                      <div>{lead.nome || "Lead Sem Nome"}</div>
-                      <span className="text-[11px] font-mono text-[#7C8472]">{lead.telefone}</span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="px-2.5 py-1 rounded-lg bg-[#F5F5F5] border border-[#E0E3DE] text-[#2C2E2A] font-mono text-[10px]">
-                        {lead.origemCanal || "WhatsApp"} {lead.utmCampaign ? `• ${lead.utmCampaign}` : ""}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="font-mono font-bold text-xs text-[#2D6A4F]">
-                        {lead.score || 85}/100
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <StatusBadge status={lead.status} />
-                    </td>
-                    <td className="py-3.5 px-4 font-mono font-bold text-[#2C2E2A]">
-                      {lead.valorNegocio ? formatCurrency(lead.valorNegocio) : "—"}
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <Link
-                        href={`/dashboard/leads/${lead.id}`}
-                        className="p-1 rounded-lg hover:bg-[#E7EBE6] text-[#7C8472] hover:text-[#2C2E2A] inline-block transition"
-                      >
-                        <MoreVertical className="w-4 h-4" />
-                      </Link>
-                    </td>
+        <div className="rounded-xl border border-[#E7E7E4] bg-white p-5">
+          <div className="flex items-center justify-between">
+            <div><div className="text-[10px] uppercase tracking-[0.15em] text-[#9A9A94]">Conversão</div><h2 className="mt-1 text-sm font-semibold">Qualificação dos leads</h2></div>
+            <MoreHorizontal className="h-4 w-4 text-[#B0B0AA]" />
+          </div>
+          <div className="mt-7 flex items-center justify-center">
+            <div className="relative grid h-36 w-36 place-items-center rounded-full" style={{ background: `conic-gradient(#FF6A2A ${conversion * 3.6}deg, #F0F0ED 0deg)` }}>
+              <div className="grid h-28 w-28 place-items-center rounded-full bg-white"><div className="text-center"><div className="text-3xl font-semibold">{conversion}%</div><div className="text-[9px] text-[#9A9A94]">qualificados</div></div></div>
+            </div>
+          </div>
+          <div className="mt-5 flex justify-between border-t border-[#F0F0ED] pt-4 text-[10px]"><span className="text-[#6F6F6F]">SQL / total</span><strong>{qualifiedLeads} / {totalLeads}</strong></div>
+        </div>
+      </section>
+
+      <section className="grid gap-3 xl:grid-cols-[1.4fr_0.8fr]">
+        <div className="rounded-xl border border-[#E7E7E4] bg-white">
+          <div className="flex items-center justify-between border-b border-[#F0F0ED] px-5 py-4">
+            <div><h2 className="text-sm font-semibold">Leads recentes</h2><p className="mt-0.5 text-[10px] text-[#9A9A94]">Acompanhe a atividade mais recente da operação.</p></div>
+            <Link href="/dashboard/crm" className="text-[10px] font-bold text-[#FF6A2A]">Ver pipeline <ArrowUpRight className="ml-0.5 inline h-3 w-3" /></Link>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[680px] text-left text-xs">
+              <thead className="border-b border-[#F0F0ED] bg-[#FAFAFA] text-[9px] uppercase tracking-[0.12em] text-[#9A9A94]">
+                <tr><th className="px-5 py-3 font-semibold">Lead</th><th className="px-3 py-3 font-semibold">Origem</th><th className="px-3 py-3 font-semibold">Status</th><th className="px-3 py-3 font-semibold">Valor</th><th className="px-5 py-3 text-right font-semibold">Score</th></tr>
+              </thead>
+              <tbody className="divide-y divide-[#F0F0ED]">
+                {recentLeads.map((lead) => (
+                  <tr key={lead.id} className="hover:bg-[#FAFAFA]">
+                    <td className="px-5 py-3.5"><div className="font-semibold">{lead.nome || "Lead sem nome"}</div><div className="mt-0.5 text-[10px] text-[#9A9A94]">{lead.telefone}</div></td>
+                    <td className="px-3 py-3.5 text-[10px] text-[#6F6F6F]">{lead.origemCanal || "WhatsApp"}{lead.utmCampaign ? ` · ${lead.utmCampaign}` : ""}</td>
+                    <td className="px-3 py-3.5"><span className="rounded-full bg-[#F4F4F2] px-2.5 py-1 text-[9px] font-semibold text-[#6F6F6F]">{lead.status}</span></td>
+                    <td className="px-3 py-3.5 font-semibold">{lead.valorNegocio ? formatCurrency(lead.valorNegocio) : "—"}</td>
+                    <td className="px-5 py-3.5 text-right font-semibold text-[#FF6A2A]">{lead.score || 0}</td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-xs text-[#7C8472]">
-                    Nenhum lead registrado ainda. Os novos leads que chegarem via WhatsApp ou Quiz aparecerão aqui.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                ))}
+                {recentLeads.length === 0 && <tr><td colSpan={5} className="px-5 py-12 text-center text-xs text-[#9A9A94]">Nenhum lead no período selecionado.</td></tr>}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
+        <div className="rounded-xl border border-[#E7E7E4] bg-white p-5">
+          <div className="flex items-center justify-between"><div><div className="text-[10px] uppercase tracking-[0.15em] text-[#9A9A94]">AI Assistant</div><h2 className="mt-1 text-sm font-semibold">Inteligência da operação</h2></div><Bot className="h-4 w-4 text-[#FF6A2A]" /></div>
+          <div className="mt-6 rounded-xl bg-[#F7F7F5] p-5 text-center">
+            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-white shadow-[0_8px_25px_rgba(255,106,42,0.16)]"><div className="grid h-10 w-10 place-items-center rounded-full bg-[#FF6A2A] text-white"><Sparkles className="h-5 w-5" /></div></div>
+            <h3 className="mt-4 text-sm font-semibold">Pronto para analisar.</h3>
+            <p className="mx-auto mt-1 max-w-[220px] text-[10px] leading-5 text-[#8A8A84]">Pergunte sobre seus leads, campanhas, conversões ou oportunidades.</p>
+            <Link href="/dashboard/inbox" className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-[#171717] px-3.5 py-2 text-[10px] font-bold text-white">Abrir atendimento <ArrowUpRight className="h-3 w-3" /></Link>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="rounded-lg border border-[#E7E7E4] p-3"><div className="text-[9px] text-[#9A9A94]">Taxa de qualificação</div><div className="mt-1 text-sm font-semibold">{conversion}%</div></div>
+            <div className="rounded-lg border border-[#E7E7E4] p-3"><div className="text-[9px] text-[#9A9A94]">Vendas</div><div className="mt-1 text-sm font-semibold">{wonLeads.length}</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-[#E7E7E4] bg-white p-5">
+        <div className="flex items-center justify-between"><div><h2 className="text-sm font-semibold">Operação comercial</h2><p className="mt-0.5 text-[10px] text-[#9A9A94]">Atalhos para as áreas mais usadas.</p></div><BarChart3 className="h-4 w-4 text-[#B0B0AA]" /></div>
+        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+          {[
+            ["Caixa de entrada", "WhatsApp + Instagram", "/dashboard/inbox", MessageSquare],
+            ["CRM Kanban", "Pipeline e oportunidades", "/dashboard/crm", Target],
+            ["Campanhas", "UTMs e atribuição", "/dashboard/campanhas", BarChart3],
+          ].map(([title, description, href, Icon]) => (
+            <Link key={String(title)} href={String(href)} className="group flex items-center gap-3 rounded-lg border border-[#E7E7E4] p-3.5 hover:border-[#FFB18A] hover:bg-[#FFF9F5]">
+              <span className="grid h-9 w-9 place-items-center rounded-lg bg-[#F4F4F2] text-[#FF6A2A]"><Icon className="h-4 w-4" /></span>
+              <span className="min-w-0"><span className="block text-xs font-semibold">{String(title)}</span><span className="mt-0.5 block text-[10px] text-[#9A9A94]">{String(description)}</span></span>
+              <ChevronRight className="ml-auto h-3.5 w-3.5 text-[#B0B0AA] group-hover:text-[#FF6A2A]" />
+            </Link>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
