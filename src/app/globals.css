@@ -1,107 +1,95 @@
 @import "tailwindcss";
 
 :root {
-  /* WAct / MAI Design System Tokens [MEDIDO] */
-  --lime: #C1ED84;
-  --lime-hover: #B2E372;
-  --sage: #7A8E75;
-  --cream: #EAE2CA;
-  --ink: #2C2E2A;
+  --ma-orange-50: #fff7f2;
+  --ma-orange-100: #ffe9dc;
+  --ma-orange-200: #ffd1b8;
+  --ma-orange-300: #ffb18a;
+  --ma-orange-400: #ff8a54;
+  --ma-orange-500: #ff6a2a;
+  --ma-orange-600: #eb5417;
+  --ma-orange-700: #c84310;
+  --ma-ink: #171717;
+  --ma-ink-soft: #292929;
+  --ma-muted: #6f6f6f;
+  --ma-muted-soft: #9a9a9a;
+  --ma-canvas: #f4f4f2;
+  --ma-surface: #ffffff;
+  --ma-surface-soft: #fafafa;
+  --ma-border: #e7e7e4;
+  --ma-border-strong: #d9d9d5;
 
-  /* Escala Neutra Esverdeada (Sage Scale) */
-  --sage-950: #2C2E2A;
-  --sage-900: #393E36;
-  --sage-800: #4E5447;
-  --sage-700: #63695B;
-  --sage-600: #7C8472;
-  --sage-500: #969F8E;
-  --sage-400: #B5BBAE;
-  --sage-300: #D0D5CD;
-  --sage-200: #E7EBE6;
-  --sage-100: #F7F7F6;
+  /* Backward-compatible WACT tokens for existing product screens. */
+  --lime: #c1ed84;
+  --lime-hover: #b2e372;
+  --sage: #7a8e75;
+  --cream: #eae2ca;
+  --ink: var(--ma-ink);
+  --sage-950: #2c2e2a;
+  --sage-900: #393e36;
+  --sage-800: #4e5447;
+  --sage-700: #63695b;
+  --sage-600: #7c8472;
+  --sage-500: #969f8e;
+  --sage-400: #b5bbae;
+  --sage-300: #d0d5cd;
+  --sage-200: #e7ebe6;
+  --sage-100: #f7f7f6;
+  --canvas: var(--ma-canvas);
+  --app-bg: #f5f5f5;
+  --card: var(--ma-surface);
+  --card-subtle: #fbfbfb;
+  --sage-card: #7a8d74;
+  --border: #e0e3de;
 
-  /* Dashboard Shell & Surfaces [MEDIDO] */
-  --canvas: #EAEAEA;
-  --app-bg: #F5F5F5;
-  --card: #FFFFFF;
-  --card-subtle: #FBFBFB;
-  --sage-card: #7A8D74;
-  --border: #E0E3DE;
-
-  /* Status Colors */
-  --status-active-bg: #DDE8DE;
-  --status-active-text: #2D6A4F;
-  --status-disabled-bg: #E9BEC4;
-  --status-disabled-text: #9B2226;
-  --status-paused-bg: #E1D6AF;
-  --status-paused-text: #8F5D18;
-
-  /* Global Fallbacks */
-  --bg-dark: #F5F5F5;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #F7F7F6;
-  --border-subtle: #E0E3DE;
-  --border-focus: #C1ED84;
-  --text-main: #2C2E2A;
-  --text-muted: #63695B;
-  --text-dim: #7C8472;
+  --status-active-bg: #dde8de;
+  --status-active-text: #2d6a4f;
+  --status-disabled-bg: #e9bec4;
+  --status-disabled-text: #9b2226;
+  --status-paused-bg: #e1d6af;
+  --status-paused-text: #8f5d18;
 
   --sidebar-width: 260px;
   --header-height: 64px;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 
-html,
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--app-bg);
-  color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   min-height: 100vh;
+  background: var(--ma-canvas);
+  color: var(--ma-ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Utilitários WAct */
-.bg-wact-lime {
-  background-color: var(--lime);
+::selection {
+  background: var(--ma-orange-200);
+  color: var(--ma-ink);
 }
 
-.text-wact-lime {
-  color: var(--lime);
-}
+/* Marketing helpers */
+.ma-page { background: var(--ma-canvas); color: var(--ma-ink); }
+.ma-surface { background: var(--ma-surface); }
+.ma-border { border-color: var(--ma-border); }
+.ma-orange { color: var(--ma-orange-500); }
+.ma-orange-bg { background: var(--ma-orange-500); }
+.ma-orange-soft { background: var(--ma-orange-100); }
+.ma-ink { color: var(--ma-ink); }
+.ma-muted { color: var(--ma-muted); }
 
-.bg-wact-sage {
-  background-color: var(--sage);
-}
-
-.text-wact-sage {
-  color: var(--sage);
-}
-
-.bg-wact-cream {
-  background-color: var(--cream);
-}
-
-.bg-wact-app {
-  background-color: var(--app-bg);
-}
-
-.bg-wact-card {
-  background-color: var(--card);
-}
-
-.border-wact {
-  border-color: var(--border);
-}
-
-.text-wact-ink {
-  color: var(--ink);
-}
-
-.text-wact-muted {
-  color: var(--sage-700);
-}
+/* Legacy WACT helpers */
+.bg-wact-lime { background-color: var(--lime); }
+.text-wact-lime { color: var(--lime); }
+.bg-wact-sage { background-color: var(--sage); }
+.text-wact-sage { color: var(--sage); }
+.bg-wact-cream { background-color: var(--cream); }
+.bg-wact-app { background-color: var(--app-bg); }
+.bg-wact-card { background-color: var(--card); }
+.border-wact { border-color: var(--border); }
+.text-wact-ink { color: var(--ink); }
+.text-wact-muted { color: var(--sage-700); }
