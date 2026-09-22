@@ -84,7 +84,7 @@ export default function LandingPage() {
     <main className="wact-page overflow-hidden">
       <header className="sticky top-0 z-50 border-b border-neutral-200/80 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-8">
-          <Link href="/" className="flex items-center gap-2.5"><span className="grid h-9 w-9 place-items-center rounded-xl bg-neutral-950 text-sm font-black text-white">M</span><span className="text-lg font-bold tracking-[-0.04em]">WACT</span></Link>
+          <Link href="/wact" className="flex items-center gap-2.5"><span className="grid h-9 w-9 place-items-center rounded-xl bg-neutral-950 text-sm font-black text-white">M</span><span className="text-lg font-bold tracking-[-0.04em]">WACT</span></Link>
           <nav className="hidden items-center gap-8 text-xs font-medium text-neutral-500 md:flex">{[["#problema","O problema"],["#como-funciona","Como funciona"],["#recursos","Recursos"],["#planos","Planos"],["#faq","FAQ"]].map(([h,t])=><a key={h} href={h} className="hover:text-neutral-950">{t}</a>)}</nav>
           <div className="flex items-center gap-2"><Link href="/login" className="hidden px-3 py-2 text-xs font-semibold text-neutral-600 sm:block">Entrar</Link><Link href="/cadastro" className="inline-flex items-center gap-2 rounded-lg bg-neutral-950 px-4 py-2.5 text-xs font-bold text-white hover:bg-neutral-800">Começar agora <ArrowRight className="h-3.5 w-3.5"/></Link></div>
         </div>
