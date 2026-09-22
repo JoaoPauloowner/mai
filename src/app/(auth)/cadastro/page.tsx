@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Sparkles,
@@ -17,6 +17,9 @@ import {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const experience = pathname.startsWith("/wact") ? "wact" : pathname.startsWith("/shoppers") ? "shoppers" : "mai";
+  const experienceLabel = experience === "wact" ? "WACT" : experience === "shoppers" ? "SHOPPERS" : "MAI";
 
   const [step, setStep] = useState<1 | 2>(1);
   const [loading, setLoading] = useState(false);
@@ -83,7 +86,7 @@ export default function RegisterPage() {
 
       const regData = await regRes.json();
       if (regData.success) {
-        router.push("/dashboard");
+        router.push(`/${experience}/dashboard`);
       } else {
         setErrorMsg(regData.error || "Falha ao criar conta da empresa.");
       }
@@ -98,7 +101,7 @@ export default function RegisterPage() {
     "w-full pl-10 pr-4 py-2.5 bg-[#F5F5F5] border border-[#E0E3DE] rounded-xl text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75] focus:bg-white transition";
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] flex flex-col justify-center items-center p-4 selection:bg-[#C1ED84] selection:text-[#2C2E2A]">
+    <div className="auth-shell min-h-screen bg-[#F5F5F5] flex flex-col justify-center items-center p-4 selection:bg-[#C1ED84] selection:text-[#2C2E2A]">
       <div className="w-full max-w-md">
         {/* Header Visual */}
         <div className="text-center mb-8">
@@ -107,7 +110,7 @@ export default function RegisterPage() {
           </div>
           <h1 className="font-serif text-3xl font-bold tracking-tight text-[#2C2E2A]">Criar Conta Comercial</h1>
           <p className="text-xs text-[#63695B] mt-1">
-            Plataforma de Atendimento com IA, CRM & Atribuição de Tráfego Pago
+            {experienceLabel} · Atendimento com IA, CRM & Atribuição de Tráfego Pago
           </p>
         </div>
 
@@ -303,7 +306,7 @@ export default function RegisterPage() {
 
           <div className="pt-2 border-t border-[#E0E3DE] text-center text-xs text-[#7C8472]">
             Já tem uma conta cadastrada?{" "}
-            <Link href="/login" className="text-[#2C2E2A] font-bold hover:underline">
+            <Link href={`/${experience}/login`} className="text-[#2C2E2A] font-bold hover:underline">
               Fazer Login
             </Link>
           </div>
