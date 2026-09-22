@@ -16,13 +16,47 @@ export function Card({ className, variant = "default", children, ...props }: Car
 
   return (
     <div
-      className={twMerge(clsx("rounded-2xl p-6 transition-all", variantStyles[variant], className))}
+      className={twMerge(clsx("rounded-2xl transition-all overflow-hidden", variantStyles[variant], className))}
       {...props}
     >
       {children}
     </div>
   );
 }
+
+export function CardHeader({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={twMerge("px-6 pt-5 pb-3 space-y-1", className)} {...props}>
+      {children}
+    </div>
+  );
+}
+
+export function CardTitle({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+  return (
+    <h2 className={twMerge("font-serif text-base font-bold text-[#2C2E2A] leading-snug", className)} {...props}>
+      {children}
+    </h2>
+  );
+}
+
+export function CardDescription({ className, children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
+  return (
+    <p className={twMerge("text-xs text-[#63695B] leading-relaxed", className)} {...props}>
+      {children}
+    </p>
+  );
+}
+
+export function CardContent({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={twMerge("px-6 pb-5", className)} {...props}>
+      {children}
+    </div>
+  );
+}
+
+
 
 export interface MetricCardProps {
   label: string;

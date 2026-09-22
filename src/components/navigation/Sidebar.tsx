@@ -199,6 +199,151 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
             </div>
           )}
 
+          {segmento === "INSURANCE" && (
+            <div>
+              {!collapsed && (
+                <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#2D6A4F]">
+                  Módulo Seguros
+                </div>
+              )}
+              <div className="space-y-1">
+                <Link
+                  href="/dashboard/seguros/cotacoes"
+                  className={`flex items-center rounded-xl text-xs font-medium transition ${
+                    collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
+                  } ${
+                    isLinkActive("/dashboard/seguros/cotacoes")
+                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
+                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                  }`}
+                >
+                  <Scale className="w-4 h-4 shrink-0 text-[#2D6A4F]" />
+                  {!collapsed && <span>Multicálculo & Cotações</span>}
+                </Link>
+
+                <Link
+                  href="/dashboard/seguros/radar-renovacoes"
+                  className={`flex items-center rounded-xl text-xs font-medium transition ${
+                    collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
+                  } ${
+                    isLinkActive("/dashboard/seguros/radar-renovacoes")
+                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
+                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                  }`}
+                >
+                  <ShieldCheck className="w-4 h-4 shrink-0 text-[#2D6A4F]" />
+                  {!collapsed && <span>Radar de Renovações</span>}
+                </Link>
+
+                <Link
+                  href="/dashboard/seguros/ligacoes-vapi"
+                  className={`flex items-center rounded-xl text-xs font-medium transition ${
+                    collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
+                  } ${
+                    isLinkActive("/dashboard/seguros/ligacoes-vapi")
+                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
+                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                  }`}
+                >
+                  <PhoneCall className="w-4 h-4 shrink-0 text-[#2D6A4F]" />
+                  {!collapsed && <span>Voz IA & Ligações</span>}
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {segmento === "ACCOUNTING" && (
+            <div>
+              {!collapsed && (
+                <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#2D6A4F]">
+                  Módulo Contábil
+                </div>
+              )}
+              <div className="space-y-1">
+                <Link
+                  href="/dashboard/contabil/guias"
+                  className={`flex items-center rounded-xl text-xs font-medium transition ${
+                    collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
+                  } ${
+                    isLinkActive("/dashboard/contabil/guias")
+                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
+                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                  }`}
+                >
+                  <ReceiptText className="w-4 h-4 shrink-0 text-[#2D6A4F]" />
+                  {!collapsed && <span>Guias & PIX Instantâneo</span>}
+                </Link>
+
+                <Link
+                  href="/dashboard/contabil/auditoria-xml"
+                  className={`flex items-center rounded-xl text-xs font-medium transition ${
+                    collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
+                  } ${
+                    isLinkActive("/dashboard/contabil/auditoria-xml")
+                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
+                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                  }`}
+                >
+                  <FileText className="w-4 h-4 shrink-0 text-[#2D6A4F]" />
+                  {!collapsed && <span>Auditoria de XMLs</span>}
+                </Link>
+
+                <Link
+                  href="/dashboard/contabil/helpdesk"
+                  className={`flex items-center rounded-xl text-xs font-medium transition ${
+                    collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
+                  } ${
+                    isLinkActive("/dashboard/contabil/helpdesk")
+                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
+                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                  }`}
+                >
+                  <LifeBuoy className="w-4 h-4 shrink-0 text-[#2D6A4F]" />
+                  {!collapsed && <span>Helpdesk Fiscal/DP</span>}
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {segmento === "CLINIC" && (
+            <div>
+              {!collapsed && (
+                <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#9B2226]">
+                  Módulo Saúde & Clínica
+                </div>
+              )}
+              <div className="space-y-1">
+                <Link
+                  href="/dashboard/clinica/consultas"
+                  className={`flex items-center rounded-xl text-xs font-medium transition ${
+                    collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
+                  } ${
+                    isLinkActive("/dashboard/clinica/consultas")
+                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
+                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                  }`}
+                >
+                  <Stethoscope className="w-4 h-4 shrink-0 text-[#9B2226]" />
+                  {!collapsed && <span>Agenda de Consultas</span>}
+                </Link>
+
+                <Link
+                  href="/dashboard/clinica/no-show"
+                  className={`flex items-center rounded-xl text-xs font-medium transition ${
+                    collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
+                  } ${
+                    isLinkActive("/dashboard/clinica/no-show")
+                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
+                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                  }`}
+                >
+                  <ClockAlert className="w-4 h-4 shrink-0 text-[#9B2226]" />
+                  {!collapsed && <span>Anti No-Show & Lembretes</span>}
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* 3. SEÇÃO: MARKETING & ATRIBUIÇÃO */}
           <div>
             {!collapsed && (
@@ -223,12 +368,12 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
               </Link>
 
               <Link
-                href="/dashboard/settings/campanhas"
+                href="/dashboard/campanhas"
                 title="Campanhas & UTMs"
                 className={`flex items-center rounded-xl text-xs font-medium transition ${
                   collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                 } ${
-                  isLinkActive("/dashboard/settings/campanhas")
+                  isLinkActive("/dashboard/campanhas")
                     ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
                     : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
                 }`}
@@ -238,12 +383,12 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
               </Link>
 
               <Link
-                href="/dashboard/quiz/editor"
+                href="/dashboard/settings/quiz"
                 title="Editor do Mini-Quiz"
                 className={`flex items-center rounded-xl text-xs font-medium transition ${
                   collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                 } ${
-                  isLinkActive("/dashboard/quiz/editor")
+                  isLinkActive("/dashboard/settings/quiz")
                     ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
                     : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
                 }`}
@@ -308,12 +453,12 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
               </Link>
 
               <Link
-                href="/dashboard/settings/regras"
+                href="/dashboard/settings/ia-prompts"
                 title="Regras da IA & Áudio Humanizado"
                 className={`flex items-center rounded-xl font-medium text-xs transition ${
                   collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                 } ${
-                  isLinkActive("/dashboard/settings/regras")
+                  isLinkActive("/dashboard/settings/ia-prompts")
                     ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
                     : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
                 }`}
@@ -335,6 +480,21 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
               >
                 <Users className="w-4 h-4 shrink-0 text-[#7A8E75]" />
                 {!collapsed && <span>Equipe & Vendedores</span>}
+              </Link>
+
+              <Link
+                href="/dashboard/settings/geral"
+                title="Dados da Empresa"
+                className={`flex items-center rounded-xl font-medium text-xs transition ${
+                  collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
+                } ${
+                  isLinkActive("/dashboard/settings/geral")
+                    ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
+                    : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                }`}
+              >
+                <Settings className="w-4 h-4 shrink-0 text-[#7A8E75]" />
+                {!collapsed && <span>Dados da Empresa</span>}
               </Link>
             </div>
           </div>

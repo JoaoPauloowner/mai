@@ -14,6 +14,8 @@ import {
   Phone,
   Lock,
 } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 
 interface TeamMember {
   id: string;
@@ -73,7 +75,10 @@ export default function TeamSettingsPage() {
 
       const data = await res.json();
       if (data.success && data.user) {
-        setMembers((prev) => [...prev, { ...data.user, createdAt: new Date().toISOString(), _count: { assignedLeads: 0 } }]);
+        setMembers((prev) => [
+          ...prev,
+          { ...data.user, createdAt: new Date().toISOString(), _count: { assignedLeads: 0 } },
+        ]);
         setInviteSuccess({
           message: data.inviteMessage,
           telefone: telefone || "",
@@ -96,124 +101,141 @@ export default function TeamSettingsPage() {
       {/* Header da Tela */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-            <Users className="w-5 h-5 text-[#00ddd7]" /> Gestão de Equipe & Vendedores
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#E7EBE6] text-[#2C2E2A] text-xs font-medium border border-[#D0D5CD] mb-2">
+            <Users className="w-3.5 h-3.5 text-[#7A8E75]" /> Distribuição Round-Robin
+          </div>
+          <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C2E2A]">
+            Gestão de Equipe & Vendedores
           </h1>
-          <p className="text-xs text-gray-400 mt-1">
-            Cadastre vendedores e gerentes. Novos leads serão distribuídos automaticamente entre a equipe.
+          <p className="text-xs text-[#63695B] mt-1">
+            Cadastre vendedores e gerentes. Novos leads são distribuídos automaticamente entre a equipe comercial.
           </p>
         </div>
 
-        <button
+        <Button
           type="button"
+          variant="primary"
           onClick={() => {
             setInviteSuccess(null);
             setShowModal(true);
           }}
-          className="px-4 py-2.5 rounded-xl bg-[#00ddd7] hover:bg-[#00c4be] text-black text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-[#00ddd7]/20"
         >
           <UserPlus className="w-4 h-4" /> Adicionar Vendedor / Gerente
-        </button>
+        </Button>
       </div>
 
       {/* Lista de Membros da Equipe */}
-      <div className="p-6 rounded-2xl bg-[#111622] border border-[#1e2638] space-y-4">
-        <h3 className="text-xs font-mono uppercase tracking-wider text-gray-400 flex items-center justify-between">
-          <span>Membros Ativos ({members.length})</span>
-          <span className="text-[#00ddd7] text-[11px]">Distribuição Round-Robin Ativa</span>
-        </h3>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Membros Ativos ({members.length})</CardTitle>
+            <CardDescription>Operadores habilitados a receber atendimentos e leads do CRM</CardDescription>
+          </div>
+          <span className="text-[11px] font-mono px-2.5 py-1 rounded-full bg-[#DDE8DE] text-[#2D6A4F] border border-[#C4D7C4] font-bold">
+            Round-Robin Ativo
+          </span>
+        </CardHeader>
 
-        {loading ? (
-          <p className="text-xs text-gray-500 py-6 text-center">Carregando membros da equipe...</p>
-        ) : members.length === 0 ? (
-          <p className="text-xs text-gray-500 py-6 text-center">Nenhum membro cadastrado além do administrador.</p>
-        ) : (
-          <div className="divide-y divide-[#1e2638]/60">
-            {members.map((user) => (
-              <div
-                key={user.id}
-                className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#161d2d] border border-[#252e42] text-white flex items-center justify-center font-bold text-sm">
-                    {user.nome.charAt(0)}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-white">{user.nome}</span>
-                      <span
-                        className={`text-[9px] font-mono px-2 py-0.5 rounded-md font-semibold border ${
-                          user.role === "SUPER_ADMIN" || user.role === "ADMIN_EMPRESA"
-                            ? "bg-purple-500/10 text-purple-400 border-purple-500/30"
-                            : "bg-blue-500/10 text-blue-400 border-blue-500/30"
-                        }`}
-                      >
-                        {user.role === "ADMIN_EMPRESA" ? "GERENTE" : user.role === "SUPER_ADMIN" ? "SUPER ADMIN" : "VENDEDOR"}
+        <CardContent>
+          {loading ? (
+            <p className="text-xs text-[#7C8472] py-8 text-center">Carregando membros da equipe...</p>
+          ) : members.length === 0 ? (
+            <p className="text-xs text-[#7C8472] py-8 text-center">Nenhum membro cadastrado além do administrador.</p>
+          ) : (
+            <div className="divide-y divide-[#E0E3DE]">
+              {members.map((user) => (
+                <div
+                  key={user.id}
+                  className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#EAE2CA] text-[#2C2E2A] border border-[#D0D5CD] flex items-center justify-center font-bold text-sm shrink-0">
+                      {user.nome.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-[#2C2E2A]">{user.nome}</span>
+                        <span
+                          className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold border ${
+                            user.role === "SUPER_ADMIN" || user.role === "ADMIN_EMPRESA"
+                              ? "bg-[#DDE8DE] text-[#2D6A4F] border-[#C4D7C4]"
+                              : "bg-[#E7EBE6] text-[#2C2E2A] border-[#D0D5CD]"
+                          }`}
+                        >
+                          {user.role === "ADMIN_EMPRESA"
+                            ? "GERENTE"
+                            : user.role === "SUPER_ADMIN"
+                            ? "SUPER ADMIN"
+                            : "VENDEDOR"}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-[#7C8472] font-mono block mt-0.5">
+                        {user.email}
                       </span>
                     </div>
-                    <span className="text-[11px] text-gray-400 font-mono block mt-0.5">
-                      {user.email}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 text-xs">
-                  <div className="text-right">
-                    <span className="text-[10px] text-gray-500 block uppercase font-mono">Leads Atribuídos</span>
-                    <span className="font-mono font-bold text-emerald-400">
-                      {user._count?.assignedLeads || 0} leads
-                    </span>
                   </div>
 
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" title="Ativo no Rodízio" />
+                  <div className="flex items-center gap-4 text-xs">
+                    <div className="text-right">
+                      <span className="text-[10px] text-[#7C8472] block uppercase font-mono">Leads Atribuídos</span>
+                      <span className="font-mono font-bold text-[#2D6A4F]">
+                        {user._count?.assignedLeads || 0} leads
+                      </span>
+                    </div>
+
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#C1ED84] border border-[#7A8E75]" title="Ativo no Rodízio" />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Modal de Convidar / Cadastrar Membro */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-[#111622] border border-[#1e2638] rounded-2xl p-6 shadow-2xl space-y-4">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <UserPlus className="w-5 h-5 text-[#00ddd7]" />
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border border-[#E0E3DE] rounded-2xl p-6 shadow-2xl space-y-4">
+            <h3 className="text-base font-bold text-[#2C2E2A] flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-[#7A8E75]" />
               Cadastrar Novo Vendedor ou Gerente
             </h3>
 
             {inviteSuccess ? (
-              <div className="space-y-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 text-xs text-white">
-                <div className="flex items-center gap-2 text-emerald-400 font-bold">
+              <div className="space-y-3 bg-[#DDE8DE] border border-[#C4D7C4] rounded-2xl p-4 text-xs text-[#2C2E2A]">
+                <div className="flex items-center gap-2 text-[#2D6A4F] font-bold">
                   <CheckCircle2 className="w-4 h-4" /> Vendedor Cadastrado com Sucesso!
                 </div>
-                <p className="text-gray-300">
+                <p className="text-[#63695B]">
                   Envie os dados de acesso para o vendedor via WhatsApp:
                 </p>
-                <div className="p-2.5 rounded-lg bg-[#0c101a] text-[11px] font-mono text-gray-300 border border-[#1e2638] break-all">
+                <div className="p-3 rounded-xl bg-white text-[11px] font-mono text-[#2C2E2A] border border-[#C4D7C4] break-all">
                   {inviteSuccess.message}
                 </div>
 
                 <div className="flex gap-2 pt-2">
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
                     onClick={() => {
                       navigator.clipboard.writeText(inviteSuccess.message);
                       alert("Mensagem copiada para a área de transferência!");
                     }}
-                    className="flex-1 py-2 rounded-xl bg-[#161d2d] hover:bg-[#1e2638] text-white font-medium transition flex items-center justify-center gap-1.5"
+                    className="flex-1"
                   >
                     <Copy className="w-3.5 h-3.5" /> Copiar Dados
-                  </button>
+                  </Button>
 
                   {inviteSuccess.telefone && (
                     <a
-                      href={`https://wa.me/${inviteSuccess.telefone.replace(/\D/g, "")}?text=${encodeURIComponent(inviteSuccess.message)}`}
+                      href={`https://wa.me/${inviteSuccess.telefone.replace(/\D/g, "")}?text=${encodeURIComponent(
+                        inviteSuccess.message
+                      )}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition flex items-center justify-center gap-1.5"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#2D6A4F] text-white font-bold text-xs hover:bg-[#24543E] transition shadow-xs"
                     >
-                      <ExternalLink className="w-3.5 h-3.5" /> Enviar no WhatsApp
+                      <ExternalLink className="w-3.5 h-3.5" /> WhatsApp
                     </a>
                   )}
                 </div>
@@ -222,16 +244,16 @@ export default function TeamSettingsPage() {
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="text-xs text-gray-400 hover:text-white underline"
+                    className="text-xs text-[#7C8472] hover:text-[#2C2E2A] underline cursor-pointer"
                   >
                     Fechar
                   </button>
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleAddMember} className="space-y-3">
+              <form onSubmit={handleAddMember} className="space-y-3.5">
                 <div>
-                  <label className="text-[11px] text-gray-400 uppercase font-mono block mb-1">
+                  <label className="text-[11px] text-[#2C2E2A] font-bold uppercase font-mono block mb-1">
                     Nome Completo
                   </label>
                   <input
@@ -240,12 +262,12 @@ export default function TeamSettingsPage() {
                     placeholder="Ex: Roberto Vendas"
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-[#161d2d] border border-[#252e42] text-xs text-white focus:outline-none focus:border-[#00ddd7]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E0E3DE] text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] text-gray-400 uppercase font-mono block mb-1">
+                  <label className="text-[11px] text-[#2C2E2A] font-bold uppercase font-mono block mb-1">
                     E-mail de Login
                   </label>
                   <input
@@ -254,12 +276,12 @@ export default function TeamSettingsPage() {
                     placeholder="vendas@suaempresa.com.br"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-[#161d2d] border border-[#252e42] text-xs text-white focus:outline-none focus:border-[#00ddd7]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E0E3DE] text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] text-gray-400 uppercase font-mono block mb-1">
+                  <label className="text-[11px] text-[#2C2E2A] font-bold uppercase font-mono block mb-1">
                     WhatsApp do Vendedor (Para envio do link de acesso)
                   </label>
                   <input
@@ -267,19 +289,19 @@ export default function TeamSettingsPage() {
                     placeholder="+55 11 99999-8888"
                     value={telefone}
                     onChange={(e) => setTelefone(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-[#161d2d] border border-[#252e42] text-xs text-white focus:outline-none focus:border-[#00ddd7]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E0E3DE] text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75]"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[11px] text-gray-400 uppercase font-mono block mb-1">
+                    <label className="text-[11px] text-[#2C2E2A] font-bold uppercase font-mono block mb-1">
                       Cargo / Perfil
                     </label>
                     <select
                       value={role}
                       onChange={(e) => setRole(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-[#161d2d] border border-[#252e42] text-xs text-white focus:outline-none focus:border-[#00ddd7]"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E0E3DE] text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75]"
                     >
                       <option value="VENDEDOR">Vendedor (Apenas seus leads)</option>
                       <option value="ADMIN_EMPRESA">Gerente (Acesso total)</option>
@@ -287,33 +309,33 @@ export default function TeamSettingsPage() {
                   </div>
 
                   <div>
-                    <label className="text-[11px] text-gray-400 uppercase font-mono block mb-1">
+                    <label className="text-[11px] text-[#2C2E2A] font-bold uppercase font-mono block mb-1">
                       Senha Provisória
                     </label>
                     <input
                       type="text"
                       value={senha}
                       onChange={(e) => setSenha(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-[#161d2d] border border-[#252e42] text-xs text-white font-mono focus:outline-none focus:border-[#00ddd7]"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E0E3DE] text-xs text-[#2C2E2A] font-mono focus:outline-none focus:border-[#7A8E75]"
                     />
                   </div>
                 </div>
 
                 <div className="pt-3 flex items-center justify-end gap-2">
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
                     onClick={() => setShowModal(false)}
-                    className="px-4 py-2 rounded-xl bg-[#161d2d] hover:bg-[#1e2638] text-xs text-gray-300 font-medium transition"
                   >
                     Cancelar
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="submit"
+                    variant="primary"
                     disabled={submitting || !nome || !email}
-                    className="px-4 py-2 rounded-xl bg-[#00ddd7] hover:bg-[#00c4be] text-black text-xs font-bold transition disabled:opacity-50"
                   >
                     {submitting ? "Cadastrando..." : "Cadastrar e Gerar Convite"}
-                  </button>
+                  </Button>
                 </div>
               </form>
             )}

@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { Target, Sparkles, Compass } from "lucide-react";
 import { InstagramIcon } from "@/components/icons/InstagramIcon";
 import Link from "next/link";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 
 export default async function CampanhasPage() {
   const session = await requireAuth();
@@ -26,50 +28,53 @@ export default async function CampanhasPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-6xl mx-auto text-[#2C2E2A]">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-white">
+          <h1 className="text-xl font-bold tracking-tight text-[#2C2E2A]">
             Rastreamento de Campanhas & Palavras-Chave Direct
           </h1>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-[#63695B] mt-0.5">
             Monitore quais anúncios do Meta Ads, Google Ads e postagens no Instagram estão gerando mais leads e vendas.
           </p>
         </div>
 
-        <Link
-          href="/quiz/captacao-geral"
-          target="_blank"
-          className="px-4 py-2 rounded-xl bg-[#161d2d] border border-[#2e3b54] hover:border-[#00ddd7] text-white text-xs font-medium transition flex items-center gap-2"
-        >
-          <Compass className="w-3.5 h-3.5 text-[#00ddd7]" /> Testar Quiz de Tráfego
+        <Link href="/quiz/captacao-geral" target="_blank">
+          <Button variant="secondary" size="sm">
+            <Compass className="w-3.5 h-3.5 text-[#7A8E75]" />
+            <span>Testar Quiz de Tráfego</span>
+          </Button>
         </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Campanhas UTM */}
-        <div className="p-6 rounded-2xl bg-[#111622] border border-[#1e2638] space-y-4">
-          <h3 className="text-sm font-bold text-white flex items-center justify-between">
+        <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] space-y-4 shadow-xs">
+          <h3 className="text-sm font-bold text-[#2C2E2A] flex items-center justify-between">
             <span className="flex items-center gap-2">
-              <Target className="w-4 h-4 text-[#00ddd7]" /> Campanhas Tráfego Pago (UTMs)
+              <Target className="w-4 h-4 text-[#7A8E75]" /> Campanhas Tráfego Pago (UTMs)
             </span>
-            <span className="text-[10px] font-mono text-gray-500 uppercase">Google & Meta Ads</span>
+            <span className="text-[10px] font-mono text-[#7C8472] uppercase">Google & Meta Ads</span>
           </h3>
 
           <div className="space-y-3">
             {campaigns.length === 0 ? (
-              <p className="text-xs text-gray-500 py-6 text-center">Nenhuma campanha com UTM capturada ainda.</p>
+              <div className="p-8 text-center text-xs text-[#7C8472] bg-[#F5F5F5] rounded-xl border border-[#E0E3DE]">
+                Nenhuma campanha com UTM detectada ainda. Ao anunciar usando links com ?utm_campaign=..., os dados aparecerão aqui em tempo real.
+              </div>
             ) : (
-              campaigns.map((c) => (
+              campaigns.map((c, idx) => (
                 <div
-                  key={`${c.utmCampaign}-${c.utmSource}`}
-                  className="p-3.5 rounded-xl bg-[#161d2d] border border-[#252e42] flex items-center justify-between"
+                  key={idx}
+                  className="p-3.5 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] flex items-center justify-between text-xs"
                 >
                   <div>
-                    <div className="font-mono text-xs font-bold text-white">{c.utmCampaign}</div>
-                    <div className="text-[10px] text-gray-400 mt-0.5">Origem: {c.utmSource || "meta_ads"}</div>
+                    <div className="font-bold text-[#2C2E2A]">{c.utmCampaign}</div>
+                    <div className="text-[10px] text-[#63695B] font-mono mt-0.5">
+                      Fonte: {c.utmSource || "Direto"}
+                    </div>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-[#00ddd7]/10 text-[#00ddd7] border border-[#00ddd7]/30">
+                  <span className="px-2.5 py-1 rounded-full bg-[#DDE8DE] text-[#2D6A4F] font-mono font-bold text-[11px]">
                     {c._count.id} leads
                   </span>
                 </div>
@@ -78,30 +83,28 @@ export default async function CampanhasPage() {
           </div>
         </div>
 
-        {/* Palavras-Chave do Instagram Direct */}
-        <div className="p-6 rounded-2xl bg-[#111622] border border-[#1e2638] space-y-4">
-          <h3 className="text-sm font-bold text-white flex items-center justify-between">
+        {/* Palavras-chave Direct */}
+        <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] space-y-4 shadow-xs">
+          <h3 className="text-sm font-bold text-[#2C2E2A] flex items-center justify-between">
             <span className="flex items-center gap-2">
-              <InstagramIcon className="w-4 h-4 text-pink-400" /> Gatilhos de Direct (Keywords)
+              <InstagramIcon className="w-4 h-4 text-[#7A8E75]" /> Palavras-Chave Instagram Direct
             </span>
-            <span className="text-[10px] font-mono text-pink-400 uppercase">Auto-Direct IA</span>
+            <span className="text-[10px] font-mono text-[#7C8472] uppercase">Gatilhos Automáticos</span>
           </h3>
 
           <div className="space-y-3">
             {directKeywords.length === 0 ? (
-              <p className="text-xs text-gray-500 py-6 text-center">Nenhuma palavra-chave capturada ainda.</p>
+              <div className="p-8 text-center text-xs text-[#7C8472] bg-[#F5F5F5] rounded-xl border border-[#E0E3DE]">
+                Nenhum lead capturado via palavra-chave do Direct ainda.
+              </div>
             ) : (
-              directKeywords.map((k) => (
+              directKeywords.map((k, idx) => (
                 <div
-                  key={k.directKeyword}
-                  className="p-3.5 rounded-xl bg-[#161d2d] border border-[#252e42] flex items-center justify-between"
+                  key={idx}
+                  className="p-3.5 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] flex items-center justify-between text-xs"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-xs text-pink-400 bg-pink-500/10 px-2.5 py-1 rounded-lg border border-pink-500/30">
-                      #{k.directKeyword}
-                    </span>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-white/5 text-white border border-white/10">
+                  <div className="font-mono font-bold text-[#2C2E2A]">#{k.directKeyword}</div>
+                  <span className="px-2.5 py-1 rounded-full bg-[#DDE8DE] text-[#2D6A4F] font-mono font-bold text-[11px]">
                     {k._count.id} acionamentos
                   </span>
                 </div>
