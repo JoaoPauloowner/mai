@@ -33,7 +33,8 @@ export default function LoginPage() {
         throw new Error(data.error || "Credenciais inválidas");
       }
 
-      router.push(`/${experience}/dashboard`);
+      const callbackUrl = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("callbackUrl") : null;
+      router.push(callbackUrl || `/${experience}/dashboard`);
       router.refresh();
     } catch (err: any) {
       setError(err.message);
