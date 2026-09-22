@@ -8,10 +8,10 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function Card({ className, variant = "default", children, ...props }: CardProps) {
   const variantStyles = {
-    default: "bg-white border border-[#E0E3DE] shadow-xs text-[#2C2E2A]",
-    subtle: "bg-[#FBFBFB] border border-[#E0E3DE] text-[#2C2E2A]",
-    sage: "bg-[#7A8E75] border border-[#63695B] text-white",
-    highlight: "bg-white border-2 border-[#C1ED84] shadow-sm text-[#2C2E2A]",
+    default: "bg-white border border-[#E7E7E4] shadow-xs text-[#171717]",
+    subtle: "bg-[#FAFAFA] border border-[#E7E7E4] text-[#171717]",
+    sage: "bg-[#FF6A2A] border border-[#6F6F6F] text-white",
+    highlight: "bg-white border-2 border-[#FF6A2A] shadow-sm text-[#171717]",
   };
 
   return (
@@ -34,7 +34,7 @@ export function CardHeader({ className, children, ...props }: React.HTMLAttribut
 
 export function CardTitle({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h2 className={twMerge("font-serif text-base font-bold text-[#2C2E2A] leading-snug", className)} {...props}>
+    <h2 className={twMerge("font-serif text-base font-bold text-[#171717] leading-snug", className)} {...props}>
       {children}
     </h2>
   );
@@ -42,7 +42,7 @@ export function CardTitle({ className, children, ...props }: React.HTMLAttribute
 
 export function CardDescription({ className, children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={twMerge("text-xs text-[#63695B] leading-relaxed", className)} {...props}>
+    <p className={twMerge("text-xs text-[#6F6F6F] leading-relaxed", className)} {...props}>
       {children}
     </p>
   );
@@ -79,21 +79,21 @@ export function MetricCard({
 }: MetricCardProps) {
   const deltaBadgeClass =
     deltaType === "positive"
-      ? "bg-[#DDE8DE] text-[#2D6A4F] border-[#C4D7C4]"
+      ? "bg-[#EAF7EF] text-[#247A4A] border-[#C8E5D1]"
       : deltaType === "negative"
-      ? "bg-[#E9BEC4] text-[#9B2226] border-red-200"
-      : "bg-[#E7EBE6] text-[#63695B] border-[#D0D5CD]";
+      ? "bg-[#FDE8E8] text-[#B42318] border-red-200"
+      : "bg-[#F4F4F2] text-[#6F6F6F] border-[#D9D9D5]";
 
   return (
     <Card className={twMerge("space-y-3 relative overflow-hidden", className)}>
-      <div className="flex items-center justify-between text-xs text-[#63695B] font-medium">
+      <div className="flex items-center justify-between text-xs text-[#6F6F6F] font-medium">
         <div className="flex items-center gap-2">
           {icon && (
-            <div className="w-8 h-8 rounded-xl bg-[#E7EBE6] text-[#7A8E75] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-[#F4F4F2] text-[#FF6A2A] flex items-center justify-center">
               {icon}
             </div>
           )}
-          <span className="font-semibold text-xs text-[#2C2E2A]">{label}</span>
+          <span className="font-semibold text-xs text-[#171717]">{label}</span>
         </div>
         {delta && (
           <span className={clsx("px-2 py-0.5 rounded-full text-[11px] font-bold font-mono border", deltaBadgeClass)}>
@@ -104,8 +104,8 @@ export function MetricCard({
 
       <div className="flex items-baseline justify-between pt-1">
         <div>
-          <div className="text-3xl font-extrabold font-mono text-[#2C2E2A] tracking-tight">{value}</div>
-          {context && <span className="text-[11px] text-[#7C8472]">{context}</span>}
+          <div className="text-3xl font-extrabold font-mono text-[#171717] tracking-tight">{value}</div>
+          {context && <span className="text-[11px] text-[#8A8A84]">{context}</span>}
         </div>
       </div>
     </Card>
