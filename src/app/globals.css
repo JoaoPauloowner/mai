@@ -93,3 +93,16 @@ body {
 .border-wact { border-color: var(--border); }
 .text-wact-ink { color: var(--ink); }
 .text-wact-muted { color: var(--sage-700); }
+
+/* Shoppers visual variant: blue/white/gray product theme.
+   Scoped so the original MAI orange theme remains untouched. */
+.shoppers-theme .bg-orange-500 { background-color: #2563EB !important; }
+.shoppers-theme .bg-orange-600 { background-color: #1D4ED8 !important; }
+.shoppers-theme .bg-orange-50 { background-color: #EFF6FF !important; }
+.shoppers-theme .bg-orange-100 { background-color: #DBEAFE !important; }
+.shoppers-theme .text-orange-500 { color: #2563EB !important; }
+.shoppers-theme .text-orange-600 { color: #2563EB !important; }
+.shoppers-theme .text-orange-700 { color: #1D4ED8 !important; }
+.shoppers-theme .border-orange-200 { border-color: #BFDBFE !important; }
+.shoppers-theme .border-orange-300 { border-color: #93C5FD !important; }
+.shoppers-theme .accent-orange-500 { accent-color: #2563EB !important; }
