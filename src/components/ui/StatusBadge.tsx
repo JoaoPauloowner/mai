@@ -11,17 +11,17 @@ export interface StatusBadgeProps {
 export function StatusBadge({ status, className, size = "sm" }: StatusBadgeProps) {
   const normalized = (status || "").toUpperCase();
 
-  let style = "bg-[#DDE8DE] text-[#2D6A4F] border-[#C4D7C4]"; // default active/verified
+  let style = "bg-[#EAF7EF] text-[#247A4A] border-[#C8E5D1]"; // default active/verified
   let label = status;
 
   if (["ACTIVE", "VERIFIED", "GANHO", "CONNECTED"].includes(normalized)) {
-    style = "bg-[#DDE8DE] text-[#2D6A4F] border-[#C4D7C4]";
+    style = "bg-[#EAF7EF] text-[#247A4A] border-[#C8E5D1]";
     label = normalized === "GANHO" ? "Venda Concluída" : normalized === "CONNECTED" ? "Conectado" : "Verificado";
   } else if (["DISABLED", "REJECTED", "DUPLICATE", "PERDIDO", "DISCONNECTED"].includes(normalized)) {
-    style = "bg-[#E9BEC4] text-[#9B2226] border-red-200";
+    style = "bg-[#FDE8E8] text-[#B42318] border-red-200";
     label = normalized === "PERDIDO" ? "Desqualificado" : normalized === "DISCONNECTED" ? "Desconectado" : "Inativo";
   } else if (["PAUSED", "PAUSE", "PHONE_UNVERIFIED", "NOVO", "QUALIFICADO", "AGENDADO", "CONNECTING"].includes(normalized)) {
-    style = "bg-[#E1D6AF] text-[#8F5D18] border-[#D0C496]";
+    style = "bg-[#FFF3D6] text-[#A15C00] border-[#E8D5A8]";
     label =
       normalized === "NOVO"
         ? "Novo Lead"
