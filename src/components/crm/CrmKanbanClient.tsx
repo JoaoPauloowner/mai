@@ -7,7 +7,13 @@ import {
   Sparkles,
   ChevronRight,
   GripVertical,
+  Plus,
+  Phone,
+  MessageSquare,
+  CalendarCheck,
 } from "lucide-react";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { Button } from "@/components/ui/Button";
 
 interface LeadItem {
   id: string;
@@ -26,11 +32,11 @@ interface LeadItem {
 }
 
 const COLUMNS = [
-  { id: "NOVO", label: "Novos Leads", cor: "border-blue-500/40 text-blue-400", activeBg: "bg-blue-500/5 border-blue-500/40" },
-  { id: "QUALIFICADO", label: "Qualificados (SQL)", cor: "border-amber-500/40 text-amber-400", activeBg: "bg-amber-500/5 border-amber-500/40" },
-  { id: "AGENDADO", label: "Visita / Reunião", cor: "border-purple-500/40 text-purple-400", activeBg: "bg-purple-500/5 border-purple-500/40" },
-  { id: "GANHO", label: "Venda Concluída", cor: "border-emerald-500/40 text-emerald-400", activeBg: "bg-emerald-500/5 border-emerald-500/40" },
-  { id: "PERDIDO", label: "Desqualificados", cor: "border-red-500/40 text-red-400", activeBg: "bg-red-500/5 border-red-500/40" },
+  { id: "NOVO", label: "Novos Leads", bgHeader: "bg-[#E1D6AF]/40 text-[#8F5D18]" },
+  { id: "QUALIFICADO", label: "Qualificados (SQL)", bgHeader: "bg-[#DDE8DE] text-[#2D6A4F]" },
+  { id: "AGENDADO", label: "Visita / Reunião", bgHeader: "bg-[#EAE2CA] text-[#2C2E2A]" },
+  { id: "GANHO", label: "Venda Concluída", bgHeader: "bg-[#C1ED84] text-[#2C2E2A]" },
+  { id: "PERDIDO", label: "Desqualificados", bgHeader: "bg-[#E9BEC4] text-[#9B2226]" },
 ];
 
 export function CrmKanbanClient({ initialLeads }: { initialLeads: LeadItem[] }) {
@@ -59,7 +65,6 @@ export function CrmKanbanClient({ initialLeads }: { initialLeads: LeadItem[] }) 
     }
   };
 
-  // Handlers de Drag and Drop
   const handleDragStart = (e: React.DragEvent, leadId: string) => {
     setDraggedLeadId(leadId);
     e.dataTransfer.setData("text/plain", leadId);
@@ -75,7 +80,6 @@ export function CrmKanbanClient({ initialLeads }: { initialLeads: LeadItem[] }) 
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
-    // Só reseta se estiver saindo do container
     if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setDragOverColId(null);
     }
@@ -92,14 +96,15 @@ export function CrmKanbanClient({ initialLeads }: { initialLeads: LeadItem[] }) 
   };
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-4 select-none min-h-[calc(100vh-200px)]">
+    <div className="flex gap-4 overflow-x-auto pb-4 select-none min-h-[calc(100vh-200px)] text-[#2C2E2A]">
       {COLUMNS.map((col) => {
         const colLeads = leads.filter((l) => l.status === col.id);
         const colTotalValor = colLeads.reduce(
           (acc, l) => acc + (l.valorNegocio || 0),
           0
         );
-        const isTarget = dragOverColId === col.id;
+
+        const isOver = dragOverColId === col.id;
 
         return (
           <div
@@ -107,151 +112,76 @@ export function CrmKanbanClient({ initialLeads }: { initialLeads: LeadItem[] }) 
             onDragOver={(e) => handleDragOver(e, col.id)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, col.id)}
-            className={`w-80 shrink-0 bg-[#0c101a] border rounded-2xl flex flex-col max-h-[calc(100vh-180px)] shadow-lg transition-all duration-150 ${
-              isTarget
-                ? `${col.activeBg} border-2 scale-[1.01]`
-                : "border-[#1e2638]"
+            className={`w-80 shrink-0 flex flex-col rounded-2xl bg-[#F5F5F5] border transition-all ${
+              isOver ? "border-[#7A8E75] bg-[#E7EBE6]" : "border-[#E0E3DE]"
             }`}
           >
             {/* Header da Coluna */}
-            <div className={`p-4 border-b border-[#1e2638] ${col.cor}`}>
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-xs uppercase tracking-wider text-white flex items-center gap-1.5">
-                  <span>{col.label}</span>
-                </h3>
-                <span className="text-xs font-mono font-bold bg-[#161d2d] px-2 py-0.5 rounded-full text-gray-300 border border-[#252e42]">
-                  {colLeads.length}
+            <div className="p-4 border-b border-[#E0E3DE] bg-white rounded-t-2xl flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold font-mono ${col.bgHeader}`}>
+                    {colLeads.length}
+                  </span>
+                  <h3 className="font-bold text-xs text-[#2C2E2A]">{col.label}</h3>
+                </div>
+                <span className="text-[11px] font-mono text-[#7C8472] mt-0.5 block">
+                  {colTotalValor > 0 ? formatCurrency(colTotalValor) : "R$ 0,00"}
                 </span>
-              </div>
-              <div className="text-[11px] text-gray-400 font-mono mt-1">
-                {formatCurrency(colTotalValor)}
               </div>
             </div>
 
-            {/* Drop Zone e Lista de Cards */}
-            <div className="p-3 overflow-y-auto space-y-3 flex-1">
-              {colLeads.length === 0 ? (
+            {/* Lista de Leads da Coluna */}
+            <div className="p-3 flex-1 overflow-y-auto space-y-3">
+              {colLeads.map((lead) => (
                 <div
-                  className={`p-6 text-center text-[11px] rounded-xl border border-dashed transition ${
-                    isTarget
-                      ? "border-[#00ddd7] text-[#00ddd7] bg-[#00ddd7]/5"
-                      : "text-gray-600 border-[#1e2638]"
+                  key={lead.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, lead.id)}
+                  className={`p-4 rounded-xl bg-white border border-[#E0E3DE] shadow-2xs hover:shadow-xs transition cursor-grab active:cursor-grabbing space-y-2.5 ${
+                    movingLeadId === lead.id ? "opacity-50" : ""
                   }`}
                 >
-                  {isTarget ? "Solte o lead aqui!" : "Arraste um lead para esta etapa"}
-                </div>
-              ) : (
-                colLeads.map((lead) => {
-                  const isHot = lead.score >= 80;
-                  const isDragging = draggedLeadId === lead.id;
-
-                  return (
-                    <div
-                      key={lead.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, lead.id)}
-                      onDragEnd={() => {
-                        setDraggedLeadId(null);
-                        setDragOverColId(null);
-                      }}
-                      className={`p-4 rounded-xl bg-[#111622] border transition shadow-md group relative space-y-3 cursor-grab active:cursor-grabbing hover:border-[#2e3b54] ${
-                        isDragging
-                          ? "opacity-30 border-[#00ddd7] scale-95"
-                          : "border-[#1e2638]"
-                      }`}
-                    >
-                      {/* Top Lead Meta */}
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-start gap-1.5">
-                          <GripVertical className="w-3.5 h-3.5 text-gray-600 group-hover:text-gray-400 transition mt-0.5 shrink-0" />
-                          <div>
-                            <Link
-                              href={`/dashboard/leads/${lead.id}`}
-                              className="font-bold text-xs text-white group-hover:text-[#00ddd7] transition flex items-center gap-1"
-                            >
-                              <span>{lead.nome}</span>
-                            </Link>
-                            <span className="text-[11px] text-gray-400 block font-mono mt-0.5">
-                              {lead.telefone}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Badge de Score */}
-                        <div
-                          className={`px-2 py-0.5 rounded-md font-mono font-bold text-[10px] flex items-center gap-1 shrink-0 ${
-                            isHot
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                              : "bg-amber-500/10 text-amber-400 border border-amber-500/30"
-                          }`}
-                        >
-                          <Sparkles className="w-3 h-3" />
-                          <span>{lead.score}</span>
-                        </div>
-                      </div>
-
-                      {/* Interesse e Valor */}
-                      <div className="text-xs space-y-1 pl-5">
-                        {lead.ramoInteresse && (
-                          <div className="text-gray-300 font-medium truncate">
-                            {lead.ramoInteresse}
-                          </div>
-                        )}
-                        <div className="text-emerald-400 font-mono font-semibold text-xs">
-                          {formatCurrency(lead.valorNegocio)}
-                        </div>
-                      </div>
-
-                      {/* Origem e UTMs */}
-                      <div className="flex flex-wrap items-center gap-1.5 pt-1 pl-5">
-                        <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-[#161d2d] text-gray-400 border border-[#252e42]">
-                          {lead.origemCanal}
-                        </span>
-                        {lead.directKeyword && (
-                          <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-pink-500/10 text-pink-400 border border-pink-500/30">
-                            #{lead.directKeyword}
-                          </span>
-                        )}
-                        {lead.utmCampaign && (
-                          <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-[#00ddd7]/10 text-[#00ddd7] border border-[#00ddd7]/30 max-w-[140px] truncate">
-                            {lead.utmCampaign}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Botões de Ação & Mudança de Estágio */}
-                      <div className="pt-2 border-t border-[#1e2638] flex items-center justify-between gap-1 pl-5">
-                        <Link
-                          href={`/dashboard/leads/${lead.id}`}
-                          className="px-2.5 py-1 rounded-lg bg-[#161d2d] hover:bg-[#1e2638] text-[10px] text-gray-300 font-medium transition"
-                        >
-                          Dossiê 360°
-                        </Link>
-
-                        {/* Botão de Avanço Rápido */}
-                        {col.id !== "GANHO" && (
-                          <button
-                            type="button"
-                            disabled={movingLeadId === lead.id}
-                            onClick={() => {
-                              const currentIndex = COLUMNS.findIndex(
-                                (c) => c.id === col.id
-                              );
-                              if (currentIndex < COLUMNS.length - 1) {
-                                moveLead(lead.id, COLUMNS[currentIndex + 1].id);
-                              }
-                            }}
-                            className="px-2.5 py-1 rounded-lg bg-[#1c2438] hover:bg-[#00ddd7] hover:text-black text-[10px] font-medium text-gray-300 transition flex items-center gap-1"
-                            title="Avançar para o próximo estágio"
-                          >
-                            <span>Avançar</span>
-                            <ChevronRight className="w-3 h-3" />
-                          </button>
-                        )}
-                      </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 overflow-hidden">
+                      <GripVertical className="w-3.5 h-3.5 text-[#B5BBAE] shrink-0" />
+                      <span className="font-bold text-xs text-[#2C2E2A] truncate">{lead.nome}</span>
                     </div>
-                  );
-                })
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#DDE8DE] text-[#2D6A4F]">
+                      Score {lead.score}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] text-[#63695B]">
+                    <span className="font-mono">{lead.telefone}</span>
+                    <span className="font-mono font-bold text-[#2C2E2A]">
+                      {lead.valorNegocio ? formatCurrency(lead.valorNegocio) : "—"}
+                    </span>
+                  </div>
+
+                  {lead.utmCampaign && (
+                    <div className="text-[10px] font-mono text-[#7C8472] bg-[#F5F5F5] px-2 py-0.5 rounded border border-[#E0E3DE] truncate">
+                      Campanha: {lead.utmCampaign}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-1 border-t border-[#E7EBE6] text-[10px]">
+                    <span className="text-[#7C8472] font-mono">{lead.origemCanal || "WhatsApp"}</span>
+                    <Link
+                      href={`/dashboard/leads/${lead.id}`}
+                      className="font-bold text-[#2C2E2A] hover:text-[#7A8E75] flex items-center gap-0.5 transition"
+                    >
+                      <span>Ver Dossiê</span>
+                      <ChevronRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+
+              {colLeads.length === 0 && (
+                <div className="py-8 text-center text-xs text-[#B5BBAE] border border-dashed border-[#E0E3DE] rounded-xl">
+                  Nenhum lead nesta etapa
+                </div>
               )}
             </div>
           </div>

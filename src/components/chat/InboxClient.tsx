@@ -15,6 +15,8 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { InstagramIcon } from "@/components/icons/InstagramIcon";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { Button } from "@/components/ui/Button";
 
 // Sanitizador para garantir que caracteres corrompidos antigos sejam corrigidos na visualização
 function cleanCorruptedText(text: string): string {
@@ -102,7 +104,7 @@ export function InboxClient({
 
     if (!activeConv) return;
 
-    // Se for áudio PTT, simula "Gravando áudio..." por 2.5 segundos
+    // Se for áudio PTT, simula "Gravando áudio..." por 2.2 segundos
     if (tipo === "AUDIO_PTT") {
       setIsSimulatingPresence(true);
       setPresenceText("🎙️ Gravando áudio...");
@@ -153,28 +155,28 @@ export function InboxClient({
   };
 
   return (
-    <div className="h-[calc(100vh-140px)] rounded-2xl bg-[#111622] border border-[#1e2638] flex overflow-hidden shadow-2xl">
+    <div className="h-[calc(100vh-140px)] rounded-2xl bg-white border border-[#E0E3DE] flex overflow-hidden shadow-xs text-[#2C2E2A]">
       {/* 1. Coluna Esquerda: Lista de Conversas */}
-      <div className="w-84 border-r border-[#1e2638] flex flex-col bg-[#0a0d14]/60">
-        <div className="p-3.5 border-b border-[#1e2638] space-y-2.5">
+      <div className="w-84 border-r border-[#E0E3DE] flex flex-col bg-[#F5F5F5]/70">
+        <div className="p-3.5 border-b border-[#E0E3DE] space-y-2.5 bg-white">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-white">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#2C2E2A]">
               Caixa de Entrada
             </h2>
-            <span className="text-[10px] font-mono text-[#00ddd7] bg-[#00ddd7]/10 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-mono text-[#2D6A4F] bg-[#DDE8DE] px-2 py-0.5 rounded-full font-bold">
               {filteredConversations.length} conversas
             </span>
           </div>
 
           {/* Abas das 2 Caixas de Entrada */}
-          <div className="grid grid-cols-3 gap-1 bg-[#0c101a] p-1 rounded-xl border border-[#1e2638] text-[11px] font-semibold">
+          <div className="grid grid-cols-3 gap-1 bg-[#E7EBE6] p-1 rounded-xl border border-[#D0D5CD] text-[11px] font-semibold">
             <button
               type="button"
               onClick={() => setChannelFilter("ALL")}
               className={`py-1.5 px-2 rounded-lg transition text-center ${
                 channelFilter === "ALL"
-                  ? "bg-[#1c2438] text-white shadow-sm"
-                  : "text-gray-400 hover:text-white"
+                  ? "bg-white text-[#2C2E2A] shadow-xs font-bold"
+                  : "text-[#63695B] hover:text-[#2C2E2A]"
               }`}
             >
               Todos ({conversations.length})
@@ -185,8 +187,8 @@ export function InboxClient({
               onClick={() => setChannelFilter("WHATSAPP")}
               className={`py-1.5 px-2 rounded-lg transition text-center flex items-center justify-center gap-1 ${
                 channelFilter === "WHATSAPP"
-                  ? "bg-emerald-600 text-white shadow-sm"
-                  : "text-emerald-400 hover:bg-[#161d2d]"
+                  ? "bg-[#C1ED84] text-[#2C2E2A] shadow-xs font-bold"
+                  : "text-[#2D6A4F] hover:bg-white"
               }`}
             >
               <span>💬 WA</span>
@@ -198,8 +200,8 @@ export function InboxClient({
               onClick={() => setChannelFilter("INSTAGRAM")}
               className={`py-1.5 px-2 rounded-lg transition text-center flex items-center justify-center gap-1 ${
                 channelFilter === "INSTAGRAM"
-                  ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm"
-                  : "text-pink-400 hover:bg-[#161d2d]"
+                  ? "bg-white text-[#2C2E2A] shadow-xs font-bold"
+                  : "text-[#9B2226] hover:bg-white"
               }`}
             >
               <span>📸 Direct</span>
@@ -208,11 +210,11 @@ export function InboxClient({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto divide-y divide-[#1e2638]/50">
+        <div className="flex-1 overflow-y-auto divide-y divide-[#E0E3DE]">
           {filteredConversations.length === 0 ? (
-            <div className="p-8 text-center text-xs text-gray-500 space-y-1">
+            <div className="p-8 text-center text-xs text-[#7C8472] space-y-1">
               <div>Nenhuma conversa no canal selecionado.</div>
-              <div className="text-[10px] text-gray-600">Alterne para a aba "Todos" para ver todas as mensagens.</div>
+              <div className="text-[10px]">Alterne para a aba "Todos" para ver todas as mensagens.</div>
             </div>
           ) : (
             filteredConversations.map((conv) => {
@@ -225,36 +227,36 @@ export function InboxClient({
                   onClick={() => setActiveId(conv.id)}
                   className={`w-full p-4 text-left flex items-start gap-3 transition ${
                     isActive
-                      ? "bg-[#1c2438] border-l-2 border-[#00ddd7]"
-                      : "hover:bg-[#161d2d]"
+                      ? "bg-white border-l-4 border-[#C1ED84] shadow-2xs font-medium"
+                      : "hover:bg-white"
                   }`}
                 >
                   <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-[#1e2638] text-white flex items-center justify-center font-bold text-sm border border-[#2e3b54]">
+                    <div className="w-10 h-10 rounded-full bg-[#EAE2CA] text-[#2C2E2A] flex items-center justify-center font-bold text-sm border border-[#D0D5CD]">
                       {conv.lead.nome.charAt(0)}
                     </div>
-                    <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[#111622] flex items-center justify-center text-[10px]">
+                    <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white flex items-center justify-center text-[10px] border border-[#E0E3DE]">
                       {conv.canal === "INSTAGRAM" ? "📸" : "💬"}
                     </span>
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-bold text-white truncate">
+                      <h4 className="text-xs font-bold text-[#2C2E2A] truncate">
                         {conv.lead.nome}
                       </h4>
                       {conv.canal === "INSTAGRAM" ? (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/40 flex items-center gap-1 shrink-0">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E9BEC4] text-[#9B2226] flex items-center gap-1 shrink-0">
                           <InstagramIcon className="w-3 h-3" /> Instagram
                         </span>
                       ) : (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1 shrink-0">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#DDE8DE] text-[#2D6A4F] flex items-center gap-1 shrink-0">
                           💬 WhatsApp
                         </span>
                       )}
                     </div>
 
-                    <p className="text-[11px] text-gray-400 truncate mt-0.5">
+                    <p className="text-[11px] text-[#63695B] truncate mt-0.5">
                       {lastMsg
                         ? lastMsg.tipoConteudo === "AUDIO_PTT"
                           ? "🎙️ Mensagem de voz PTT"
@@ -263,11 +265,11 @@ export function InboxClient({
                     </p>
 
                     <div className="flex items-center gap-1 mt-1.5">
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#161d2d] text-gray-400 border border-[#252e42]">
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#E7EBE6] text-[#63695B] border border-[#D0D5CD]">
                         {conv.lead.origemCanal}
                       </span>
                       {conv.lead.directKeyword && (
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-pink-500/10 text-pink-400 border border-pink-500/30">
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#E9BEC4] text-[#9B2226] border border-red-200">
                           #{conv.lead.directKeyword}
                         </span>
                       )}
@@ -282,27 +284,27 @@ export function InboxClient({
 
       {/* 2. Coluna Central: Thread de Mensagens */}
       {activeConv ? (
-        <div className="flex-1 flex flex-col bg-[#0c101a] min-w-0">
+        <div className="flex-1 flex flex-col bg-[#F5F5F5] min-w-0">
           {/* Header do Chat */}
-          <div className="p-4 border-b border-[#1e2638] bg-[#111622]/80 backdrop-blur-md flex items-center justify-between">
+          <div className="p-4 border-b border-[#E0E3DE] bg-white flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-[#1c2438] text-[#00ddd7] flex items-center justify-center font-bold text-sm">
+              <div className="w-9 h-9 rounded-full bg-[#EAE2CA] text-[#2C2E2A] flex items-center justify-center font-bold text-sm border border-[#D0D5CD]">
                 {activeConv.lead.nome.charAt(0)}
               </div>
               <div>
-                <h3 className="text-xs font-bold text-white flex items-center gap-2">
+                <h3 className="text-xs font-bold text-[#2C2E2A] flex items-center gap-2">
                   <span>{activeConv.lead.nome}</span>
                   {activeConv.canal === "INSTAGRAM" ? (
-                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-300 border border-pink-500/40 font-mono font-bold flex items-center gap-1">
-                      <InstagramIcon className="w-3.5 h-3.5" /> Falando pelo Instagram Direct
+                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#E9BEC4] text-[#9B2226] font-mono font-bold flex items-center gap-1">
+                      <InstagramIcon className="w-3.5 h-3.5" /> Instagram Direct
                     </span>
                   ) : (
-                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono font-bold flex items-center gap-1">
-                      💬 Falando pelo WhatsApp Oficial
+                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#DDE8DE] text-[#2D6A4F] font-mono font-bold flex items-center gap-1">
+                      💬 WhatsApp Oficial
                     </span>
                   )}
                 </h3>
-                <p className="text-[11px] text-gray-400 mt-0.5">
+                <p className="text-[11px] text-[#63695B] mt-0.5">
                   {activeConv.lead.telefone} • {activeConv.lead.ramoInteresse || "Interesse Geral"}
                 </p>
               </div>
@@ -313,14 +315,14 @@ export function InboxClient({
                 href={`https://wa.me/${activeConv.lead.telefone.replace(/\D/g, "")}`}
                 target="_blank"
                 rel="noreferrer"
-                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-xl bg-[#C1ED84] hover:bg-[#B2E372] text-[#2C2E2A] text-xs font-bold transition flex items-center gap-1.5 shadow-2xs"
               >
                 <ExternalLink className="w-3.5 h-3.5" /> Abrir no WA
               </a>
             </div>
           </div>
 
-          {/* Área das Mensagens com Scroll */}
+          {/* Área das Mensagens */}
           <div className="flex-1 p-5 overflow-y-auto space-y-4">
             {activeConv.messages.map((msg) => {
               const isLead = msg.remetenteTipo === "LEAD";
@@ -332,14 +334,13 @@ export function InboxClient({
                   className={`flex ${isLead ? "justify-start" : "justify-end"}`}
                 >
                   <div
-                    className={`max-w-[75%] rounded-2xl p-3.5 text-xs shadow-md ${
+                    className={`max-w-[75%] rounded-2xl p-3.5 text-xs shadow-2xs ${
                       isLead
-                        ? "bg-[#161d2d] border border-[#252e42] text-gray-200 rounded-tl-sm"
-                        : "bg-gradient-to-br from-[#00b4b0] to-[#00938f] text-black font-medium rounded-tr-sm"
+                        ? "bg-white border border-[#E0E3DE] text-[#2C2E2A] rounded-tl-sm"
+                        : "bg-[#C1ED84] text-[#2C2E2A] font-medium rounded-tr-sm border border-[#B2E372]"
                     }`}
                   >
                     {isAudio ? (
-                      /* Reprodutor de Áudio PTT com Onda Sonora Estilo WhatsApp */
                       <div className="flex items-center gap-3 min-w-[220px]">
                         <button
                           type="button"
@@ -348,10 +349,10 @@ export function InboxClient({
                               isPlayingAudioId === msg.id ? null : msg.id
                             )
                           }
-                          className={`w-9 h-9 rounded-full flex items-center justify-center transition shadow-sm ${
+                          className={`w-9 h-9 rounded-full flex items-center justify-center transition shadow-2xs ${
                             isLead
-                              ? "bg-[#00ddd7] text-black"
-                              : "bg-black/20 text-black hover:bg-black/30"
+                              ? "bg-[#7A8E75] text-white"
+                              : "bg-[#2C2E2A] text-[#C1ED84]"
                           }`}
                         >
                           {isPlayingAudioId === msg.id ? (
@@ -363,19 +364,17 @@ export function InboxClient({
 
                         <div className="flex-1">
                           <div className="flex items-center gap-1 h-5">
-                            <span className="w-1 bg-current rounded-full animate-soundwave-1" />
-                            <span className="w-1 bg-current rounded-full animate-soundwave-2" />
-                            <span className="w-1 bg-current rounded-full animate-soundwave-3" />
-                            <span className="w-1 bg-current rounded-full animate-soundwave-4" />
-                            <span className="w-1 bg-current rounded-full animate-soundwave-5" />
-                            <span className="w-1 bg-current rounded-full animate-soundwave-2" />
-                            <span className="w-1 bg-current rounded-full animate-soundwave-1" />
-                            <span className="w-1 bg-current rounded-full animate-soundwave-4" />
-                            <span className="w-1 bg-current rounded-full animate-soundwave-3" />
+                            <span className="w-1 bg-[#2C2E2A] rounded-full h-3" />
+                            <span className="w-1 bg-[#2C2E2A] rounded-full h-5" />
+                            <span className="w-1 bg-[#2C2E2A] rounded-full h-2" />
+                            <span className="w-1 bg-[#2C2E2A] rounded-full h-4" />
+                            <span className="w-1 bg-[#2C2E2A] rounded-full h-3" />
+                            <span className="w-1 bg-[#2C2E2A] rounded-full h-5" />
+                            <span className="w-1 bg-[#2C2E2A] rounded-full h-2" />
                           </div>
-                          <div className="flex justify-between items-center text-[10px] opacity-80 mt-1 font-mono">
+                          <div className="flex justify-between items-center text-[10px] text-[#63695B] mt-1 font-mono">
                             <span>0:{msg.audioDuration || 14}</span>
-                            <span className="uppercase text-[9px]">Áudio PTT</span>
+                            <span className="uppercase text-[9px] font-bold">Áudio PTT</span>
                           </div>
                         </div>
                       </div>
@@ -387,7 +386,7 @@ export function InboxClient({
 
                     <div
                       className={`flex items-center justify-end gap-1 mt-1 text-[9px] ${
-                        isLead ? "text-gray-400" : "text-black/70"
+                        isLead ? "text-[#7C8472]" : "text-[#2C2E2A]/70"
                       }`}
                     >
                       <Clock className="w-2.5 h-2.5" />
@@ -404,10 +403,9 @@ export function InboxClient({
               );
             })}
 
-            {/* Simulação de Presença Ativa */}
             {isSimulatingPresence && (
               <div className="flex justify-end">
-                <div className="px-3 py-1.5 rounded-full bg-[#161d2d] border border-[#2e3b54] text-xs text-[#00ddd7] flex items-center gap-2 animate-pulse">
+                <div className="px-3 py-1.5 rounded-full bg-white border border-[#E0E3DE] text-xs text-[#2D6A4F] flex items-center gap-2 animate-pulse font-mono">
                   <span>{presenceText}</span>
                 </div>
               </div>
@@ -416,8 +414,8 @@ export function InboxClient({
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Barra Inferior de Input com Simulação PTT */}
-          <div className="p-3 border-t border-[#1e2638] bg-[#111622] space-y-2">
+          {/* Barra de Input */}
+          <div className="p-3 border-t border-[#E0E3DE] bg-white space-y-2">
             <div className="flex items-center gap-2">
               <input
                 type="text"
@@ -430,94 +428,33 @@ export function InboxClient({
                   }
                 }}
                 placeholder="Escreva uma mensagem ou simule áudio PTT..."
-                className="flex-1 bg-[#0a0d14] border border-[#252e42] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#00ddd7] transition"
+                className="flex-1 bg-[#F5F5F5] border border-[#E0E3DE] rounded-xl px-4 py-2.5 text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75] transition"
               />
 
-              <button
-                type="button"
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={() => handleSendMessage("TEXTO")}
                 disabled={!inputText.trim()}
-                className="p-2.5 rounded-xl bg-[#00ddd7] hover:bg-[#00c4be] text-black font-bold transition disabled:opacity-30"
-                title="Enviar Texto"
               >
                 <Send className="w-4 h-4" />
-              </button>
+              </Button>
 
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={simulatePttRecord}
-                className="px-3 py-2.5 rounded-xl bg-[#161d2d] border border-[#2e3b54] hover:border-emerald-500 hover:text-emerald-400 text-gray-300 text-xs font-medium transition flex items-center gap-1.5 shadow-sm"
-                title="Simular Gravação de Áudio PTT no WhatsApp"
+                title="Simular Gravação de Áudio PTT"
               >
-                <Mic className="w-4 h-4 text-emerald-400" />
-                <span className="hidden sm:inline">Simular Áudio PTT</span>
-              </button>
+                <Mic className="w-4 h-4 text-[#7A8E75]" />
+                <span>Áudio PTT</span>
+              </Button>
             </div>
           </div>
         </div>
-      ) : null}
-
-      {/* 3. Coluna Direita: Ficha Expressa do Lead */}
-      {activeConv && (
-        <div className="w-72 border-l border-[#1e2638] p-5 overflow-y-auto bg-[#0a0d14]/40 hidden lg:block space-y-5">
-          <div className="text-center pb-4 border-b border-[#1e2638]">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#00ddd7] to-[#3b82f6] text-black text-2xl font-black mx-auto flex items-center justify-center mb-3 shadow-[0_0_20px_rgba(0,221,215,0.25)]">
-              {activeConv.lead.nome.charAt(0)}
-            </div>
-            <h4 className="font-bold text-sm text-white">{activeConv.lead.nome}</h4>
-            <p className="text-xs text-gray-400">{activeConv.lead.telefone}</p>
-          </div>
-
-          {/* Lead Score da IA */}
-          <div className="p-3.5 rounded-xl bg-[#161d2d] border border-[#252e42] space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-400 font-medium">Lead Score (IA)</span>
-              <span className="font-mono font-bold text-emerald-400">
-                {activeConv.lead.score}/100
-              </span>
-            </div>
-            <div className="h-1.5 w-full bg-[#1c2438] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-emerald-400 rounded-full"
-                style={{ width: `${activeConv.lead.score}%` }}
-              />
-            </div>
-            {activeConv.lead.scoreJustificativa && (
-              <p className="text-[10px] text-gray-400 leading-tight pt-1">
-                &ldquo;{activeConv.lead.scoreJustificativa}&rdquo;
-              </p>
-            )}
-          </div>
-
-          {/* Metadados de Atribuição */}
-          <div className="space-y-2.5 text-xs">
-            <h5 className="text-[10px] font-mono uppercase tracking-wider text-gray-400">
-              Atribuição de Marketing
-            </h5>
-
-            <div className="p-2.5 rounded-lg bg-[#111622] border border-[#1e2638] space-y-1">
-              <div className="text-[10px] text-gray-500">Canal de Origem</div>
-              <div className="font-semibold text-white">{activeConv.lead.origemCanal}</div>
-            </div>
-
-            {activeConv.lead.utmCampaign && (
-              <div className="p-2.5 rounded-lg bg-[#111622] border border-[#1e2638] space-y-1">
-                <div className="text-[10px] text-gray-500">Campanha Tráfego Pago</div>
-                <div className="font-mono text-[11px] text-[#00ddd7] truncate">
-                  {activeConv.lead.utmCampaign}
-                </div>
-              </div>
-            )}
-
-            {activeConv.lead.directKeyword && (
-              <div className="p-2.5 rounded-lg bg-[#111622] border border-[#1e2638] space-y-1">
-                <div className="text-[10px] text-gray-500">Palavra Direct Instagram</div>
-                <div className="font-mono text-[11px] text-pink-400">
-                  #{activeConv.lead.directKeyword}
-                </div>
-              </div>
-            )}
-          </div>
+      ) : (
+        <div className="flex-1 flex items-center justify-center p-8 text-center text-xs text-[#7C8472]">
+          Nenhuma conversa selecionada.
         </div>
       )}
     </div>

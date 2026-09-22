@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Omni Service SaaS | AI-Powered Vertical Platform",
-  description: "Plataforma Multi-Vertical com IA, Atribuição de Marketing Total e Caixa de Entrada Unificada",
+  title: "MAI — Motor de Atendimento & Inteligência | WhatsApp Attribution",
+  description: "Plataforma B2B de Atendimento Imediato com IA, Atribuição Reversa de Marketing e CRM Integrado",
 };
 
 export default function RootLayout({
@@ -12,8 +12,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className="dark">
-      <body className="bg-[#0a0d14] text-[#f3f4f6] min-h-screen antialiased">
+    <html lang="pt-BR">
+      <body className="bg-[#F5F5F5] text-[#2C2E2A] min-h-screen antialiased">
         {children}
       </body>
     </html>

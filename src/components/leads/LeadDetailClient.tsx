@@ -20,6 +20,9 @@ import {
   Clock,
   UserCheck,
 } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { Card } from "@/components/ui/Card";
 
 interface NoteItem {
   id: string;
@@ -93,38 +96,26 @@ export function LeadDetailClient({ lead: initialLead }: LeadDetailClientProps) {
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
   // Notas Internas
-  let parsedNotes: NoteItem[] = [];
-  if (lead.notasInternasJson) {
-    try {
-      parsedNotes = JSON.parse(lead.notasInternasJson);
-    } catch {
-      parsedNotes = [];
-    }
-  }
-  const [notes, setNotes] = useState<NoteItem[]>(parsedNotes);
+  const initialNotes: NoteItem[] = initialLead.notasInternasJson
+    ? JSON.parse(initialLead.notasInternasJson)
+    : [];
+  const [notes, setNotes] = useState<NoteItem[]>(initialNotes);
   const [newNoteText, setNewNoteText] = useState("");
   const [submittingNote, setSubmittingNote] = useState(false);
 
   // Agendamento Rápido
-  const [appointments, setAppointments] = useState<AppointmentItem[]>(lead.appointments || []);
+  const [appointments, setAppointments] = useState<AppointmentItem[]>(
+    initialLead.appointments || []
+  );
   const [showAppModal, setShowAppModal] = useState(false);
-  const [appTitulo, setAppTitulo] = useState("Visita / Demonstração com o Cliente");
+  const [appTitulo, setAppTitulo] = useState("Reunião de Fechamento Comercial");
   const [appData, setAppData] = useState("");
   const [appHora, setAppHora] = useState("14:00");
   const [appTipo, setAppTipo] = useState("VISITA");
   const [submittingApp, setSubmittingApp] = useState(false);
 
-  // Quiz Answers
-  let quizAnswers: Record<string, any> | null = null;
-  if (lead.quizAnswersJson) {
-    try {
-      quizAnswers = JSON.parse(lead.quizAnswersJson);
-    } catch {
-      quizAnswers = null;
-    }
-  }
+  const quizAnswers = lead.quizAnswersJson ? JSON.parse(lead.quizAnswersJson) : null;
 
-  // Alterar Status do Funil
   const handleStatusChange = async (newStatus: string) => {
     setStatus(newStatus);
     setUpdatingStatus(true);
@@ -136,13 +127,12 @@ export function LeadDetailClient({ lead: initialLead }: LeadDetailClientProps) {
       });
       setLead((prev) => ({ ...prev, status: newStatus }));
     } catch (e) {
-      console.error(e);
+      console.error("Erro ao atualizar status", e);
     } finally {
       setUpdatingStatus(false);
     }
   };
 
-  // Adicionar Nova Nota
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newNoteText.trim()) return;
@@ -166,7 +156,6 @@ export function LeadDetailClient({ lead: initialLead }: LeadDetailClientProps) {
     }
   };
 
-  // Criar Agendamento Rápido
   const handleCreateAppointment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!appData) return;
@@ -199,59 +188,57 @@ export function LeadDetailClient({ lead: initialLead }: LeadDetailClientProps) {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-6xl mx-auto text-[#2C2E2A]">
       {/* Top Breadcrumb & Actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Link
           href="/dashboard/crm"
-          className="inline-flex items-center gap-2 text-xs text-gray-400 hover:text-white transition"
+          className="inline-flex items-center gap-2 text-xs text-[#63695B] hover:text-[#2C2E2A] transition font-medium"
         >
-          <ArrowLeft className="w-4 h-4" /> Voltar ao Pipeline CRM
+          <ArrowLeft className="w-4 h-4 text-[#7A8E75]" /> Voltar ao Pipeline CRM
         </Link>
 
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setShowAppModal(true)}
-            className="px-4 py-2 rounded-xl bg-[#1c2438] hover:bg-[#253049] border border-[#2e3b54] text-white text-xs font-semibold transition flex items-center gap-2"
-          >
-            <Calendar className="w-3.5 h-3.5 text-[#00ddd7]" /> Agendar Visita/Reunião
-          </button>
+        <div className="flex items-center gap-2.5">
+          <Button variant="secondary" size="sm" onClick={() => setShowAppModal(true)}>
+            <Calendar className="w-3.5 h-3.5 text-[#7A8E75]" />
+            <span>Agendar Visita/Reunião</span>
+          </Button>
 
           <a
             href={`https://wa.me/${lead.telefone.replace(/\D/g, "")}`}
             target="_blank"
             rel="noreferrer"
-            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-emerald-950"
           >
-            <ExternalLink className="w-3.5 h-3.5" /> Chamar no WhatsApp
+            <Button variant="secondary" size="sm">
+              <ExternalLink className="w-3.5 h-3.5 text-[#2D6A4F]" />
+              <span>Chamar no WhatsApp</span>
+            </Button>
           </a>
 
-          <Link
-            href="/dashboard/inbox"
-            className="px-4 py-2 rounded-xl bg-[#00ddd7] hover:bg-[#00c4be] text-black text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-[#00ddd7]/20"
-          >
-            <MessageSquare className="w-3.5 h-3.5" /> Abrir no Chat Unificado
+          <Link href="/dashboard/inbox">
+            <Button variant="primary" size="sm">
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>Abrir no Chat Unificado</span>
+            </Button>
           </Link>
         </div>
       </div>
 
       {/* Header do Dossiê */}
-      <div className="p-6 rounded-2xl bg-[#111622] border border-[#1e2638] flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
+      <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#00ddd7] to-[#3b82f6] text-black text-2xl font-black flex items-center justify-center shadow-[0_0_20px_rgba(0,221,215,0.3)]">
+          <div className="w-14 h-14 rounded-2xl bg-[#EAE2CA] text-[#2C2E2A] text-2xl font-black flex items-center justify-center border border-[#D0D5CD]">
             {lead.nome.charAt(0)}
           </div>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-xl font-bold text-white">{lead.nome}</h1>
+              <h1 className="text-xl font-bold text-[#2C2E2A]">{lead.nome}</h1>
               
-              {/* Seletor Rápido de Status no Dossiê */}
               <select
                 value={status}
                 disabled={updatingStatus}
                 onChange={(e) => handleStatusChange(e.target.value)}
-                className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#161d2d] text-[#00ddd7] border border-[#2e3b54] cursor-pointer focus:outline-none focus:border-[#00ddd7]"
+                className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#F5F5F5] text-[#2C2E2A] border border-[#E0E3DE] cursor-pointer focus:outline-none focus:border-[#7A8E75]"
               >
                 <option value="NOVO">NOVO LEAD</option>
                 <option value="QUALIFICADO">QUALIFICADO (SQL)</option>
@@ -260,12 +247,12 @@ export function LeadDetailClient({ lead: initialLead }: LeadDetailClientProps) {
                 <option value="PERDIDO">DESQUALIFICADO</option>
               </select>
             </div>
-            <div className="text-xs text-gray-400 mt-1 flex flex-wrap items-center gap-3">
-              <span className="font-mono text-gray-300">{lead.telefone}</span>
+            <div className="text-xs text-[#63695B] mt-1 flex flex-wrap items-center gap-3">
+              <span className="font-mono text-[#2C2E2A]">{lead.telefone}</span>
               {lead.email && <span>• {lead.email}</span>}
               {lead.empresa && (
-                <span className="flex items-center gap-1 text-gray-300">
-                  <Building2 className="w-3.5 h-3.5 text-gray-500" /> {lead.empresa}
+                <span className="flex items-center gap-1 text-[#2C2E2A]">
+                  <Building2 className="w-3.5 h-3.5 text-[#7A8E75]" /> {lead.empresa}
                 </span>
               )}
             </div>
@@ -273,19 +260,19 @@ export function LeadDetailClient({ lead: initialLead }: LeadDetailClientProps) {
         </div>
 
         {/* Lead Score Highlight */}
-        <div className="p-4 rounded-xl bg-[#161d2d] border border-[#252e42] flex items-center gap-4">
+        <div className="p-4 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] flex items-center gap-4">
           <div className="text-right">
-            <div className="text-[10px] uppercase font-mono tracking-wider text-gray-400">
+            <div className="text-[10px] uppercase font-mono tracking-wider text-[#63695B]">
               Lead Score IA
             </div>
-            <div className="text-2xl font-black text-emerald-400 font-mono">
+            <div className="text-2xl font-extrabold text-[#2D6A4F] font-mono">
               {lead.score}/100
             </div>
-            <div className="text-[10px] font-semibold text-emerald-400">
+            <div className="text-[10px] font-bold text-[#2D6A4F]">
               PRIORIDADE {lead.prioridade}
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-[#DDE8DE] border border-[#C4D7C4] text-[#2D6A4F] flex items-center justify-center">
             <Sparkles className="w-5 h-5" />
           </div>
         </div>
@@ -293,43 +280,43 @@ export function LeadDetailClient({ lead: initialLead }: LeadDetailClientProps) {
 
       {/* Grid Principal do Dossiê 360° */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Coluna Esquerda (2 cols): Diagnóstico, Quiz, Anotações e Histórico */}
+        {/* Coluna Esquerda (2 cols) */}
         <div className="lg:col-span-2 space-y-6">
           
-          {/* Resumo Executivo da IA */}
-          <div className="p-5 rounded-2xl bg-[#111622] border border-[#1e2638] space-y-3">
-            <h3 className="text-xs font-mono uppercase tracking-wider text-[#00ddd7] flex items-center gap-2">
+          {/* Diagnóstico da IA */}
+          <div className="p-5 rounded-2xl bg-white border border-[#E0E3DE] space-y-3 shadow-xs">
+            <h3 className="text-xs font-mono uppercase tracking-wider text-[#7A8E75] flex items-center gap-2 font-bold">
               <Sparkles className="w-4 h-4" /> Diagnóstico & Parecer da IA
             </h3>
             {lead.scoreJustificativa && (
-              <p className="text-xs text-gray-300 leading-relaxed bg-[#161d2d] p-3.5 rounded-xl border border-[#252e42]">
-                <strong className="text-white block mb-1">Critério de Qualificação:</strong>
+              <p className="text-xs text-[#2C2E2A] leading-relaxed bg-[#F5F5F5] p-3.5 rounded-xl border border-[#E0E3DE]">
+                <strong className="text-[#2C2E2A] block mb-1">Critério de Qualificação:</strong>
                 {cleanCorruptedText(lead.scoreJustificativa)}
               </p>
             )}
             {lead.resumoIa && (
-              <p className="text-xs text-gray-400 leading-relaxed">
+              <p className="text-xs text-[#63695B] leading-relaxed">
                 {cleanCorruptedText(lead.resumoIa)}
               </p>
             )}
           </div>
 
-          {/* Dossiê de Respostas do Mini-Quiz (se houver) */}
+          {/* Respostas do Mini-Quiz */}
           {quizAnswers && (
-            <div className="p-5 rounded-2xl bg-[#111622] border border-[#1e2638] space-y-4">
-              <h3 className="text-xs font-mono uppercase tracking-wider text-purple-400 flex items-center gap-2">
+            <div className="p-5 rounded-2xl bg-white border border-[#E0E3DE] space-y-4 shadow-xs">
+              <h3 className="text-xs font-mono uppercase tracking-wider text-[#7A8E75] flex items-center gap-2 font-bold">
                 <FileQuestion className="w-4 h-4" /> Respostas do Mini-Quiz de Captação
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {Object.entries(quizAnswers).map(([key, value]) => (
                   <div
                     key={key}
-                    className="p-3 rounded-xl bg-[#161d2d] border border-[#252e42] text-xs space-y-1"
+                    className="p-3 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] text-xs space-y-1"
                   >
-                    <span className="text-[10px] text-gray-500 font-mono uppercase block">
+                    <span className="text-[10px] text-[#7C8472] font-mono uppercase block">
                       {key.replace(/_/g, " ")}
                     </span>
-                    <span className="font-semibold text-white block">
+                    <span className="font-semibold text-[#2C2E2A] block">
                       {cleanCorruptedText(String(value))}
                     </span>
                   </div>
@@ -338,18 +325,17 @@ export function LeadDetailClient({ lead: initialLead }: LeadDetailClientProps) {
             </div>
           )}
 
-          {/* NOVO: Anotações Internas da Equipe Comercial */}
-          <div className="p-5 rounded-2xl bg-[#111622] border border-[#1e2638] space-y-4">
-            <h3 className="text-xs font-mono uppercase tracking-wider text-amber-400 flex items-center justify-between">
+          {/* Anotações Internas da Equipe */}
+          <div className="p-5 rounded-2xl bg-white border border-[#E0E3DE] space-y-4 shadow-xs">
+            <h3 className="text-xs font-mono uppercase tracking-wider text-[#8F5D18] flex items-center justify-between font-bold">
               <span className="flex items-center gap-2">
                 <StickyNote className="w-4 h-4" /> Anotações Internas da Equipe
               </span>
-              <span className="text-gray-400 text-[11px] font-mono">
+              <span className="text-[#7C8472] text-[11px] font-mono">
                 {notes.length} notas
               </span>
             </h3>
 
-            {/* Input de Adicionar Nota */}
             <form onSubmit={handleAddNote} className="space-y-2">
               <div className="flex gap-2">
                 <input
@@ -357,150 +343,91 @@ export function LeadDetailClient({ lead: initialLead }: LeadDetailClientProps) {
                   placeholder="Escreva uma observação interna rápida sobre a negociação..."
                   value={newNoteText}
                   onChange={(e) => setNewNoteText(e.target.value)}
-                  className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#161d2d] border border-[#252e42] text-xs text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-400"
+                  className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] text-xs text-[#2C2E2A] placeholder:text-[#7C8472] focus:outline-none focus:border-[#7A8E75]"
                 />
-                <button
-                  type="submit"
-                  disabled={submittingNote || !newNoteText.trim()}
-                  className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs transition flex items-center gap-1.5 disabled:opacity-50"
-                >
+                <Button variant="secondary" size="sm" type="submit" disabled={submittingNote || !newNoteText.trim()}>
                   <Send className="w-3.5 h-3.5" />
                   <span>Salvar</span>
-                </button>
+                </Button>
               </div>
             </form>
 
-            {/* Lista de Notas */}
             <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
               {notes.length === 0 ? (
-                <p className="text-xs text-gray-500 italic py-2">
+                <p className="text-xs text-[#7C8472] italic py-2">
                   Nenhuma anotação registrada ainda. Use o campo acima para salvar observações do cliente.
                 </p>
               ) : (
                 notes.map((nota) => (
                   <div
                     key={nota.id}
-                    className="p-3 rounded-xl bg-[#161d2d] border border-[#252e42] text-xs space-y-1"
+                    className="p-3 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] text-xs space-y-1"
                   >
-                    <div className="flex items-center justify-between text-[10px] text-gray-400 font-mono">
-                      <span className="font-semibold text-amber-400 flex items-center gap-1">
+                    <div className="flex items-center justify-between text-[10px] text-[#63695B] font-mono">
+                      <span className="font-semibold text-[#8F5D18] flex items-center gap-1">
                         <UserCheck className="w-3 h-3" /> {nota.autor}
                       </span>
                       <span>{new Date(nota.createdAt).toLocaleString("pt-BR")}</span>
                     </div>
-                    <p className="text-gray-200">{nota.texto}</p>
+                    <p className="text-[#2C2E2A]">{nota.texto}</p>
                   </div>
                 ))
               )}
             </div>
           </div>
-
-          {/* Histórico de Conversas e Mensagens */}
-          <div className="p-5 rounded-2xl bg-[#111622] border border-[#1e2638] space-y-4">
-            <h3 className="text-xs font-mono uppercase tracking-wider text-gray-400 flex items-center justify-between">
-              <span>Linha do Tempo de Interações</span>
-              <span className="text-[#00ddd7] font-mono">
-                {lead.conversations.length} canais conectados
-              </span>
-            </h3>
-
-            <div className="space-y-3">
-              {lead.conversations.map((conv) => (
-                <div
-                  key={conv.id}
-                  className="p-4 rounded-xl bg-[#0c101a] border border-[#1e2638] space-y-3"
-                >
-                  <div className="flex items-center justify-between text-xs border-b border-[#1e2638] pb-2">
-                    <span className="font-semibold text-white flex items-center gap-1.5">
-                      <MessageSquare className="w-3.5 h-3.5 text-[#00ddd7]" />
-                      Canal {conv.canal}
-                    </span>
-                    <span className="text-[10px] text-gray-500">
-                      Última mensagem: {formatDate(conv.ultimoContato)}
-                    </span>
-                  </div>
-
-                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                    {conv.messages.map((m) => (
-                      <div
-                        key={m.id}
-                        className={`text-xs p-2.5 rounded-lg ${
-                          m.remetenteTipo === "LEAD"
-                            ? "bg-[#161d2d] text-gray-300"
-                            : "bg-[#00ddd7]/10 border border-[#00ddd7]/30 text-white"
-                        }`}
-                      >
-                        <div className="text-[9px] text-gray-400 font-mono mb-0.5">
-                          {m.remetenteTipo} • {new Date(m.createdAt).toLocaleTimeString()}
-                        </div>
-                        <div>{cleanCorruptedText(m.conteudo)}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
-        {/* Coluna Direita (1 col): Torre de Atribuição de Marketing & Agendamentos */}
+        {/* Coluna Direita: Atribuição & Agendamentos */}
         <div className="space-y-6">
-          <div className="p-5 rounded-2xl bg-[#111622] border border-[#1e2638] space-y-4">
-            <h3 className="text-xs font-mono uppercase tracking-wider text-[#00ddd7] flex items-center gap-2">
+          <div className="p-5 rounded-2xl bg-white border border-[#E0E3DE] space-y-4 shadow-xs">
+            <h3 className="text-xs font-mono uppercase tracking-wider text-[#7A8E75] flex items-center gap-2 font-bold">
               <Target className="w-4 h-4" /> Atribuição de Marketing Ponta a Ponta
             </h3>
 
             <div className="space-y-3 text-xs">
-              <div className="p-3 rounded-xl bg-[#161d2d] border border-[#252e42] space-y-1">
-                <span className="text-[10px] text-gray-500 font-mono uppercase">Canal de Aquisição</span>
-                <div className="font-bold text-white text-sm">{lead.origemCanal}</div>
+              <div className="p-3 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] space-y-1">
+                <span className="text-[10px] text-[#7C8472] font-mono uppercase">Canal de Aquisição</span>
+                <div className="font-bold text-[#2C2E2A] text-sm">{lead.origemCanal}</div>
               </div>
 
               {lead.utmSource && (
-                <div className="p-3 rounded-xl bg-[#161d2d] border border-[#252e42] space-y-1">
-                  <span className="text-[10px] text-gray-500 font-mono uppercase">UTM Source (Fonte)</span>
-                  <div className="font-mono text-gray-300">{lead.utmSource}</div>
+                <div className="p-3 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] space-y-1">
+                  <span className="text-[10px] text-[#7C8472] font-mono uppercase">UTM Source (Fonte)</span>
+                  <div className="font-mono text-[#2C2E2A]">{lead.utmSource}</div>
                 </div>
               )}
 
               {lead.utmCampaign && (
-                <div className="p-3 rounded-xl bg-[#161d2d] border border-[#252e42] space-y-1">
-                  <span className="text-[10px] text-gray-500 font-mono uppercase">UTM Campaign (Campanha)</span>
-                  <div className="font-mono text-[#00ddd7]">{lead.utmCampaign}</div>
+                <div className="p-3 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] space-y-1">
+                  <span className="text-[10px] text-[#7C8472] font-mono uppercase">UTM Campaign (Campanha)</span>
+                  <div className="font-mono text-[#2D6A4F] font-bold">{lead.utmCampaign}</div>
                 </div>
               )}
 
-              {lead.directKeyword && (
-                <div className="p-3 rounded-xl bg-pink-500/10 border border-pink-500/20 space-y-1">
-                  <span className="text-[10px] text-pink-400 font-mono uppercase">Palavra do Direct</span>
-                  <div className="font-mono font-bold text-pink-400">#{lead.directKeyword}</div>
-                </div>
-              )}
-
-              <div className="p-3 rounded-xl bg-[#161d2d] border border-[#252e42] space-y-1">
-                <span className="text-[10px] text-gray-500 font-mono uppercase">Valor Previsto do Negócio</span>
-                <div className="font-mono font-bold text-emerald-400 text-sm">
+              <div className="p-3 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] space-y-1">
+                <span className="text-[10px] text-[#7C8472] font-mono uppercase">Valor Previsto do Negócio</span>
+                <div className="font-mono font-bold text-[#2C2E2A] text-sm">
                   {formatCurrency(lead.valorNegocio)}
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-[#161d2d] border border-[#252e42] space-y-1">
-                <span className="text-[10px] text-gray-500 font-mono uppercase">Data de Cadastro</span>
-                <div className="text-gray-300">{formatDate(lead.createdAt)}</div>
+              <div className="p-3 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] space-y-1">
+                <span className="text-[10px] text-[#7C8472] font-mono uppercase">Data de Cadastro</span>
+                <div className="text-[#2C2E2A]">{formatDate(lead.createdAt)}</div>
               </div>
             </div>
           </div>
 
-          {/* Agendamentos Vinculados */}
-          <div className="p-5 rounded-2xl bg-[#111622] border border-[#1e2638] space-y-3">
+          {/* Agendamentos */}
+          <div className="p-5 rounded-2xl bg-white border border-[#E0E3DE] space-y-3 shadow-xs">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-mono uppercase tracking-wider text-blue-400 flex items-center gap-2">
-                <CalendarCheck className="w-4 h-4" /> Agendamentos & Visitas
+              <h3 className="text-xs font-mono uppercase tracking-wider text-[#2C2E2A] flex items-center gap-2 font-bold">
+                <CalendarCheck className="w-4 h-4 text-[#7A8E75]" /> Agendamentos & Visitas
               </h3>
               <button
                 type="button"
                 onClick={() => setShowAppModal(true)}
-                className="p-1.5 rounded-lg bg-[#161d2d] hover:bg-[#253049] text-[#00ddd7] transition"
+                className="p-1.5 rounded-lg bg-[#F5F5F5] hover:bg-[#E7EBE6] text-[#2C2E2A] transition"
                 title="Novo Agendamento"
               >
                 <Plus className="w-3.5 h-3.5" />
@@ -508,20 +435,20 @@ export function LeadDetailClient({ lead: initialLead }: LeadDetailClientProps) {
             </div>
 
             {appointments.length === 0 ? (
-              <p className="text-xs text-gray-500">Nenhum agendamento registrado ainda.</p>
+              <p className="text-xs text-[#7C8472]">Nenhum agendamento registrado ainda.</p>
             ) : (
               appointments.map((app) => (
                 <div
                   key={app.id}
-                  className="p-3 rounded-xl bg-[#161d2d] border border-[#252e42] text-xs space-y-1"
+                  className="p-3 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] text-xs space-y-1"
                 >
-                  <div className="font-semibold text-white">{app.titulo}</div>
-                  <div className="text-gray-400 font-mono text-[11px] flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-[#00ddd7]" />
+                  <div className="font-semibold text-[#2C2E2A]">{app.titulo}</div>
+                  <div className="text-[#63695B] font-mono text-[11px] flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-[#7A8E75]" />
                     {formatDate(app.dataHorario)}
                   </div>
-                  <div className="inline-block mt-1 text-[9px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                    {app.status}
+                  <div className="inline-block mt-1">
+                    <StatusBadge status={app.status} />
                   </div>
                 </div>
               ))
@@ -532,16 +459,16 @@ export function LeadDetailClient({ lead: initialLead }: LeadDetailClientProps) {
 
       {/* Modal de Novo Agendamento */}
       {showAppModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-[#111622] border border-[#1e2638] rounded-2xl p-6 shadow-2xl space-y-4">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-[#00ddd7]" />
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border border-[#E0E3DE] rounded-2xl p-6 shadow-xl space-y-4">
+            <h3 className="text-base font-bold text-[#2C2E2A] flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-[#7A8E75]" />
               Agendar Visita ou Reunião
             </h3>
 
             <form onSubmit={handleCreateAppointment} className="space-y-3">
               <div>
-                <label className="text-[11px] text-gray-400 uppercase font-mono block mb-1">
+                <label className="text-[11px] text-[#63695B] uppercase font-mono block mb-1">
                   Título do Compromisso
                 </label>
                 <input
@@ -549,13 +476,13 @@ export function LeadDetailClient({ lead: initialLead }: LeadDetailClientProps) {
                   required
                   value={appTitulo}
                   onChange={(e) => setAppTitulo(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#161d2d] border border-[#252e42] text-xs text-white focus:outline-none focus:border-[#00ddd7]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] text-gray-400 uppercase font-mono block mb-1">
+                  <label className="text-[11px] text-[#63695B] uppercase font-mono block mb-1">
                     Data
                   </label>
                   <input
@@ -563,12 +490,12 @@ export function LeadDetailClient({ lead: initialLead }: LeadDetailClientProps) {
                     required
                     value={appData}
                     onChange={(e) => setAppData(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-[#161d2d] border border-[#252e42] text-xs text-white focus:outline-none focus:border-[#00ddd7]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] text-gray-400 uppercase font-mono block mb-1">
+                  <label className="text-[11px] text-[#63695B] uppercase font-mono block mb-1">
                     Horário
                   </label>
                   <input
@@ -576,19 +503,19 @@ export function LeadDetailClient({ lead: initialLead }: LeadDetailClientProps) {
                     required
                     value={appHora}
                     onChange={(e) => setAppHora(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-[#161d2d] border border-[#252e42] text-xs text-white focus:outline-none focus:border-[#00ddd7]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-[11px] text-gray-400 uppercase font-mono block mb-1">
+                <label className="text-[11px] text-[#63695B] uppercase font-mono block mb-1">
                   Tipo de Atendimento
                 </label>
                 <select
                   value={appTipo}
                   onChange={(e) => setAppTipo(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#161d2d] border border-[#252e42] text-xs text-white focus:outline-none focus:border-[#00ddd7]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75]"
                 >
                   <option value="VISITA">Visita Presencial / Test-Drive</option>
                   <option value="REUNIAO_ONLINE">Reunião Online (Google Meet/Zoom)</option>
@@ -598,20 +525,12 @@ export function LeadDetailClient({ lead: initialLead }: LeadDetailClientProps) {
               </div>
 
               <div className="pt-3 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAppModal(false)}
-                  className="px-4 py-2 rounded-xl bg-[#161d2d] hover:bg-[#1e2638] text-xs text-gray-300 font-medium transition"
-                >
+                <Button variant="secondary" size="sm" type="button" onClick={() => setShowAppModal(false)}>
                   Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={submittingApp || !appData}
-                  className="px-4 py-2 rounded-xl bg-[#00ddd7] hover:bg-[#00c4be] text-black text-xs font-bold transition disabled:opacity-50"
-                >
+                </Button>
+                <Button variant="primary" size="sm" type="submit" disabled={submittingApp || !appData}>
                   {submittingApp ? "Salvando..." : "Confirmar Agendamento"}
-                </button>
+                </Button>
               </div>
             </form>
           </div>
