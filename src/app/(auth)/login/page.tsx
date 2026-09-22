@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, Mail, ArrowRight, ShieldCheck } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const experience = pathname.startsWith("/wact") ? "wact" : pathname.startsWith("/shoppers") ? "shoppers" : "mai";
+  const experienceLabel = experience === "wact" ? "WACT" : experience === "shoppers" ? "SHOPPERS" : "MAI";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,7 +33,7 @@ export default function LoginPage() {
         throw new Error(data.error || "Credenciais inválidas");
       }
 
-      router.push("/dashboard");
+      router.push(`/${experience}/dashboard`);
       router.refresh();
     } catch (err: any) {
       setError(err.message);
@@ -40,14 +43,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] flex flex-col items-center justify-center p-4 selection:bg-[#C1ED84] selection:text-[#2C2E2A]">
+    <div className="auth-shell min-h-screen bg-[#F5F5F5] flex flex-col items-center justify-center p-4 selection:bg-[#C1ED84] selection:text-[#2C2E2A]">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex w-12 h-12 rounded-2xl bg-[#2C2E2A] items-center justify-center font-extrabold text-[#C1ED84] text-xl mb-4 shadow-md">
             Ω
           </div>
-          <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C2E2A]">MAI Cockpit</h1>
+          <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C2E2A]">{experienceLabel} Cockpit</h1>
           <p className="text-xs text-[#63695B] mt-1">Omni Service SaaS — Acesso Corporativo</p>
         </div>
 
@@ -119,7 +122,7 @@ export default function LoginPage() {
 
           <div className="pt-1 border-t border-[#E0E3DE] text-center text-xs text-[#7C8472]">
             Ainda não tem conta?{" "}
-            <Link href="/cadastro" className="text-[#2C2E2A] font-bold hover:underline">
+            <Link href={`/${experience}/cadastro`} className="text-[#2C2E2A] font-bold hover:underline">
               Criar Conta Comercial
             </Link>
           </div>
