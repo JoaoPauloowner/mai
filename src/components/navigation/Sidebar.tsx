@@ -57,31 +57,31 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
 
   // Badge de Nicho Ativo
   const segmentConfig: Record<string, { label: string; color: string; icon: string }> = {
-    AUTO: { label: "Automotivo", color: "bg-[#E1D6AF] text-[#8F5D18] border-[#D0C496]", icon: "🚗" },
-    INSURANCE: { label: "Seguros", color: "bg-[#DDE8DE] text-[#2D6A4F] border-[#C4D7C4]", icon: "🛡️" },
-    ACCOUNTING: { label: "Contábil", color: "bg-[#DDE8DE] text-[#2D6A4F] border-[#C4D7C4]", icon: "📊" },
-    CLINIC: { label: "Saúde & Clínica", color: "bg-[#E9BEC4] text-[#9B2226] border-red-200", icon: "🏥" },
-    GENERAL: { label: "Multi-Vertical", color: "bg-[#E7EBE6] text-[#2C2E2A] border-[#D0D5CD]", icon: "🌐" },
+    AUTO: { label: "Automotivo", color: "bg-[#FFF3D6] text-[#A15C00] border-[#E8D5A8]", icon: "🚗" },
+    INSURANCE: { label: "Seguros", color: "bg-[#EAF7EF] text-[#247A4A] border-[#C8E5D1]", icon: "🛡️" },
+    ACCOUNTING: { label: "Contábil", color: "bg-[#EAF7EF] text-[#247A4A] border-[#C8E5D1]", icon: "📊" },
+    CLINIC: { label: "Saúde & Clínica", color: "bg-[#FDE8E8] text-[#B42318] border-red-200", icon: "🏥" },
+    GENERAL: { label: "Multi-Vertical", color: "bg-[#F4F4F2] text-[#171717] border-[#D9D9D5]", icon: "🌐" },
   };
 
   const activeSegment = segmentConfig[segmento] || segmentConfig.GENERAL;
 
   return (
     <aside
-      className={`bg-[#F5F5F5] border-r border-[#E0E3DE] flex flex-col justify-between shrink-0 h-screen sticky top-0 select-none transition-all duration-200 ${
+      className={`bg-[#F4F4F2] border-r border-[#E7E7E4] flex flex-col justify-between shrink-0 h-screen sticky top-0 select-none transition-all duration-200 ${
         collapsed ? "w-18" : "w-64"
       }`}
     >
       {/* Header do Menu com Tile Lime WAct */}
       <div>
-        <div className="p-4 border-b border-[#E0E3DE] flex items-center justify-between gap-2">
+        <div className="p-4 border-b border-[#E7E7E4] flex items-center justify-between gap-2">
           <Link href="/dashboard" className="flex items-center gap-3 overflow-hidden">
-            <div className="w-10 h-10 rounded-2xl bg-[#C1ED84] text-[#2C2E2A] flex items-center justify-center font-extrabold text-lg shadow-xs shrink-0 border border-[#B2E372]">
+            <div className="w-10 h-10 rounded-2xl bg-[#FF6A2A] text-[#171717] flex items-center justify-center font-extrabold text-lg shadow-xs shrink-0 border border-[#EB5417]">
               Ω
             </div>
             {!collapsed && (
               <div className="overflow-hidden">
-                <h1 className="font-bold text-sm tracking-tight text-[#2C2E2A] truncate">{orgNome}</h1>
+                <h1 className="font-bold text-sm tracking-tight text-[#171717] truncate">{orgNome}</h1>
                 <span className={`inline-flex items-center gap-1 text-[10px] border px-2 py-0.5 rounded-full font-mono mt-0.5 ${activeSegment.color}`}>
                   <span>{activeSegment.icon}</span> {activeSegment.label}
                 </span>
@@ -93,7 +93,7 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
             type="button"
             onClick={() => setCollapsed(!collapsed)}
             title={collapsed ? "Expandir menu lateral" : "Recolher menu lateral"}
-            className="p-1.5 rounded-lg text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6] transition shrink-0"
+            className="p-1.5 rounded-lg text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2] transition shrink-0"
           >
             {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
@@ -105,7 +105,7 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
           {/* 1. SEÇÃO: OPERAÇÃO & ATENDIMENTO */}
           <div>
             {!collapsed && (
-              <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#7C8472]">
+              <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#8A8A84]">
                 Operação & Atendimento
               </div>
             )}
@@ -117,15 +117,15 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                   collapsed ? "justify-center p-2.5" : "justify-between px-3 py-2"
                 } ${
                   isLinkActive("/dashboard/inbox")
-                    ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                    : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                    ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                    : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <MessageSquare className="w-4 h-4 shrink-0 text-[#7A8E75]" />
+                  <MessageSquare className="w-4 h-4 shrink-0 text-[#FF6A2A]" />
                   {!collapsed && <span>Caixa de Entrada</span>}
                 </div>
-                {!collapsed && <span className="w-2 h-2 rounded-full bg-[#C1ED84] border border-[#7A8E75]" />}
+                {!collapsed && <span className="w-2 h-2 rounded-full bg-[#FF6A2A] border border-[#FF6A2A]" />}
               </Link>
 
               <Link
@@ -135,11 +135,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                   collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                 } ${
                   isLinkActive("/dashboard/crm")
-                    ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                    : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                    ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                    : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                 }`}
               >
-                <Kanban className="w-4 h-4 shrink-0 text-[#7A8E75]" />
+                <Kanban className="w-4 h-4 shrink-0 text-[#FF6A2A]" />
                 {!collapsed && <span>CRM Kanban & Leads</span>}
               </Link>
             </div>
@@ -149,7 +149,7 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
           {segmento === "AUTO" && (
             <div>
               {!collapsed && (
-                <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#8F5D18]">
+                <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#A15C00]">
                   Módulo Automotivo
                 </div>
               )}
@@ -160,11 +160,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                     collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                   } ${
                     isLinkActive("/dashboard/auto/estoque")
-                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                      ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                      : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                   }`}
                 >
-                  <Car className="w-4 h-4 shrink-0 text-[#8F5D18]" />
+                  <Car className="w-4 h-4 shrink-0 text-[#A15C00]" />
                   {!collapsed && <span>Estoque no Pátio</span>}
                 </Link>
 
@@ -174,11 +174,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                     collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                   } ${
                     isLinkActive("/dashboard/auto/avaliacao-usados")
-                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                      ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                      : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                   }`}
                 >
-                  <FileCheck2 className="w-4 h-4 shrink-0 text-[#8F5D18]" />
+                  <FileCheck2 className="w-4 h-4 shrink-0 text-[#A15C00]" />
                   {!collapsed && <span>Avaliação de Troca</span>}
                 </Link>
 
@@ -188,11 +188,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                     collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                   } ${
                     isLinkActive("/dashboard/auto/test-drives")
-                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                      ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                      : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                   }`}
                 >
-                  <CalendarDays className="w-4 h-4 shrink-0 text-[#8F5D18]" />
+                  <CalendarDays className="w-4 h-4 shrink-0 text-[#A15C00]" />
                   {!collapsed && <span>Agenda Test-Drives</span>}
                 </Link>
               </div>
@@ -202,7 +202,7 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
           {segmento === "INSURANCE" && (
             <div>
               {!collapsed && (
-                <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#2D6A4F]">
+                <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#247A4A]">
                   Módulo Seguros
                 </div>
               )}
@@ -213,11 +213,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                     collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                   } ${
                     isLinkActive("/dashboard/seguros/cotacoes")
-                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                      ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                      : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                   }`}
                 >
-                  <Scale className="w-4 h-4 shrink-0 text-[#2D6A4F]" />
+                  <Scale className="w-4 h-4 shrink-0 text-[#247A4A]" />
                   {!collapsed && <span>Multicálculo & Cotações</span>}
                 </Link>
 
@@ -227,11 +227,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                     collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                   } ${
                     isLinkActive("/dashboard/seguros/radar-renovacoes")
-                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                      ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                      : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                   }`}
                 >
-                  <ShieldCheck className="w-4 h-4 shrink-0 text-[#2D6A4F]" />
+                  <ShieldCheck className="w-4 h-4 shrink-0 text-[#247A4A]" />
                   {!collapsed && <span>Radar de Renovações</span>}
                 </Link>
 
@@ -241,11 +241,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                     collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                   } ${
                     isLinkActive("/dashboard/seguros/ligacoes-vapi")
-                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                      ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                      : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                   }`}
                 >
-                  <PhoneCall className="w-4 h-4 shrink-0 text-[#2D6A4F]" />
+                  <PhoneCall className="w-4 h-4 shrink-0 text-[#247A4A]" />
                   {!collapsed && <span>Voz IA & Ligações</span>}
                 </Link>
               </div>
@@ -255,7 +255,7 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
           {segmento === "ACCOUNTING" && (
             <div>
               {!collapsed && (
-                <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#2D6A4F]">
+                <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#247A4A]">
                   Módulo Contábil
                 </div>
               )}
@@ -266,11 +266,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                     collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                   } ${
                     isLinkActive("/dashboard/contabil/guias")
-                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                      ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                      : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                   }`}
                 >
-                  <ReceiptText className="w-4 h-4 shrink-0 text-[#2D6A4F]" />
+                  <ReceiptText className="w-4 h-4 shrink-0 text-[#247A4A]" />
                   {!collapsed && <span>Guias & PIX Instantâneo</span>}
                 </Link>
 
@@ -280,11 +280,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                     collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                   } ${
                     isLinkActive("/dashboard/contabil/auditoria-xml")
-                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                      ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                      : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                   }`}
                 >
-                  <FileText className="w-4 h-4 shrink-0 text-[#2D6A4F]" />
+                  <FileText className="w-4 h-4 shrink-0 text-[#247A4A]" />
                   {!collapsed && <span>Auditoria de XMLs</span>}
                 </Link>
 
@@ -294,11 +294,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                     collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                   } ${
                     isLinkActive("/dashboard/contabil/helpdesk")
-                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                      ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                      : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                   }`}
                 >
-                  <LifeBuoy className="w-4 h-4 shrink-0 text-[#2D6A4F]" />
+                  <LifeBuoy className="w-4 h-4 shrink-0 text-[#247A4A]" />
                   {!collapsed && <span>Helpdesk Fiscal/DP</span>}
                 </Link>
               </div>
@@ -308,7 +308,7 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
           {segmento === "CLINIC" && (
             <div>
               {!collapsed && (
-                <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#9B2226]">
+                <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#B42318]">
                   Módulo Saúde & Clínica
                 </div>
               )}
@@ -319,11 +319,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                     collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                   } ${
                     isLinkActive("/dashboard/clinica/consultas")
-                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                      ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                      : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                   }`}
                 >
-                  <Stethoscope className="w-4 h-4 shrink-0 text-[#9B2226]" />
+                  <Stethoscope className="w-4 h-4 shrink-0 text-[#B42318]" />
                   {!collapsed && <span>Agenda de Consultas</span>}
                 </Link>
 
@@ -333,11 +333,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                     collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                   } ${
                     isLinkActive("/dashboard/clinica/no-show")
-                      ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                      : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                      ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                      : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                   }`}
                 >
-                  <ClockAlert className="w-4 h-4 shrink-0 text-[#9B2226]" />
+                  <ClockAlert className="w-4 h-4 shrink-0 text-[#B42318]" />
                   {!collapsed && <span>Anti No-Show & Lembretes</span>}
                 </Link>
               </div>
@@ -347,7 +347,7 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
           {/* 3. SEÇÃO: MARKETING & ATRIBUIÇÃO */}
           <div>
             {!collapsed && (
-              <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#7C8472]">
+              <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#8A8A84]">
                 Marketing & Atribuição
               </div>
             )}
@@ -359,11 +359,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                   collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                 } ${
                   pathname === "/dashboard"
-                    ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                    : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                    ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                    : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                 }`}
               >
-                <LayoutDashboard className="w-4 h-4 shrink-0 text-[#7A8E75]" />
+                <LayoutDashboard className="w-4 h-4 shrink-0 text-[#FF6A2A]" />
                 {!collapsed && <span>Torre de Atribuição</span>}
               </Link>
 
@@ -374,11 +374,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                   collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                 } ${
                   isLinkActive("/dashboard/campanhas")
-                    ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                    : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                    ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                    : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                 }`}
               >
-                <Target className="w-4 h-4 shrink-0 text-[#7A8E75]" />
+                <Target className="w-4 h-4 shrink-0 text-[#FF6A2A]" />
                 {!collapsed && <span>Campanhas & UTMs</span>}
               </Link>
 
@@ -389,11 +389,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                   collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                 } ${
                   isLinkActive("/dashboard/settings/quiz")
-                    ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                    : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                    ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                    : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                 }`}
               >
-                <FileQuestion className="w-4 h-4 shrink-0 text-[#7A8E75]" />
+                <FileQuestion className="w-4 h-4 shrink-0 text-[#FF6A2A]" />
                 {!collapsed && <span>Editor do Mini-Quiz</span>}
               </Link>
 
@@ -404,11 +404,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                   collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                 } ${
                   isLinkActive("/dashboard/importar")
-                    ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                    : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                    ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                    : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                 }`}
               >
-                <Upload className="w-4 h-4 shrink-0 text-[#7A8E75]" />
+                <Upload className="w-4 h-4 shrink-0 text-[#FF6A2A]" />
                 {!collapsed && <span>Importador CSV / Excel</span>}
               </Link>
             </div>
@@ -417,7 +417,7 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
           {/* 4. SEÇÃO: CANAIS & CONFIGURAÇÕES */}
           <div>
             {!collapsed && (
-              <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#7C8472]">
+              <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-[#8A8A84]">
                 Canais & Configurações
               </div>
             )}
@@ -429,11 +429,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                   collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                 } ${
                   isLinkActive("/dashboard/settings/whatsapp")
-                    ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                    : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                    ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                    : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                 }`}
               >
-                <Phone className="w-4 h-4 shrink-0 text-[#7A8E75]" />
+                <Phone className="w-4 h-4 shrink-0 text-[#FF6A2A]" />
                 {!collapsed && <span>Conectar WhatsApp</span>}
               </Link>
 
@@ -444,11 +444,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                   collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                 } ${
                   isLinkActive("/dashboard/settings/instagram")
-                    ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                    : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                    ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                    : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                 }`}
               >
-                <InstagramIcon className="w-4 h-4 shrink-0 text-[#7A8E75]" />
+                <InstagramIcon className="w-4 h-4 shrink-0 text-[#FF6A2A]" />
                 {!collapsed && <span>Conectar Instagram</span>}
               </Link>
 
@@ -459,11 +459,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                   collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                 } ${
                   isLinkActive("/dashboard/settings/ia-prompts")
-                    ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                    : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                    ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                    : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                 }`}
               >
-                <Sparkles className="w-4 h-4 shrink-0 text-[#7A8E75]" />
+                <Sparkles className="w-4 h-4 shrink-0 text-[#FF6A2A]" />
                 {!collapsed && <span>Regras da IA & Áudio</span>}
               </Link>
 
@@ -474,11 +474,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                   collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                 } ${
                   isLinkActive("/dashboard/settings/equipe")
-                    ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                    : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                    ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                    : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                 }`}
               >
-                <Users className="w-4 h-4 shrink-0 text-[#7A8E75]" />
+                <Users className="w-4 h-4 shrink-0 text-[#FF6A2A]" />
                 {!collapsed && <span>Equipe & Vendedores</span>}
               </Link>
 
@@ -489,11 +489,11 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
                   collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
                 } ${
                   isLinkActive("/dashboard/settings/geral")
-                    ? "bg-white text-[#2C2E2A] font-bold shadow-xs border border-[#E0E3DE]"
-                    : "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6]"
+                    ? "bg-white text-[#171717] font-bold shadow-xs border border-[#E7E7E4]"
+                    : "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2]"
                 }`}
               >
-                <Settings className="w-4 h-4 shrink-0 text-[#7A8E75]" />
+                <Settings className="w-4 h-4 shrink-0 text-[#FF6A2A]" />
                 {!collapsed && <span>Dados da Empresa</span>}
               </Link>
             </div>
@@ -503,27 +503,27 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
       </div>
 
       {/* Rodapé: Card Promocional Sage + Logout */}
-      <div className="p-3 border-t border-[#E0E3DE] space-y-3">
+      <div className="p-3 border-t border-[#E7E7E4] space-y-3">
         {!collapsed && (
-          <div className="p-3.5 rounded-2xl bg-[#7A8E75] text-white space-y-1.5 shadow-xs">
+          <div className="p-3.5 rounded-2xl bg-[#FF6A2A] text-white space-y-1.5 shadow-xs">
             <div className="flex items-center gap-1.5 text-xs font-bold">
               <span>🛡️ No Walls, No Limits</span>
             </div>
-            <p className="text-[11px] text-[#E7EBE6] leading-tight">
+            <p className="text-[11px] text-[#F4F4F2] leading-tight">
               Acesso comercial ilimitado com IA e atribuição reversa.
             </p>
           </div>
         )}
 
-        <div className="flex items-center justify-between p-2 rounded-xl bg-white border border-[#E0E3DE]">
+        <div className="flex items-center justify-between p-2 rounded-xl bg-white border border-[#E7E7E4]">
           <div className="flex items-center gap-2 overflow-hidden">
-            <div className="w-8 h-8 rounded-full bg-[#EAE2CA] text-[#2C2E2A] flex items-center justify-center font-bold text-xs shrink-0 border border-[#D0D5CD]">
+            <div className="w-8 h-8 rounded-full bg-[#F3F3F0] text-[#171717] flex items-center justify-center font-bold text-xs shrink-0 border border-[#D9D9D5]">
               {role.charAt(0)}
             </div>
             {!collapsed && (
               <div className="overflow-hidden">
-                <span className="text-xs font-bold text-[#2C2E2A] block truncate">{role}</span>
-                <span className="text-[10px] text-[#7C8472] block truncate">Operação Ativa</span>
+                <span className="text-xs font-bold text-[#171717] block truncate">{role}</span>
+                <span className="text-[10px] text-[#8A8A84] block truncate">Operação Ativa</span>
               </div>
             )}
           </div>
@@ -531,7 +531,7 @@ export function Sidebar({ segmento, orgNome, role }: SidebarProps) {
           <button
             onClick={handleLogout}
             title="Sair da Conta"
-            className="p-1.5 text-[#63695B] hover:text-red-600 transition rounded-lg hover:bg-red-50"
+            className="p-1.5 text-[#6F6F6F] hover:text-red-600 transition rounded-lg hover:bg-red-50"
           >
             <LogOut className="w-4 h-4" />
           </button>
