@@ -47,13 +47,13 @@ export default function NoShowClinicaPage() {
     <div className="space-y-6 max-w-5xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#E9BEC4] text-[#9B2226] text-xs font-bold border border-red-200 mb-2">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FDE8E8] text-[#B42318] text-xs font-bold border border-red-200 mb-2">
             <ClockAlert className="w-3.5 h-3.5" /> Módulo Clínicas & Saúde
           </div>
-          <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C2E2A]">
+          <h1 className="font-serif text-2xl font-bold tracking-tight text-[#171717]">
             Painel de Prevenção de Faltas (Anti No-Show)
           </h1>
-          <p className="text-xs text-[#63695B] mt-1">
+          <p className="text-xs text-[#6F6F6F] mt-1">
             Régua ativa de confirmação com envio de botões interativos (&ldquo;Confirmar&rdquo; / &ldquo;Remarcar&rdquo;) 24h e 2h antes da consulta.
           </p>
         </div>
@@ -70,22 +70,22 @@ export default function NoShowClinicaPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl bg-white border border-[#E0E3DE] shadow-xs">
-          <div className="text-xs text-[#7C8472] uppercase font-mono mb-1">Faltas Prevenidas</div>
-          <div className="text-2xl font-serif font-bold text-[#2D6A4F]">34 consultas</div>
-          <p className="text-[11px] text-[#63695B] mt-1">Neste mês corrente</p>
+        <div className="p-4 rounded-2xl bg-white border border-[#E7E7E4] shadow-xs">
+          <div className="text-xs text-[#8A8A84] uppercase font-mono mb-1">Faltas Prevenidas</div>
+          <div className="text-2xl font-serif font-bold text-[#247A4A]">34 consultas</div>
+          <p className="text-[11px] text-[#6F6F6F] mt-1">Neste mês corrente</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white border border-[#E0E3DE] shadow-xs">
-          <div className="text-xs text-[#7C8472] uppercase font-mono mb-1">Índice de No-Show</div>
-          <div className="text-2xl font-serif font-bold text-[#2C2E2A]">4.8%</div>
-          <p className="text-[11px] text-[#2D6A4F] mt-1">Redução de 28% para menos de 5%</p>
+        <div className="p-4 rounded-2xl bg-white border border-[#E7E7E4] shadow-xs">
+          <div className="text-xs text-[#8A8A84] uppercase font-mono mb-1">Índice de No-Show</div>
+          <div className="text-2xl font-serif font-bold text-[#171717]">4.8%</div>
+          <p className="text-[11px] text-[#247A4A] mt-1">Redução de 28% para menos de 5%</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white border border-[#E0E3DE] shadow-xs">
-          <div className="text-xs text-[#7C8472] uppercase font-mono mb-1">Receita Preservada</div>
-          <div className="text-2xl font-serif font-bold text-[#8F5D18]">R$ 11.900</div>
-          <p className="text-[11px] text-[#63695B] mt-1">Gabinete médico ocupado</p>
+        <div className="p-4 rounded-2xl bg-white border border-[#E7E7E4] shadow-xs">
+          <div className="text-xs text-[#8A8A84] uppercase font-mono mb-1">Receita Preservada</div>
+          <div className="text-2xl font-serif font-bold text-[#A15C00]">R$ 11.900</div>
+          <p className="text-[11px] text-[#6F6F6F] mt-1">Gabinete médico ocupado</p>
         </div>
       </div>
 
@@ -96,15 +96,15 @@ export default function NoShowClinicaPage() {
         </CardHeader>
 
         <CardContent>
-          <div className="divide-y divide-[#E0E3DE]">
+          <div className="divide-y divide-[#E7E7E4]">
             {pacientesPendentes.map((p) => (
               <div key={p.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-[#2C2E2A]">{p.nome}</span>
-                    <span className="font-mono text-[#63695B] text-[11px]">({p.telefone})</span>
+                    <span className="font-bold text-sm text-[#171717]">{p.nome}</span>
+                    <span className="font-mono text-[#6F6F6F] text-[11px]">({p.telefone})</span>
                   </div>
-                  <p className="text-xs text-[#63695B]">
+                  <p className="text-xs text-[#6F6F6F]">
                     {p.procedimento} • <strong>{p.horario}</strong>
                   </p>
                 </div>
@@ -113,8 +113,8 @@ export default function NoShowClinicaPage() {
                   <span
                     className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-full border ${
                       p.status === "CONFIRMADO_WHATSAPP"
-                        ? "bg-[#DDE8DE] text-[#2D6A4F] border-[#C4D7C4]"
-                        : "bg-[#E1D6AF] text-[#8F5D18] border-[#D0C496]"
+                        ? "bg-[#EAF7EF] text-[#247A4A] border-[#C8E5D1]"
+                        : "bg-[#FFF3D6] text-[#A15C00] border-[#E8D5A8]"
                     }`}
                   >
                     {p.status === "CONFIRMADO_WHATSAPP" ? "✓ Confirmado via WhatsApp" : "⏳ Aguardando Resposta"}
@@ -128,7 +128,7 @@ export default function NoShowClinicaPage() {
                     )})? Digite 1 para Confirmar ou 2 para Remarcar.`}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-3 py-1.5 rounded-xl bg-[#C1ED84] text-[#2C2E2A] font-bold text-xs hover:bg-[#B2E372] transition border border-[#A5DC60]"
+                    className="px-3 py-1.5 rounded-xl bg-[#FF6A2A] text-[#171717] font-bold text-xs hover:bg-[#EB5417] transition border border-[#A5DC60]"
                   >
                     Reenviar
                   </a>
