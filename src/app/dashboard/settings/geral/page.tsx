@@ -63,19 +63,19 @@ export default function SettingsGeralPage() {
   };
 
   if (loading) {
-    return <div className="p-8 text-xs text-[#7C8472]">Carregando configurações...</div>;
+    return <div className="p-8 text-xs text-[#8A8A84]">Carregando configurações...</div>;
   }
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div>
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#E7EBE6] text-[#2C2E2A] text-xs font-medium border border-[#D0D5CD] mb-2">
-          <Building2 className="w-3.5 h-3.5 text-[#7A8E75]" /> Informações da Conta & Tenant
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F4F4F2] text-[#171717] text-xs font-medium border border-[#D9D9D5] mb-2">
+          <Building2 className="w-3.5 h-3.5 text-[#FF6A2A]" /> Informações da Conta & Tenant
         </div>
-        <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C2E2A]">
+        <h1 className="font-serif text-2xl font-bold tracking-tight text-[#171717]">
           Dados da Empresa & Telefones de Contato
         </h1>
-        <p className="text-xs text-[#63695B] mt-1">
+        <p className="text-xs text-[#6F6F6F] mt-1">
           Cadastre as informações institucionais e o número de WhatsApp comercial oficial da sua empresa.
         </p>
       </div>
@@ -91,14 +91,14 @@ export default function SettingsGeralPage() {
 
           <CardContent className="space-y-6">
             {success && (
-              <div className="p-4 rounded-xl bg-[#DDE8DE] border border-[#C4D7C4] text-[#2D6A4F] text-xs flex items-center gap-2">
+              <div className="p-4 rounded-xl bg-[#EAF7EF] border border-[#C8E5D1] text-[#247A4A] text-xs flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 <span>Informações salvas e atualizadas com sucesso!</span>
               </div>
             )}
 
             {error && (
-              <div className="p-4 rounded-xl bg-[#E9BEC4] border border-[#C4D7C4] text-[#9B2226] text-xs flex items-center gap-2">
+              <div className="p-4 rounded-xl bg-[#FDE8E8] border border-[#C8E5D1] text-[#B42318] text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -107,8 +107,8 @@ export default function SettingsGeralPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Nome da Empresa */}
               <div>
-                <label className="block text-xs font-bold text-[#2C2E2A] mb-1.5 flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 text-[#7A8E75]" /> Nome Fantasia / Razão Social
+                <label className="block text-xs font-bold text-[#171717] mb-1.5 flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-[#FF6A2A]" /> Nome Fantasia / Razão Social
                 </label>
                 <input
                   type="text"
@@ -116,28 +116,28 @@ export default function SettingsGeralPage() {
                   value={form.nome}
                   onChange={(e) => setForm({ ...form, nome: e.target.value })}
                   placeholder="Ex: Minha Empresa Ltda"
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#E0E3DE] rounded-xl text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75] transition"
+                  className="w-full px-3.5 py-2.5 bg-white border border-[#E7E7E4] rounded-xl text-xs text-[#171717] focus:outline-none focus:border-[#FF6A2A] transition"
                 />
               </div>
 
               {/* CNPJ */}
               <div>
-                <label className="block text-xs font-bold text-[#2C2E2A] mb-1.5 flex items-center gap-1.5">
-                  <FileText className="w-3.5 h-3.5 text-[#7C8472]" /> CNPJ da Empresa
+                <label className="block text-xs font-bold text-[#171717] mb-1.5 flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-[#8A8A84]" /> CNPJ da Empresa
                 </label>
                 <input
                   type="text"
                   value={form.cnpj}
                   onChange={(e) => setForm({ ...form, cnpj: e.target.value })}
                   placeholder="00.000.000/0001-00"
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#E0E3DE] rounded-xl text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75] transition"
+                  className="w-full px-3.5 py-2.5 bg-white border border-[#E7E7E4] rounded-xl text-xs text-[#171717] focus:outline-none focus:border-[#FF6A2A] transition"
                 />
               </div>
 
               {/* Telefone Comercial */}
               <div>
-                <label className="block text-xs font-bold text-[#2C2E2A] mb-1.5 flex items-center gap-1.5">
-                  <Phone className="w-3.5 h-3.5 text-[#2D6A4F]" /> WhatsApp Comercial (Transbordo Humano)
+                <label className="block text-xs font-bold text-[#171717] mb-1.5 flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-[#247A4A]" /> WhatsApp Comercial (Transbordo Humano)
                 </label>
                 <input
                   type="tel"
@@ -145,57 +145,57 @@ export default function SettingsGeralPage() {
                   value={form.whatsappNumber}
                   onChange={(e) => setForm({ ...form, whatsappNumber: e.target.value })}
                   placeholder="(11) 99999-8888"
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#E0E3DE] rounded-xl text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75] transition"
+                  className="w-full px-3.5 py-2.5 bg-white border border-[#E7E7E4] rounded-xl text-xs text-[#171717] focus:outline-none focus:border-[#FF6A2A] transition"
                 />
-                <p className="text-[10px] text-[#7C8472] mt-1">
+                <p className="text-[10px] text-[#8A8A84] mt-1">
                   Número para onde os leads qualificados serão transferidos quando pedirem atendente humano.
                 </p>
               </div>
 
               {/* Telefone Fixo ou Geral */}
               <div>
-                <label className="block text-xs font-bold text-[#2C2E2A] mb-1.5 flex items-center gap-1.5">
-                  <Phone className="w-3.5 h-3.5 text-[#7C8472]" /> Telefone Geral / Fixo (Opcional)
+                <label className="block text-xs font-bold text-[#171717] mb-1.5 flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-[#8A8A84]" /> Telefone Geral / Fixo (Opcional)
                 </label>
                 <input
                   type="tel"
                   value={form.telefoneComercial}
                   onChange={(e) => setForm({ ...form, telefoneComercial: e.target.value })}
                   placeholder="(11) 3333-4444"
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#E0E3DE] rounded-xl text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75] transition"
+                  className="w-full px-3.5 py-2.5 bg-white border border-[#E7E7E4] rounded-xl text-xs text-[#171717] focus:outline-none focus:border-[#FF6A2A] transition"
                 />
               </div>
 
               {/* E-mail de Notificações */}
               <div>
-                <label className="block text-xs font-bold text-[#2C2E2A] mb-1.5 flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-[#7A8E75]" /> E-mail para Alertas e Resumos
+                <label className="block text-xs font-bold text-[#171717] mb-1.5 flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-[#FF6A2A]" /> E-mail para Alertas e Resumos
                 </label>
                 <input
                   type="email"
                   value={form.emailNotificacoes}
                   onChange={(e) => setForm({ ...form, emailNotificacoes: e.target.value })}
                   placeholder="comercial@empresa.com.br"
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#E0E3DE] rounded-xl text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75] transition"
+                  className="w-full px-3.5 py-2.5 bg-white border border-[#E7E7E4] rounded-xl text-xs text-[#171717] focus:outline-none focus:border-[#FF6A2A] transition"
                 />
               </div>
 
               {/* Instagram Handle */}
               <div>
-                <label className="block text-xs font-bold text-[#2C2E2A] mb-1.5 flex items-center gap-1.5">
-                  <span className="text-[#2C2E2A]">@</span> Usuário do Instagram
+                <label className="block text-xs font-bold text-[#171717] mb-1.5 flex items-center gap-1.5">
+                  <span className="text-[#171717]">@</span> Usuário do Instagram
                 </label>
                 <input
                   type="text"
                   value={form.instagramHandle}
                   onChange={(e) => setForm({ ...form, instagramHandle: e.target.value })}
                   placeholder="@suaempresa"
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#E0E3DE] rounded-xl text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75] transition"
+                  className="w-full px-3.5 py-2.5 bg-white border border-[#E7E7E4] rounded-xl text-xs text-[#171717] focus:outline-none focus:border-[#FF6A2A] transition"
                 />
               </div>
             </div>
 
-            <div className="pt-4 border-t border-[#E0E3DE] flex justify-end">
+            <div className="pt-4 border-t border-[#E7E7E4] flex justify-end">
               <Button type="submit" variant="primary" disabled={saving}>
                 <Save className="w-4 h-4" />
                 {saving ? "Salvando..." : "Salvar Configurações"}
