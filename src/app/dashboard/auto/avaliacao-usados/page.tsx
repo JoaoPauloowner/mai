@@ -85,13 +85,13 @@ export default function AvaliacaoUsadosPage() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div>
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#E1D6AF] text-[#8F5D18] text-xs font-bold border border-[#D0C496] mb-2">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FFF3D6] text-[#A15C00] text-xs font-bold border border-[#E8D5A8] mb-2">
           <Car className="w-3.5 h-3.5" /> Módulo Automotivo Especializado
         </div>
-        <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C2E2A]">
+        <h1 className="font-serif text-2xl font-bold tracking-tight text-[#171717]">
           Avaliação de Usados na Troca (Visão Computacional & FIPE)
         </h1>
-        <p className="text-xs text-[#63695B] mt-1">
+        <p className="text-xs text-[#6F6F6F] mt-1">
           Triagem de seminovos enviados pelo WhatsApp com análise automática de tabela FIPE, margem de concessionária e proposta na hora.
         </p>
       </div>
@@ -109,45 +109,45 @@ export default function AvaliacaoUsadosPage() {
           <form onSubmit={handleSimularAvaliacao} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-bold text-[#2C2E2A] mb-1">Placa do Veículo</label>
+                <label className="block text-xs font-bold text-[#171717] mb-1">Placa do Veículo</label>
                 <input
                   type="text"
                   required
                   placeholder="Ex: BRA2E19"
                   value={placa}
                   onChange={(e) => setPlaca(e.target.value.toUpperCase())}
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#E0E3DE] rounded-xl text-xs font-mono font-bold text-[#2C2E2A] uppercase focus:outline-none focus:border-[#7A8E75]"
+                  className="w-full px-3.5 py-2.5 bg-white border border-[#E7E7E4] rounded-xl text-xs font-mono font-bold text-[#171717] uppercase focus:outline-none focus:border-[#FF6A2A]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#2C2E2A] mb-1">Marca / Modelo / Versão</label>
+                <label className="block text-xs font-bold text-[#171717] mb-1">Marca / Modelo / Versão</label>
                 <input
                   type="text"
                   required
                   placeholder="Ex: Honda Civic EXL 2.0"
                   value={modelo}
                   onChange={(e) => setModelo(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#E0E3DE] rounded-xl text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75]"
+                  className="w-full px-3.5 py-2.5 bg-white border border-[#E7E7E4] rounded-xl text-xs text-[#171717] focus:outline-none focus:border-[#FF6A2A]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#2C2E2A] mb-1">Ano / Quilometragem</label>
+                <label className="block text-xs font-bold text-[#171717] mb-1">Ano / Quilometragem</label>
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     type="text"
                     placeholder="Ano (2021)"
                     value={ano}
                     onChange={(e) => setAno(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-[#E0E3DE] rounded-xl text-xs text-[#2C2E2A]"
+                    className="w-full px-3 py-2 bg-white border border-[#E7E7E4] rounded-xl text-xs text-[#171717]"
                   />
                   <input
                     type="text"
                     placeholder="Km (45000)"
                     value={km}
                     onChange={(e) => setKm(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-[#E0E3DE] rounded-xl text-xs text-[#2C2E2A]"
+                    className="w-full px-3 py-2 bg-white border border-[#E7E7E4] rounded-xl text-xs text-[#171717]"
                   />
                 </div>
               </div>
@@ -155,26 +155,26 @@ export default function AvaliacaoUsadosPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-[#2C2E2A] mb-1">Nome do Cliente</label>
+                <label className="block text-xs font-bold text-[#171717] mb-1">Nome do Cliente</label>
                 <input
                   type="text"
                   required
                   placeholder="Ex: Fernando Silva"
                   value={cliente}
                   onChange={(e) => setCliente(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#E0E3DE] rounded-xl text-xs text-[#2C2E2A]"
+                  className="w-full px-3.5 py-2.5 bg-white border border-[#E7E7E4] rounded-xl text-xs text-[#171717]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#2C2E2A] mb-1">WhatsApp de Contato</label>
+                <label className="block text-xs font-bold text-[#171717] mb-1">WhatsApp de Contato</label>
                 <input
                   type="text"
                   required
                   placeholder="(11) 98888-7777"
                   value={telefone}
                   onChange={(e) => setTelefone(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#E0E3DE] rounded-xl text-xs text-[#2C2E2A]"
+                  className="w-full px-3.5 py-2.5 bg-white border border-[#E7E7E4] rounded-xl text-xs text-[#171717]"
                 />
               </div>
             </div>
@@ -197,22 +197,22 @@ export default function AvaliacaoUsadosPage() {
         </CardHeader>
 
         <CardContent>
-          <div className="divide-y divide-[#E0E3DE]">
+          <div className="divide-y divide-[#E7E7E4]">
             {records.map((rec) => (
               <div key={rec.id} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-[#2C2E2A]">{rec.veiculo}</span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#E7EBE6] text-[#2C2E2A] font-bold">
+                    <span className="font-bold text-sm text-[#171717]">{rec.veiculo}</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#F4F4F2] text-[#171717] font-bold">
                       {rec.ano} • {rec.km}
                     </span>
                   </div>
-                  <p className="text-xs text-[#63695B]">
+                  <p className="text-xs text-[#6F6F6F]">
                     Cliente: <strong>{rec.cliente}</strong> ({rec.telefone})
                   </p>
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {rec.avarias.map((av, i) => (
-                      <span key={i} className="text-[10px] bg-[#F5F5F5] border border-[#E0E3DE] px-2 py-0.5 rounded text-[#2C2E2A]">
+                      <span key={i} className="text-[10px] bg-[#F4F4F2] border border-[#E7E7E4] px-2 py-0.5 rounded text-[#171717]">
                         ✓ {av}
                       </span>
                     ))}
@@ -221,12 +221,12 @@ export default function AvaliacaoUsadosPage() {
 
                 <div className="flex items-center gap-4 text-right shrink-0">
                   <div>
-                    <span className="text-[10px] text-[#7C8472] uppercase font-mono block">Tabela FIPE</span>
-                    <span className="text-xs font-mono text-[#63695B] line-through">
+                    <span className="text-[10px] text-[#8A8A84] uppercase font-mono block">Tabela FIPE</span>
+                    <span className="text-xs font-mono text-[#6F6F6F] line-through">
                       R$ {rec.valorFipe.toLocaleString("pt-BR")}
                     </span>
-                    <span className="text-[10px] text-[#7C8472] uppercase font-mono block mt-1">Oferta Concessionária</span>
-                    <span className="text-base font-bold font-mono text-[#2D6A4F]">
+                    <span className="text-[10px] text-[#8A8A84] uppercase font-mono block mt-1">Oferta Concessionária</span>
+                    <span className="text-base font-bold font-mono text-[#247A4A]">
                       R$ {rec.ofertaSugerida.toLocaleString("pt-BR")}
                     </span>
                   </div>
@@ -239,7 +239,7 @@ export default function AvaliacaoUsadosPage() {
                     )} e temos uma proposta especial de R$ ${rec.ofertaSugerida.toLocaleString("pt-BR")} na troca.`}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-3.5 py-2 rounded-xl bg-[#C1ED84] text-[#2C2E2A] font-bold text-xs hover:bg-[#B2E372] transition border border-[#A5DC60]"
+                    className="px-3.5 py-2 rounded-xl bg-[#FF6A2A] text-[#171717] font-bold text-xs hover:bg-[#EB5417] transition border border-[#A5DC60]"
                   >
                     Enviar Proposta
                   </a>
