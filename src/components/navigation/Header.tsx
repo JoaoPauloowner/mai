@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { DemoSwitcher } from "./DemoSwitcher";
-import { ChevronDown, Download, Calendar } from "lucide-react";
+import { ChevronDown, Download } from "lucide-react";
 
 interface HeaderProps {
   userName: string;
@@ -21,7 +21,20 @@ export function Header({
   orgNome,
   isDemoMode,
 }: HeaderProps) {
-  const [periodo, setPeriodo] = useState<"7d" | "30d" | "3m" | "6m" | "1y">("30d");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const periodo = (searchParams.get("period") as "7d" | "30d" | "3m" | "6m" | "1y") || "30d";
+
+  const setPeriodo = (p: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("period", p);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const handleExport = () => {
+    window.open(`/api/export/leads?period=${periodo}`, "_blank");
+  };
 
   return (
     <header className="h-16 border-b border-[#E0E3DE] bg-[#F5F5F5] px-6 flex items-center justify-between sticky top-0 z-30">
@@ -61,8 +74,12 @@ export function Header({
           <ChevronDown className="w-3.5 h-3.5 text-[#7C8472]" />
         </button>
 
-        {/* Botão Export */}
-        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#E0E3DE] text-xs font-bold text-[#2C2E2A] hover:bg-[#FBFBFB] shadow-sm">
+        {/* Botão Export — abre CSV real */}
+        <button
+          onClick={handleExport}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#E0E3DE] text-xs font-bold text-[#2C2E2A] hover:bg-[#FBFBFB] shadow-sm transition"
+          title={`Exportar leads dos últimos ${periodo}`}
+        >
           <Download className="w-3.5 h-3.5 text-[#7A8E75]" />
           <span>Export</span>
         </button>

@@ -22,38 +22,53 @@ import { MetricCard } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Button } from "@/components/ui/Button";
 
-export default async function DashboardOverviewPage() {
+export default async function DashboardOverviewPage({
+  searchParams,
+}: {
+  searchParams: { period?: string };
+}) {
   const session = await requireAuth();
+
+  // Calcular o intervalo de datas com base no período selecionado
+  const periodMap: Record<string, number> = {
+    "7d": 7, "30d": 30, "3m": 90, "6m": 180, "1y": 365,
+  };
+  const days = periodMap[searchParams.period || "30d"] ?? 30;
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
 
   // Carrega leads e métricas reais do banco de dados
   const leads = await prisma.lead.findMany({
-    where: { organizationId: session.organizationId },
+    where: { organizationId: session.organizationId, createdAt: { gte: since } },
     orderBy: { createdAt: "desc" },
     take: 10,
   });
 
   const totalLeads = await prisma.lead.count({
-    where: { organizationId: session.organizationId },
+    where: { organizationId: session.organizationId, createdAt: { gte: since } },
   });
 
   const leadsQualificados = await prisma.lead.count({
     where: {
       organizationId: session.organizationId,
+      createdAt: { gte: since },
       status: { in: ["QUALIFICADO", "AGENDADO", "GANHO"] },
     },
   });
 
   const appointmentsCount = await prisma.appointment.count({
-    where: { organizationId: session.organizationId },
+    where: { organizationId: session.organizationId, createdAt: { gte: since } },
   });
 
   const leadsGanhos = await prisma.lead.findMany({
     where: {
       organizationId: session.organizationId,
+      createdAt: { gte: since },
       status: "GANHO",
     },
     select: { valorNegocio: true },
   });
+
 
   const receitaTotal = leadsGanhos.reduce(
     (acc, item) => acc + (item.valorNegocio || 0),
