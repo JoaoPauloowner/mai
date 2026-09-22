@@ -13,8 +13,6 @@ const nextConfig: NextConfig = {
       { source: "/mai/dashboard/:path*", destination: "/dashboard/:path*" },
       { source: "/wact/dashboard", destination: "/dashboard" },
       { source: "/wact/dashboard/:path*", destination: "/dashboard/:path*" },
-      { source: "/shoppers/dashboard", destination: "/shoppers/dashboard" },
-      { source: "/shoppers/dashboard/:path*", destination: "/shoppers/dashboard/:path*" },
     ];
   },
 };
