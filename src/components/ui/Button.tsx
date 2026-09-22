@@ -14,12 +14,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       "inline-flex items-center justify-center font-bold transition-all select-none rounded-xl disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-2 focus:ring-offset-2";
 
     const variantStyles = {
-      primary: "bg-[#C1ED84] hover:bg-[#B2E372] text-[#2C2E2A] shadow-sm focus:ring-[#C1ED84]",
-      secondary: "bg-white hover:bg-[#F7F7F6] text-[#2C2E2A] border border-[#E0E3DE] shadow-sm focus:ring-[#7A8E75]",
-      outline: "border border-[#E0E3DE] text-[#2C2E2A] hover:bg-[#E7EBE6] focus:ring-[#7A8E75]",
-      ghost: "text-[#63695B] hover:text-[#2C2E2A] hover:bg-[#E7EBE6] focus:ring-[#7A8E75]",
-      danger: "bg-[#E9BEC4] text-[#9B2226] hover:bg-red-200 border border-red-200 focus:ring-red-500",
-      sage: "bg-[#7A8E75] hover:bg-[#63695B] text-white shadow-sm focus:ring-[#7A8E75]",
+      primary: "bg-[#FF6A2A] hover:bg-[#EB5417] text-[#171717] shadow-sm focus:ring-[#FF6A2A]",
+      secondary: "bg-white hover:bg-[#F7F7F6] text-[#171717] border border-[#E7E7E4] shadow-sm focus:ring-[#FF6A2A]",
+      outline: "border border-[#E7E7E4] text-[#171717] hover:bg-[#F4F4F2] focus:ring-[#FF6A2A]",
+      ghost: "text-[#6F6F6F] hover:text-[#171717] hover:bg-[#F4F4F2] focus:ring-[#FF6A2A]",
+      danger: "bg-[#FDE8E8] text-[#B42318] hover:bg-red-200 border border-red-200 focus:ring-red-500",
+      sage: "bg-[#FF6A2A] hover:bg-[#6F6F6F] text-white shadow-sm focus:ring-[#FF6A2A]",
     };
 
     const sizeStyles = {
