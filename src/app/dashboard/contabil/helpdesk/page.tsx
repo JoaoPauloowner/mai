@@ -61,37 +61,37 @@ export default function HelpdeskContabilPage() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div>
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#DDE8DE] text-[#2D6A4F] text-xs font-bold border border-[#C4D7C4] mb-2">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EAF7EF] text-[#247A4A] text-xs font-bold border border-[#C8E5D1] mb-2">
           <LifeBuoy className="w-3.5 h-3.5" /> Módulo Contábil & Fiscal
         </div>
-        <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C2E2A]">
+        <h1 className="font-serif text-2xl font-bold tracking-tight text-[#171717]">
           Helpdesk Contábil Departamental
         </h1>
-        <p className="text-xs text-[#63695B] mt-1">
+        <p className="text-xs text-[#6F6F6F] mt-1">
           Triagem e roteamento inteligente de solicitações do cliente para os departamentos Fiscal, DP, Societário ou Contábil.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl bg-white border border-[#E0E3DE] shadow-xs">
-          <div className="text-[10px] text-[#7C8472] uppercase font-mono mb-1">Fiscal / Tributário</div>
-          <div className="text-2xl font-serif font-bold text-[#2C2E2A]">12 chamados</div>
-          <p className="text-[11px] text-[#2D6A4F] mt-1">SLA Médio: 18 min</p>
+        <div className="p-4 rounded-2xl bg-white border border-[#E7E7E4] shadow-xs">
+          <div className="text-[10px] text-[#8A8A84] uppercase font-mono mb-1">Fiscal / Tributário</div>
+          <div className="text-2xl font-serif font-bold text-[#171717]">12 chamados</div>
+          <p className="text-[11px] text-[#247A4A] mt-1">SLA Médio: 18 min</p>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-[#E0E3DE] shadow-xs">
-          <div className="text-[10px] text-[#7C8472] uppercase font-mono mb-1">Dep. Pessoal (DP)</div>
-          <div className="text-2xl font-serif font-bold text-[#2C2E2A]">8 chamados</div>
-          <p className="text-[11px] text-[#2D6A4F] mt-1">Admissões & Rescisões</p>
+        <div className="p-4 rounded-2xl bg-white border border-[#E7E7E4] shadow-xs">
+          <div className="text-[10px] text-[#8A8A84] uppercase font-mono mb-1">Dep. Pessoal (DP)</div>
+          <div className="text-2xl font-serif font-bold text-[#171717]">8 chamados</div>
+          <p className="text-[11px] text-[#247A4A] mt-1">Admissões & Rescisões</p>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-[#E0E3DE] shadow-xs">
-          <div className="text-[10px] text-[#7C8472] uppercase font-mono mb-1">Societário / Legal</div>
-          <div className="text-2xl font-serif font-bold text-[#2C2E2A]">4 chamados</div>
-          <p className="text-[11px] text-[#63695B] mt-1">JUCESP & Alvarás</p>
+        <div className="p-4 rounded-2xl bg-white border border-[#E7E7E4] shadow-xs">
+          <div className="text-[10px] text-[#8A8A84] uppercase font-mono mb-1">Societário / Legal</div>
+          <div className="text-2xl font-serif font-bold text-[#171717]">4 chamados</div>
+          <p className="text-[11px] text-[#6F6F6F] mt-1">JUCESP & Alvarás</p>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-[#E0E3DE] shadow-xs">
-          <div className="text-[10px] text-[#7C8472] uppercase font-mono mb-1">Satisfação Clientes</div>
-          <div className="text-2xl font-serif font-bold text-[#2D6A4F]">98.4%</div>
-          <p className="text-[11px] text-[#2D6A4F] mt-1">Avaliações WhatsApp 5★</p>
+        <div className="p-4 rounded-2xl bg-white border border-[#E7E7E4] shadow-xs">
+          <div className="text-[10px] text-[#8A8A84] uppercase font-mono mb-1">Satisfação Clientes</div>
+          <div className="text-2xl font-serif font-bold text-[#247A4A]">98.4%</div>
+          <p className="text-[11px] text-[#247A4A] mt-1">Avaliações WhatsApp 5★</p>
         </div>
       </div>
 
@@ -102,35 +102,35 @@ export default function HelpdeskContabilPage() {
         </CardHeader>
 
         <CardContent>
-          <div className="divide-y divide-[#E0E3DE]">
+          <div className="divide-y divide-[#E7E7E4]">
             {chamados.map((c) => (
               <div key={c.id} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] font-bold bg-[#E7EBE6] text-[#2C2E2A] px-2 py-0.5 rounded border border-[#D0D5CD]">
+                    <span className="font-mono text-[10px] font-bold bg-[#F4F4F2] text-[#171717] px-2 py-0.5 rounded border border-[#D9D9D5]">
                       {c.departamento}
                     </span>
-                    <span className="font-bold text-sm text-[#2C2E2A]">{c.cliente}</span>
+                    <span className="font-bold text-sm text-[#171717]">{c.cliente}</span>
                     <span
                       className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold border ${
                         c.status === "RESOLVIDO"
-                          ? "bg-[#DDE8DE] text-[#2D6A4F] border-[#C4D7C4]"
+                          ? "bg-[#EAF7EF] text-[#247A4A] border-[#C8E5D1]"
                           : c.status === "EM_ATENDIMENTO"
-                          ? "bg-[#C1ED84] text-[#2C2E2A] border-[#A5DC60]"
-                          : "bg-[#E1D6AF] text-[#8F5D18] border-[#D0C496]"
+                          ? "bg-[#FF6A2A] text-[#171717] border-[#A5DC60]"
+                          : "bg-[#FFF3D6] text-[#A15C00] border-[#E8D5A8]"
                       }`}
                     >
                       {c.status === "RESOLVIDO" ? "✓ Resolvido" : c.status === "EM_ATENDIMENTO" ? "Em Atendimento" : "Aguardando"}
                     </span>
                   </div>
-                  <p className="font-bold text-xs text-[#2C2E2A]">{c.assunto}</p>
-                  <p className="text-[#63695B] text-xs italic">&ldquo;{c.ultimaMensagem}&rdquo;</p>
+                  <p className="font-bold text-xs text-[#171717]">{c.assunto}</p>
+                  <p className="text-[#6F6F6F] text-xs italic">&ldquo;{c.ultimaMensagem}&rdquo;</p>
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
                   <div className="text-right text-xs">
-                    <span className="text-[10px] text-[#7C8472] uppercase font-mono block">Tempo na Fila</span>
-                    <span className="font-mono font-bold text-[#2C2E2A]">{c.tempoEspera}</span>
+                    <span className="text-[10px] text-[#8A8A84] uppercase font-mono block">Tempo na Fila</span>
+                    <span className="font-mono font-bold text-[#171717]">{c.tempoEspera}</span>
                   </div>
 
                   {c.status !== "RESOLVIDO" && (
