@@ -149,76 +149,85 @@ export default async function DashboardOverviewPage({
         />
       </div>
 
-      {/* 2. CONVERSION FUNNEL (BARRA HORIZONTAL WACT COM ÚLTIMA EM LIME) */}
-      <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] shadow-xs space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h3 className="text-base font-bold text-[#2C2E2A]">Funil de Conversão & Atribuição</h3>
-            <p className="text-xs text-[#63695B]">Do clique no anúncio à venda fechada no WhatsApp</p>
-          </div>
 
-          <div className="flex items-center gap-2 text-xs">
-            <span className="px-3 py-1 rounded-lg bg-[#F5F5F5] border border-[#E0E3DE] font-semibold text-[#63695B]">
-              Período: Últimos 30 dias
-            </span>
-          </div>
-        </div>
-
-        {/* Funil de Barras Horizontais */}
-        <div className="space-y-4 pt-2">
-          
-          <div className="grid grid-cols-12 items-center gap-4 text-xs font-medium">
-            <span className="col-span-2 text-[#63695B] font-semibold">1. Cliques nos Anúncios</span>
-            <span className="col-span-1 text-[#7C8472] font-mono">100%</span>
-            <span className="col-span-1 font-bold font-mono text-[#2C2E2A]">2,400</span>
-            <div className="col-span-8 flex items-center gap-3">
-              <div className="flex-1 h-3.5 bg-[#E7EBE6] rounded-full overflow-hidden">
-                <div className="h-full bg-[#B5BBAE] w-full rounded-full" />
+      {/* 2. PIPELINE REAL — DADOS 100% DO BANCO */}
+      {(() => {
+        const etapas = [
+          {
+            label: "Leads Recebidos",
+            value: totalLeads,
+            note: "via WhatsApp ou Quiz",
+            lime: false,
+          },
+          {
+            label: "Qualificados pela IA",
+            value: leadsQualificados,
+            note: `${totalLeads > 0 ? Math.round((leadsQualificados / totalLeads) * 100) : 0}% do total`,
+            lime: false,
+          },
+          {
+            label: "Agendamentos",
+            value: appointmentsCount,
+            note: "reuniões ou visitas",
+            lime: false,
+          },
+          {
+            label: "Vendas Fechadas",
+            value: leadsGanhos.length,
+            note: "status GANHO no CRM",
+            lime: true,
+          },
+        ];
+        const max = Math.max(totalLeads, 1);
+        return (
+          <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] shadow-xs space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-[#2C2E2A]">Pipeline de Conversão</h3>
+                <p className="text-xs text-[#63695B]">
+                  Dados reais · {searchParams.period || "30d"}
+                </p>
               </div>
+              <span className="text-[10px] font-mono text-[#7A8E75] uppercase tracking-wider px-2.5 py-1 bg-[#E7EBE6] rounded-lg border border-[#D0D5CD]">
+                Fonte: CRM
+              </span>
             </div>
-          </div>
 
-          <div className="grid grid-cols-12 items-center gap-4 text-xs font-medium">
-            <span className="col-span-2 text-[#63695B] font-semibold">2. Inbound WhatsApp</span>
-            <span className="col-span-1 text-[#7C8472] font-mono">45%</span>
-            <span className="col-span-1 font-bold font-mono text-[#2C2E2A]">320</span>
-            <div className="col-span-8 flex items-center gap-3">
-              <div className="w-[45%] h-3.5 bg-[#E7EBE6] rounded-full overflow-hidden">
-                <div className="h-full bg-[#B5BBAE] w-full rounded-full" />
-              </div>
-              <span className="text-[11px] font-mono text-[#7C8472]">Speed-to-lead &lt; 30s</span>
+            <div className="space-y-3">
+              {etapas.map((e, i) => {
+                const pct = Math.round((e.value / max) * 100);
+                return (
+                  <div key={e.label} className="flex items-center gap-4">
+                    <div className="w-5 text-[11px] font-mono text-[#7C8472]">{i + 1}</div>
+                    <div className="w-44 shrink-0">
+                      <div className={`text-xs font-bold ${e.lime ? "text-[#2C2E2A]" : "text-[#63695B]"}`}>{e.label}</div>
+                      <div className="text-[10px] text-[#7C8472]">{e.note}</div>
+                    </div>
+                    <div className="flex-1 h-3 bg-[#E7EBE6] rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${e.lime ? "bg-[#C1ED84]" : "bg-[#C8CEC4]"}`}
+                        style={{ width: `${Math.max(pct, e.value > 0 ? 2 : 0)}%` }}
+                      />
+                    </div>
+                    <div className={`w-10 text-right text-sm font-extrabold font-mono ${e.lime ? "text-[#2D6A4F]" : "text-[#2C2E2A]"}`}>
+                      {e.value}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          </div>
 
-          <div className="grid grid-cols-12 items-center gap-4 text-xs font-medium">
-            <span className="col-span-2 text-[#63695B] font-semibold">3. Triados no Quiz (IA)</span>
-            <span className="col-span-1 text-[#7C8472] font-mono">25%</span>
-            <span className="col-span-1 font-bold font-mono text-[#2C2E2A]">{leadsQualificados || 180}</span>
-            <div className="col-span-8 flex items-center gap-3">
-              <div className="w-[25%] h-3.5 bg-[#E7EBE6] rounded-full overflow-hidden">
-                <div className="h-full bg-[#B5BBAE] w-full rounded-full" />
-              </div>
-              <span className="text-[11px] font-mono text-[#8F5D18] font-semibold">Score 70+ Confirmado</span>
-            </div>
+            {totalLeads === 0 && (
+              <p className="text-center text-xs text-[#7C8472] border-t border-[#E0E3DE] pt-4 mt-2">
+                Nenhum lead neste período. Os dados aparecerão conforme chegarem via WhatsApp ou Quiz.
+              </p>
+            )}
           </div>
-
-          {/* Linha Final em Lime */}
-          <div className="grid grid-cols-12 items-center gap-4 text-xs font-medium">
-            <span className="col-span-2 text-[#2C2E2A] font-bold">4. Vendas Fechadas (CAPI)</span>
-            <span className="col-span-1 text-[#2C2E2A] font-bold font-mono">10%</span>
-            <span className="col-span-1 font-extrabold font-mono text-[#2C2E2A]">{leadsGanhos.length || 24}</span>
-            <div className="col-span-8 flex items-center gap-3">
-              <div className="w-[12%] h-3.5 bg-[#E7EBE6] rounded-full overflow-hidden">
-                <div className="h-full bg-[#C1ED84] w-full rounded-full border border-[#B2E372]" />
-              </div>
-              <span className="text-[11px] font-mono text-[#2D6A4F] font-bold">✓ Conversão Reversa Enviada ao Ads</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
+        );
+      })()}
 
       {/* 3. RECENT ACTIVITY & LEADS DA ORGANIZAÇÃO */}
+
       <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div>
