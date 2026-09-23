@@ -81,18 +81,40 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   return vector;
 }
 
-// Busca Semântica RAG multi-tenant no banco de dados
+// Busca Semântica RAG multi-tenant no banco de dados (Híbrido: Native PostgreSQL pgvector + In-Memory Fallback)
 export async function searchKnowledgeBase({
   organizationId,
   query,
   limit = 4,
+  threshold = 0.1,
 }: {
   organizationId: string;
   query: string;
   limit?: number;
+  threshold?: number;
 }): Promise<Array<{ id: string; documento: string; conteudo: string; score: number }>> {
   const queryEmbedding = await generateEmbedding(query);
 
+  // 1. Tentar busca nativa no PostgreSQL (pgvector via Stored Procedure)
+  try {
+    const vectorString = `[${queryEmbedding.join(",")}]`;
+    const pgResults = await prisma.$queryRaw<
+      Array<{ id: string; documento_titulo: string; conteudo_texto: string; similarity: number }>
+    >`SELECT * FROM match_knowledge_chunks(${vectorString}::vector, ${threshold}, ${limit}, ${organizationId})`;
+
+    if (pgResults && pgResults.length > 0) {
+      return pgResults.map((r) => ({
+        id: r.id,
+        documento: r.documento_titulo,
+        conteudo: r.conteudo_texto,
+        score: Number(r.similarity),
+      }));
+    }
+  } catch {
+    // Caso esteja rodando em SQLite local ou o banco ainda não tenha a stored procedure
+  }
+
+  // 2. Fallback: Busca e cálculo de similaridade de cosseno em memória (compatível com SQLite)
   const chunks = await prisma.knowledgeChunk.findMany({
     where: { organizationId },
     include: { document: true },
@@ -100,7 +122,6 @@ export async function searchKnowledgeBase({
 
   if (chunks.length === 0) return [];
 
-  // Calcular score de similaridade
   const scored = chunks
     .map((chunk) => {
       let embedding: number[] = [];
@@ -118,7 +139,7 @@ export async function searchKnowledgeBase({
         score,
       };
     })
-    .filter((item) => item.score > 0.1) // Filtrar ruídos
+    .filter((item) => item.score > threshold)
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 
