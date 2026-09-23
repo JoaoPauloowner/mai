@@ -1,9 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { Bot, Sparkles, Sliders, Volume2, Save, CheckCircle2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Bot, Save, CheckCircle2, Upload, Trash2, FileText, Plus } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+
+interface KnowledgeDoc {
+  id: string;
+  titulo: string;
+  tipo: string;
+  tamanhoBytes: number;
+  totalChunks: number;
+  createdAt: string;
+}
 
 export default function SettingsIaPromptsPage() {
   const [nomeAgente, setNomeAgente] = useState("Aria");
@@ -13,68 +23,228 @@ export default function SettingsIaPromptsPage() {
   const [scoreTransbordo, setScoreTransbordo] = useState(80);
   const [saved, setSaved] = useState(false);
 
-  const handleSave = (e: React.FormEvent) => {
+  // RAG / Knowledge Base State
+  const [documents, setDocuments] = useState<KnowledgeDoc[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(true);
+  const [showAddDoc, setShowAddDoc] = useState(false);
+  const [docTitulo, setDocTitulo] = useState("");
+  const [docTipo, setDocTipo] = useState("MANUAL");
+  const [docConteudo, setDocConteudo] = useState("");
+  const [savingDoc, setSavingDoc] = useState(false);
+
+  const fetchDocs = async () => {
+    try {
+      const res = await fetch("/api/knowledge");
+      const data = await res.json();
+      if (data.documents) {
+        setDocuments(data.documents);
+      }
+    } catch (e) {
+      console.error("Erro ao carregar base de conhecimento", e);
+    } finally {
+      setLoadingDocs(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDocs();
+  }, []);
+
+  const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
 
+  const handleAddDocument = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!docTitulo || !docConteudo.trim()) return;
+
+    setSavingDoc(true);
+    try {
+      const res = await fetch("/api/knowledge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          titulo: docTitulo,
+          tipo: docTipo,
+          conteudoTexto: docConteudo,
+        }),
+      });
+
+      if (res.ok) {
+        setDocTitulo("");
+        setDocConteudo("");
+        setShowAddDoc(false);
+        fetchDocs();
+      }
+    } catch (e) {
+      console.error("Erro ao adicionar documento", e);
+    } finally {
+      setSavingDoc(false);
+    }
+  };
+
+  const handleDeleteDocument = async (id: string) => {
+    if (!confirm("Deseja realmente remover este documento da Base de Conhecimento?")) return;
+
+    try {
+      const res = await fetch(`/api/knowledge?id=${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setDocuments((prev) => prev.filter((d) => d.id !== id));
+      }
+    } catch (e) {
+      console.error("Erro ao remover documento", e);
+    }
+  };
+
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 max-w-4xl">
       <div>
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#E7EBE6] text-[#2C2E2A] text-xs font-medium border border-[#D0D5CD] mb-2">
-          <Sparkles className="w-3.5 h-3.5 text-[#7A8E75]" /> Regras de Atendimento Inteligente
-        </div>
-        <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C2E2A]">
-          Inteligência Artificial, Tom de Voz & Presença
+        <h1 className="text-xl font-bold text-neutral-900">
+          Inteligência Artificial & Base de Conhecimento (RAG)
         </h1>
-        <p className="text-xs text-[#63695B] mt-1">
-          Personalize a identidade da IA, a velocidade de simulação humana (&ldquo;Digitando...&rdquo; e &ldquo;Gravando áudio...&rdquo;) e os gatilhos de transbordo.
+        <p className="text-xs text-neutral-500 mt-1">
+          Configure a identidade da IA e alimente a base de conhecimento dinâmica (PDFs, regras e tabelas de preços) para consulta em tempo real.
         </p>
       </div>
 
-      <form onSubmit={handleSave}>
+      {/* 1. Base de Conhecimento Dinâmica (RAG) */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Base de Conhecimento do Negócio (RAG)</CardTitle>
+            <CardDescription>
+              Documentos indexados com busca semântica para responder dúvidas reais de leads.
+            </CardDescription>
+          </div>
+          <Button variant="secondary" size="sm" onClick={() => setShowAddDoc(!showAddDoc)}>
+            <Plus className="w-3.5 h-3.5" />
+            <span>Adicionar Conteúdo</span>
+          </Button>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          {showAddDoc && (
+            <form onSubmit={handleAddDocument} className="p-4 border border-neutral-300 rounded bg-neutral-50 space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Input
+                  id="docTitulo"
+                  label="Título do Documento ou Tabela"
+                  required
+                  placeholder="Ex: Tabela de Preços e Prazos 2026"
+                  value={docTitulo}
+                  onChange={(e) => setDocTitulo(e.target.value)}
+                />
+                <div>
+                  <label className="block text-xs font-medium text-neutral-700 mb-1">Tipo de Conteúdo</label>
+                  <select
+                    value={docTipo}
+                    onChange={(e) => setDocTipo(e.target.value)}
+                    className="w-full rounded border border-neutral-300 bg-white py-1.5 px-3 text-xs text-neutral-900"
+                  >
+                    <option value="MANUAL">Manual / Regras de Negócio</option>
+                    <option value="TABELA_PRECOS">Tabela de Preços / Catálogo</option>
+                    <option value="FAQ">Perguntas Frequentes (FAQ)</option>
+                    <option value="ESTOQUE">Estoque / Disponibilidade</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
+                  Texto Completo para Vetorização (Cole aqui o conteúdo do PDF/Tabela)
+                </label>
+                <textarea
+                  required
+                  rows={5}
+                  value={docConteudo}
+                  onChange={(e) => setDocConteudo(e.target.value)}
+                  placeholder="Cole aqui o conteúdo técnico, regras de parcelamento, itens inclusos, coberturas ou horários..."
+                  className="w-full rounded border border-neutral-300 bg-white p-3 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="ghost" size="sm" onClick={() => setShowAddDoc(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" variant="primary" size="sm" disabled={savingDoc} isLoading={savingDoc}>
+                  Vetorizar e Salvar
+                </Button>
+              </div>
+            </form>
+          )}
+
+          {loadingDocs ? (
+            <div className="text-xs text-neutral-500 py-4">Carregando base de conhecimento...</div>
+          ) : documents.length === 0 ? (
+            <div className="text-center py-6 text-xs text-neutral-500 border border-dashed border-neutral-300 rounded">
+              Nenhum documento cadastrado ainda. Adicione tabelas de preços, estoque ou manuais para a IA responder com precisão.
+            </div>
+          ) : (
+            <div className="divide-y divide-neutral-200 border border-neutral-200 rounded">
+              {documents.map((doc) => (
+                <div key={doc.id} className="p-3 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-4 h-4 text-neutral-600" />
+                    <div>
+                      <div className="font-semibold text-neutral-900">{doc.titulo}</div>
+                      <div className="text-[11px] text-neutral-500">
+                        {doc.tipo} • {doc.totalChunks} chunks vetorizados • {new Date(doc.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteDocument(doc.id)}
+                    className="p-1.5 text-neutral-400 hover:text-red-600 transition"
+                    title="Excluir documento"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 2. Personalidade & Resposta da IA */}
+      <form onSubmit={handleSaveSettings}>
         <Card>
           <CardHeader>
-            <CardTitle>Configurações de Personalidade & Conduta</CardTitle>
+            <CardTitle>Comportamento e Atendimento do SDR</CardTitle>
             <CardDescription>
               Ajuste como a assistente virtual interage com os leads no WhatsApp e Instagram Direct.
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4">
             {saved && (
-              <div className="p-4 rounded-xl bg-[#DDE8DE] border border-[#C4D7C4] text-[#2D6A4F] text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 shrink-0" /> Configurações de IA salvas com sucesso!
+              <div className="p-3 rounded bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>Regras salvas com sucesso!</span>
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Nome do Agente */}
-              <div>
-                <label className="block text-xs font-bold text-[#2C2E2A] mb-1.5">
-                  Nome do Assistente Virtual
-                </label>
-                <input
-                  type="text"
-                  value={nomeAgente}
-                  onChange={(e) => setNomeAgente(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#E0E3DE] rounded-xl text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75] focus:ring-1 focus:ring-[#7A8E75] transition"
-                />
-                <p className="text-[10px] text-[#7C8472] mt-1">
-                  Ex: &ldquo;Olá, sou a Aria, especialista da empresa...&rdquo;
-                </p>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                id="nomeAgente"
+                label="Nome do Assistente Virtual"
+                value={nomeAgente}
+                onChange={(e) => setNomeAgente(e.target.value)}
+                placeholder="Ex: Aria"
+              />
 
-              {/* Tom de Voz */}
               <div>
-                <label className="block text-xs font-bold text-[#2C2E2A] mb-1.5">
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
                   Tom de Voz Predominante
                 </label>
                 <select
                   value={tomVoz}
                   onChange={(e) => setTomVoz(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#E0E3DE] rounded-xl text-xs text-[#2C2E2A] focus:outline-none focus:border-[#7A8E75] focus:ring-1 focus:ring-[#7A8E75] transition"
+                  className="w-full rounded border border-neutral-300 bg-white py-1.5 px-3 text-xs text-neutral-900"
                 >
                   <option value="consultivo">Consultivo & Especialista (Recomendado)</option>
                   <option value="persuasivo">Comercial & Foco em Fechamento</option>
@@ -84,29 +254,28 @@ export default function SettingsIaPromptsPage() {
               </div>
             </div>
 
-            {/* Simulação de Presença Humana */}
-            <div className="p-4 rounded-2xl bg-[#F5F5F5] border border-[#E0E3DE] space-y-4">
+            <div className="p-4 rounded border border-neutral-200 space-y-3 bg-neutral-50">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-xs font-bold text-[#2C2E2A] flex items-center gap-1.5">
-                    <Volume2 className="w-4 h-4 text-[#7A8E75]" /> Simulação de Áudio de Voz (PTT Humanizado)
-                  </h4>
-                  <p className="text-[11px] text-[#63695B]">
-                    A IA envia áudios gravados na hora com status &ldquo;Gravando áudio...&rdquo; para aumentar a conversão.
-                  </p>
+                  <div className="text-xs font-semibold text-neutral-900">
+                    Simulação de Áudio de Voz (PTT Humanizado)
+                  </div>
+                  <div className="text-[11px] text-neutral-500">
+                    A IA envia áudios gravados na hora com status de gravação ativo.
+                  </div>
                 </div>
                 <input
                   type="checkbox"
                   checked={enviarAudioPtt}
                   onChange={(e) => setEnviarAudioPtt(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#7A8E75] focus:ring-0 accent-[#7A8E75] cursor-pointer"
+                  className="w-4 h-4 rounded text-neutral-900 cursor-pointer"
                 />
               </div>
 
               <div>
-                <div className="flex justify-between text-xs text-[#2C2E2A] font-medium mb-1">
-                  <span>Delay Médio de Digitação / Gravação</span>
-                  <span className="font-mono text-[#2D6A4F] font-bold">{delaySegundos} segundos</span>
+                <div className="flex justify-between text-xs text-neutral-700 mb-1">
+                  <span>Delay de Digitação / Gravação</span>
+                  <span className="font-mono font-bold text-neutral-900">{delaySegundos}s</span>
                 </div>
                 <input
                   type="range"
@@ -114,32 +283,15 @@ export default function SettingsIaPromptsPage() {
                   max={25}
                   value={delaySegundos}
                   onChange={(e) => setDelaySegundos(Number(e.target.value))}
-                  className="w-full h-1.5 bg-[#E0E3DE] rounded-lg appearance-none cursor-pointer accent-[#7A8E75]"
+                  className="w-full accent-neutral-900 cursor-pointer"
                 />
-                <div className="flex justify-between text-[10px] text-[#7C8472] font-mono mt-1">
-                  <span>3s (Instantâneo)</span>
-                  <span>12s (Natural)</span>
-                  <span>25s (Ultra Humanizado)</span>
-                </div>
               </div>
             </div>
 
-            {/* Transbordo Humano */}
-            <div className="space-y-2">
-              <label className="block text-xs font-bold text-[#2C2E2A]">
-                Gatilho de Transbordo para Vendedor Humano
-              </label>
-              <div className="p-3.5 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE] text-xs text-[#2C2E2A] flex items-center justify-between">
-                <span>Transferir automaticamente para a equipe comercial quando o Lead Score atingir:</span>
-                <span className="font-mono font-bold text-[#2D6A4F] text-sm bg-white px-2.5 py-1 rounded-lg border border-[#E0E3DE]">
-                  Score &gt;= {scoreTransbordo}
-                </span>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-[#E0E3DE] flex justify-end">
+            <div className="flex justify-end pt-3 border-t border-neutral-200">
               <Button type="submit" variant="primary">
-                <Save className="w-4 h-4" /> Salvar Regras de IA
+                <Save className="w-4 h-4" />
+                <span>Salvar Configurações</span>
               </Button>
             </div>
           </CardContent>

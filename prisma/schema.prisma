@@ -58,6 +58,8 @@ model Organization {
   insurancePolicies InsurancePolicy[]
   taxGuides       TaxGuide[]
   auditLogs       AuditLog[]
+  knowledgeDocuments KnowledgeDocument[]
+  knowledgeChunks    KnowledgeChunk[]
 }
 
 // ──────────────────────────────────────────────
@@ -254,4 +256,40 @@ model AuditLog {
   user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([organizationId])
+}
+
+// ──────────────────────────────────────────────
+// Base de Conhecimento Dinâmica & RAG
+// ──────────────────────────────────────────────
+model KnowledgeDocument {
+  id             String           @id @default(cuid())
+  organizationId String
+  titulo         String           // Nome do documento (ex: Manual_Estoque_2026.pdf)
+  tipo           String           // PDF, EXCEL, FAQ, MANUAL, TEXT
+  urlOriginal    String?
+  tamanhoBytes   Int?             @default(0)
+  totalChunks    Int              @default(0)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  chunks         KnowledgeChunk[]
+
+  @@index([organizationId])
+}
+
+model KnowledgeChunk {
+  id             String            @id @default(cuid())
+  organizationId String
+  documentId     String
+  chunkIndex     Int               @default(0)
+  conteudoTexto  String            // Conteúdo textual fatiado
+  embeddingJson  String?           // Array de floats em formato JSON para portabilidade
+  createdAt      DateTime          @default(now())
+
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  document       KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([documentId])
 }
