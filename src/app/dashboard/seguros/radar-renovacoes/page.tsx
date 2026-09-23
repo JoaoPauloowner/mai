@@ -141,7 +141,7 @@ export default function RadarRenovacoesPage() {
                     )} vence em ${ap.diasParaVencer} dias. Já preparamos sua cotação de renovação com o desconto de classe de bônus!` }
                     target="_blank"
                     rel="noreferrer"
-                    className="px-3.5 py-2 rounded-xl bg-[#C1ED84] text-[#2C2E2A] font-bold text-xs hover:bg-[#B2E372] transition border border-[#A5DC60] inline-flex items-center gap-1.5"
+                    className="px-3.5 py-2 rounded-xl bg-zinc-900 text-white font-medium text-xs hover:bg-zinc-800 transition inline-flex items-center gap-1.5"
                   >
                     <Send className="w-3.5 h-3.5" /> Lembrete WhatsApp
                   </a>

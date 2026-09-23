@@ -93,7 +93,7 @@ export default function CotacoesSegurosPage() {
               )}:%0A%0A1) Porto Seguro: R$ 3.450 em 10x sem juros (Franquia R$ 2.800)%0A2) Allianz: R$ 3.190 em 10x sem juros (Franquia R$ 3.200)%0A3) Tokio Marine: R$ 2.980 em 10x sem juros%0A%0AQual opção prefere fechar?`}
               target="_blank"
               rel="noreferrer"
-              className="px-4 py-2.5 rounded-xl bg-[#C1ED84] text-[#2C2E2A] font-bold text-xs hover:bg-[#B2E372] transition border border-[#A5DC60] inline-flex items-center gap-1.5 shadow-xs"
+              className="px-4 py-2.5 rounded-xl bg-zinc-900 text-white font-medium text-xs hover:bg-zinc-800 transition inline-flex items-center gap-1.5 shadow-xs"
             >
               <Send className="w-4 h-4" /> Enviar Comparativo no WhatsApp
             </a>
@@ -104,25 +104,25 @@ export default function CotacoesSegurosPage() {
       {/* Matriz Comparativa */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {cotacoes.map((c, i) => (
-          <Card key={i} className={c.destaque ? "ring-2 ring-[#7A8E75]" : ""}>
+          <Card key={i} className={c.destaque ? "ring-2 ring-zinc-900" : ""}>
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="text-base">{c.seguradora}</CardTitle>
                 <CardDescription>Cobertura Compreensiva 100% FIPE</CardDescription>
               </div>
               {c.destaque && (
-                <span className="text-[10px] font-mono font-bold bg-[#C1ED84] text-[#2C2E2A] px-2.5 py-1 rounded-full border border-[#A5DC60]">
+                <span className="text-[10px] font-mono font-bold bg-zinc-900 text-white px-2.5 py-1 rounded-full">
                   Melhor Custo-Benefício
                 </span>
               )}
             </CardHeader>
 
             <CardContent className="space-y-4">
-              <div className="flex items-baseline justify-between p-3 rounded-xl bg-[#F5F5F5] border border-[#E0E3DE]">
-                <span className="text-xs text-[#63695B] font-medium">Prêmio Anual:</span>
-                <span className="font-serif font-bold text-xl text-[#2C2E2A]">
+              <div className="flex items-baseline justify-between p-3 rounded-xl bg-zinc-50 border border-zinc-200">
+                <span className="text-xs text-zinc-500 font-medium">Prêmio Anual:</span>
+                <span className="font-bold text-xl text-zinc-900">
                   R$ {c.premioTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                  <span className="text-[11px] font-sans font-normal text-[#7C8472] ml-1">(10x s/ juros)</span>
+                  <span className="text-[11px] font-normal text-zinc-500 ml-1">(10x s/ juros)</span>
                 </span>
               </div>
 

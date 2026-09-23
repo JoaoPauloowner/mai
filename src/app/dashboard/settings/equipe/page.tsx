@@ -177,13 +177,13 @@ export default function TeamSettingsPage() {
 
                   <div className="flex items-center gap-4 text-xs">
                     <div className="text-right">
-                      <span className="text-[10px] text-[#7C8472] block uppercase font-mono">Leads Atribuídos</span>
-                      <span className="font-mono font-bold text-[#2D6A4F]">
+                      <span className="text-[10px] text-zinc-500 block uppercase font-mono">Leads Atribuídos</span>
+                      <span className="font-mono font-bold text-zinc-900">
                         {user._count?.assignedLeads || 0} leads
                       </span>
                     </div>
 
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#C1ED84] border border-[#7A8E75]" title="Ativo no Rodízio" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-emerald-600" title="Ativo no Rodízio" />
                   </div>
                 </div>
               ))}
