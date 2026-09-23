@@ -314,40 +314,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           </div>
         </div>
       </section>
-
-      {/* Quick Access Grid */}
-      <section className="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 shadow-[var(--shadow-card)]">
-        <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
-          <div>
-            <h3 className="text-sm font-bold text-[var(--text-main)]">Módulos da Operação</h3>
-            <p className="text-[11px] text-[var(--text-muted)]">Navegue pelas ferramentas integradas.</p>
-          </div>
-          <BarChart3 className="h-4 w-4 text-[var(--text-subtle)]" />
-        </div>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          {[
-            ["Caixa de Entrada", "WhatsApp + Instagram Direct", "/dashboard/inbox", MessageSquare],
-            ["CRM Kanban", "Funil comercial e oportunidades", "/dashboard/crm", Target],
-            ["Campanhas", "UTMs e Atribuição de Tráfego", "/dashboard/campanhas", BarChart3],
-          ].map(([title, description, href, Icon]) => (
-            <Link
-              key={String(title)}
-              href={String(href)}
-              className="group flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--border-subtle)] p-3.5 hover:border-[var(--accent-primary)] hover:bg-[var(--bg-subtle)] transition-all"
-            >
-              <span className="grid h-9 w-9 place-items-center rounded-[var(--radius-md)] bg-[var(--bg-subtle)] text-[var(--accent-ink)] group-hover:scale-105 transition-transform">
-                <Icon className="h-4 w-4" />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-xs font-bold text-[var(--text-main)]">{String(title)}</span>
-                <span className="mt-0.5 block text-[10px] text-[var(--text-muted)]">{String(description)}</span>
-              </span>
-              <ChevronRight className="ml-auto h-3.5 w-3.5 text-[var(--text-subtle)] group-hover:text-[var(--accent-ink)]" />
-            </Link>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }

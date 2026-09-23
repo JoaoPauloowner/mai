@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { DemoSwitcher } from "./DemoSwitcher";
 import { Download } from "lucide-react";
 
 interface HeaderProps {
@@ -65,8 +64,6 @@ export function Header({
           <Download className="w-3.5 h-3.5" />
           <span>Exportar</span>
         </button>
-
-        <DemoSwitcher currentSlug={orgSlug} currentSegmento={orgSegmento} />
       </div>
     </header>
   );
