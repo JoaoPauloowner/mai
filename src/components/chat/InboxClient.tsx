@@ -155,28 +155,28 @@ export function InboxClient({
   };
 
   return (
-    <div className="h-[calc(100vh-140px)] rounded-2xl bg-white border border-[#E7E7E4] flex overflow-hidden shadow-xs text-[#171717]">
+    <div className="h-[calc(100vh-140px)] rounded-[var(--radius-lg)] bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex overflow-hidden shadow-xs text-[var(--text-main)]">
       {/* 1. Coluna Esquerda: Lista de Conversas */}
-      <div className="w-84 border-r border-[#E7E7E4] flex flex-col bg-[#F4F4F2]/70">
-        <div className="p-3.5 border-b border-[#E7E7E4] space-y-2.5 bg-white">
+      <div className="w-80 sm:w-84 border-r border-[var(--border-subtle)] flex flex-col bg-[var(--bg-canvas)]/60">
+        <div className="p-3.5 border-b border-[var(--border-subtle)] space-y-2.5 bg-[var(--bg-surface)]">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-[#171717]">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--text-main)] font-[var(--font-heading)]">
               Caixa de Entrada
             </h2>
-            <span className="text-[10px] font-mono text-[#247A4A] bg-[#EAF7EF] px-2 py-0.5 rounded-full font-bold">
+            <span className="text-[10px] font-mono text-[var(--accent-text)] bg-[var(--accent-soft)] px-2 py-0.5 rounded-full font-bold">
               {filteredConversations.length} conversas
             </span>
           </div>
 
           {/* Abas das 2 Caixas de Entrada */}
-          <div className="grid grid-cols-3 gap-1 bg-[#F4F4F2] p-1 rounded-xl border border-[#D9D9D5] text-[11px] font-semibold">
+          <div className="grid grid-cols-3 gap-1 bg-[var(--bg-canvas)] p-1 rounded-xl border border-[var(--border-subtle)] text-[11px] font-semibold">
             <button
               type="button"
               onClick={() => setChannelFilter("ALL")}
               className={`py-1.5 px-2 rounded-lg transition text-center ${
                 channelFilter === "ALL"
-                  ? "bg-white text-[#171717] shadow-xs font-bold"
-                  : "text-[#6F6F6F] hover:text-[#171717]"
+                  ? "bg-[var(--bg-surface)] text-[var(--text-main)] shadow-xs font-bold border border-[var(--border-subtle)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
               }`}
             >
               Todos ({conversations.length})
@@ -187,8 +187,8 @@ export function InboxClient({
               onClick={() => setChannelFilter("WHATSAPP")}
               className={`py-1.5 px-2 rounded-lg transition text-center flex items-center justify-center gap-1 ${
                 channelFilter === "WHATSAPP"
-                  ? "bg-[#FF6A2A] text-[#171717] shadow-xs font-bold"
-                  : "text-[#247A4A] hover:bg-white"
+                  ? "bg-[var(--accent-primary)] text-[var(--accent-ink)] shadow-xs font-bold"
+                  : "text-[var(--text-muted)] hover:bg-[var(--bg-surface)]"
               }`}
             >
               <span>💬 WA</span>
@@ -200,8 +200,8 @@ export function InboxClient({
               onClick={() => setChannelFilter("INSTAGRAM")}
               className={`py-1.5 px-2 rounded-lg transition text-center flex items-center justify-center gap-1 ${
                 channelFilter === "INSTAGRAM"
-                  ? "bg-white text-[#171717] shadow-xs font-bold"
-                  : "text-[#B42318] hover:bg-white"
+                  ? "bg-[var(--accent-primary)] text-[var(--accent-ink)] shadow-xs font-bold"
+                  : "text-[var(--text-muted)] hover:bg-[var(--bg-surface)]"
               }`}
             >
               <span>📸 Direct</span>
@@ -210,9 +210,9 @@ export function InboxClient({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto divide-y divide-[#E7E7E4]">
+        <div className="flex-1 overflow-y-auto divide-y divide-[var(--border-subtle)]">
           {filteredConversations.length === 0 ? (
-            <div className="p-8 text-center text-xs text-[#8A8A84] space-y-1">
+            <div className="p-8 text-center text-xs text-[var(--text-muted)] space-y-1">
               <div>Nenhuma conversa no canal selecionado.</div>
               <div className="text-[10px]">Alterne para a aba "Todos" para ver todas as mensagens.</div>
             </div>
@@ -227,36 +227,36 @@ export function InboxClient({
                   onClick={() => setActiveId(conv.id)}
                   className={`w-full p-4 text-left flex items-start gap-3 transition ${
                     isActive
-                      ? "bg-white border-l-4 border-[#FF6A2A] shadow-2xs font-medium"
-                      : "hover:bg-white"
+                      ? "bg-[var(--bg-surface)] border-l-4 border-[var(--accent-primary)] shadow-2xs font-medium"
+                      : "hover:bg-[var(--bg-surface)]"
                   }`}
                 >
                   <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-[#F3F3F0] text-[#171717] flex items-center justify-center font-bold text-sm border border-[#D9D9D5]">
+                    <div className="w-10 h-10 rounded-full bg-[var(--bg-canvas)] text-[var(--text-main)] flex items-center justify-center font-bold text-sm border border-[var(--border-subtle)]">
                       {conv.lead.nome.charAt(0)}
                     </div>
-                    <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white flex items-center justify-center text-[10px] border border-[#E7E7E4]">
+                    <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[var(--bg-surface)] flex items-center justify-center text-[10px] border border-[var(--border-subtle)]">
                       {conv.canal === "INSTAGRAM" ? "📸" : "💬"}
                     </span>
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-bold text-[#171717] truncate">
+                      <h4 className="text-xs font-bold text-[var(--text-main)] truncate">
                         {conv.lead.nome}
                       </h4>
                       {conv.canal === "INSTAGRAM" ? (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FDE8E8] text-[#B42318] flex items-center gap-1 shrink-0">
-                          <InstagramIcon className="w-3 h-3" /> Instagram
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--bg-canvas)] text-[var(--text-muted)] border border-[var(--border-subtle)] flex items-center gap-1 shrink-0">
+                          <InstagramIcon className="w-3 h-3" /> Direct
                         </span>
                       ) : (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EAF7EF] text-[#247A4A] flex items-center gap-1 shrink-0">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent-text)] flex items-center gap-1 shrink-0">
                           💬 WhatsApp
                         </span>
                       )}
                     </div>
 
-                    <p className="text-[11px] text-[#6F6F6F] truncate mt-0.5">
+                    <p className="text-[11px] text-[var(--text-muted)] truncate mt-0.5">
                       {lastMsg
                         ? lastMsg.tipoConteudo === "AUDIO_PTT"
                           ? "🎙️ Mensagem de voz PTT"
@@ -265,11 +265,11 @@ export function InboxClient({
                     </p>
 
                     <div className="flex items-center gap-1 mt-1.5">
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#F4F4F2] text-[#6F6F6F] border border-[#D9D9D5]">
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-canvas)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
                         {conv.lead.origemCanal}
                       </span>
                       {conv.lead.directKeyword && (
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#FDE8E8] text-[#B42318] border border-red-200">
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[var(--accent-soft)] text-[var(--accent-text)] border border-[var(--accent-primary)]/20">
                           #{conv.lead.directKeyword}
                         </span>
                       )}
@@ -284,27 +284,27 @@ export function InboxClient({
 
       {/* 2. Coluna Central: Thread de Mensagens */}
       {activeConv ? (
-        <div className="flex-1 flex flex-col bg-[#F4F4F2] min-w-0">
+        <div className="flex-1 flex flex-col bg-[var(--bg-canvas)] min-w-0">
           {/* Header do Chat */}
-          <div className="p-4 border-b border-[#E7E7E4] bg-white flex items-center justify-between">
+          <div className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-[#F3F3F0] text-[#171717] flex items-center justify-center font-bold text-sm border border-[#D9D9D5]">
+              <div className="w-9 h-9 rounded-full bg-[var(--bg-canvas)] text-[var(--text-main)] flex items-center justify-center font-bold text-sm border border-[var(--border-subtle)]">
                 {activeConv.lead.nome.charAt(0)}
               </div>
               <div>
-                <h3 className="text-xs font-bold text-[#171717] flex items-center gap-2">
+                <h3 className="text-xs font-bold text-[var(--text-main)] flex items-center gap-2">
                   <span>{activeConv.lead.nome}</span>
                   {activeConv.canal === "INSTAGRAM" ? (
-                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#FDE8E8] text-[#B42318] font-mono font-bold flex items-center gap-1">
+                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[var(--bg-canvas)] text-[var(--text-muted)] border border-[var(--border-subtle)] font-mono font-bold flex items-center gap-1">
                       <InstagramIcon className="w-3.5 h-3.5" /> Instagram Direct
                     </span>
                   ) : (
-                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#EAF7EF] text-[#247A4A] font-mono font-bold flex items-center gap-1">
+                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent-text)] font-mono font-bold flex items-center gap-1">
                       💬 WhatsApp Oficial
                     </span>
                   )}
                 </h3>
-                <p className="text-[11px] text-[#6F6F6F] mt-0.5">
+                <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
                   {activeConv.lead.telefone} • {activeConv.lead.ramoInteresse || "Interesse Geral"}
                 </p>
               </div>
@@ -315,9 +315,11 @@ export function InboxClient({
                 href={`https://wa.me/${activeConv.lead.telefone.replace(/\D/g, "")}`}
                 target="_blank"
                 rel="noreferrer"
-                className="px-3 py-1.5 rounded-xl bg-[#FF6A2A] hover:bg-[#EB5417] text-[#171717] text-xs font-bold transition flex items-center gap-1.5 shadow-2xs"
               >
-                <ExternalLink className="w-3.5 h-3.5" /> Abrir no WA
+                <Button variant="primary" size="sm">
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Abrir no WA</span>
+                </Button>
               </a>
             </div>
           </div>
@@ -336,8 +338,8 @@ export function InboxClient({
                   <div
                     className={`max-w-[75%] rounded-2xl p-3.5 text-xs shadow-2xs ${
                       isLead
-                        ? "bg-white border border-[#E7E7E4] text-[#171717] rounded-tl-sm"
-                        : "bg-[#FF6A2A] text-[#171717] font-medium rounded-tr-sm border border-[#EB5417]"
+                        ? "bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-main)] rounded-tl-sm"
+                        : "bg-[var(--accent-primary)] text-[var(--accent-ink)] font-medium rounded-tr-sm border border-[var(--accent-hover)]"
                     }`}
                   >
                     {isAudio ? (
@@ -351,8 +353,8 @@ export function InboxClient({
                           }
                           className={`w-9 h-9 rounded-full flex items-center justify-center transition shadow-2xs ${
                             isLead
-                              ? "bg-[#FF6A2A] text-white"
-                              : "bg-[#171717] text-[#FF6A2A]"
+                              ? "bg-[var(--accent-primary)] text-[var(--accent-ink)]"
+                              : "bg-[var(--text-main)] text-[var(--bg-surface)]"
                           }`}
                         >
                           {isPlayingAudioId === msg.id ? (
@@ -364,15 +366,15 @@ export function InboxClient({
 
                         <div className="flex-1">
                           <div className="flex items-center gap-1 h-5">
-                            <span className="w-1 bg-[#171717] rounded-full h-3" />
-                            <span className="w-1 bg-[#171717] rounded-full h-5" />
-                            <span className="w-1 bg-[#171717] rounded-full h-2" />
-                            <span className="w-1 bg-[#171717] rounded-full h-4" />
-                            <span className="w-1 bg-[#171717] rounded-full h-3" />
-                            <span className="w-1 bg-[#171717] rounded-full h-5" />
-                            <span className="w-1 bg-[#171717] rounded-full h-2" />
+                            <span className="w-1 bg-current opacity-70 rounded-full h-3" />
+                            <span className="w-1 bg-current opacity-90 rounded-full h-5" />
+                            <span className="w-1 bg-current opacity-60 rounded-full h-2" />
+                            <span className="w-1 bg-current opacity-80 rounded-full h-4" />
+                            <span className="w-1 bg-current opacity-70 rounded-full h-3" />
+                            <span className="w-1 bg-current opacity-90 rounded-full h-5" />
+                            <span className="w-1 bg-current opacity-60 rounded-full h-2" />
                           </div>
-                          <div className="flex justify-between items-center text-[10px] text-[#6F6F6F] mt-1 font-mono">
+                          <div className="flex justify-between items-center text-[10px] opacity-80 mt-1 font-mono">
                             <span>0:{msg.audioDuration || 14}</span>
                             <span className="uppercase text-[9px] font-bold">Áudio PTT</span>
                           </div>
@@ -386,7 +388,7 @@ export function InboxClient({
 
                     <div
                       className={`flex items-center justify-end gap-1 mt-1 text-[9px] ${
-                        isLead ? "text-[#8A8A84]" : "text-[#171717]/70"
+                        isLead ? "text-[var(--text-muted)]" : "opacity-80"
                       }`}
                     >
                       <Clock className="w-2.5 h-2.5" />
@@ -405,7 +407,7 @@ export function InboxClient({
 
             {isSimulatingPresence && (
               <div className="flex justify-end">
-                <div className="px-3 py-1.5 rounded-full bg-white border border-[#E7E7E4] text-xs text-[#247A4A] flex items-center gap-2 animate-pulse font-mono">
+                <div className="px-3 py-1.5 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs text-[var(--accent-text)] flex items-center gap-2 animate-pulse font-mono">
                   <span>{presenceText}</span>
                 </div>
               </div>
@@ -415,7 +417,7 @@ export function InboxClient({
           </div>
 
           {/* Barra de Input */}
-          <div className="p-3 border-t border-[#E7E7E4] bg-white space-y-2">
+          <div className="p-3 border-t border-[var(--border-subtle)] bg-[var(--bg-surface)] space-y-2">
             <div className="flex items-center gap-2">
               <input
                 type="text"
@@ -428,7 +430,7 @@ export function InboxClient({
                   }
                 }}
                 placeholder="Escreva uma mensagem ou simule áudio PTT..."
-                className="flex-1 bg-[#F4F4F2] border border-[#E7E7E4] rounded-xl px-4 py-2.5 text-xs text-[#171717] focus:outline-none focus:border-[#FF6A2A] transition"
+                className="flex-1 bg-[var(--bg-canvas)] border border-[var(--border-subtle)] rounded-xl px-4 py-2.5 text-xs text-[var(--text-main)] focus:outline-none focus:border-[var(--accent-primary)] transition"
               />
 
               <Button
@@ -446,14 +448,14 @@ export function InboxClient({
                 onClick={simulatePttRecord}
                 title="Simular Gravação de Áudio PTT"
               >
-                <Mic className="w-4 h-4 text-[#FF6A2A]" />
+                <Mic className="w-4 h-4 text-[var(--accent-primary)]" />
                 <span>Áudio PTT</span>
               </Button>
             </div>
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center p-8 text-center text-xs text-[#8A8A84]">
+        <div className="flex-1 flex items-center justify-center p-8 text-center text-xs text-[var(--text-muted)]">
           Nenhuma conversa selecionada.
         </div>
       )}

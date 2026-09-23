@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { InboxClient } from "@/components/chat/InboxClient";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export default async function InboxPage() {
   const session = await requireAuth();
@@ -18,15 +19,11 @@ export default async function InboxPage() {
   });
 
   return (
-    <div className="space-y-4 max-w-7xl mx-auto">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight text-white">
-          Caixa de Entrada Unificada (Omnichannel)
-        </h1>
-        <p className="text-xs text-gray-400">
-          WhatsApp & Instagram Direct com simulação de presença e envio de áudios gravados na hora.
-        </p>
-      </div>
+    <div className="space-y-4 max-w-7xl mx-auto text-[var(--text-main)]">
+      <PageHeader
+        title="Caixa de Entrada Unificada"
+        description="WhatsApp Oficial & Instagram Direct com mensageria em tempo real e simulação de áudios PTT."
+      />
 
       <InboxClient initialConversations={conversations as any} />
     </div>

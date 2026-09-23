@@ -1,21 +1,43 @@
-import type { ReactNode } from "react";
+import React from "react";
+import { twMerge } from "tailwind-merge";
 
-type PageHeaderProps = {
-  eyebrow?: string;
+export interface PageHeaderProps {
   title: string;
   description?: string;
-  actions?: ReactNode;
-};
+  badge?: React.ReactNode;
+  actions?: React.ReactNode;
+  className?: string;
+}
 
-export function PageHeader({ eyebrow, title, description, actions }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  description,
+  badge,
+  actions,
+  className,
+}: PageHeaderProps) {
   return (
-    <header className="flex flex-col gap-4 border-b border-[#E7E7E4] pb-5 sm:flex-row sm:items-end sm:justify-between">
-      <div className="min-w-0">
-        {eyebrow ? <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9A9A94]">{eyebrow}</div> : null}
-        <h1 className="mt-1 text-[22px] font-semibold tracking-[-0.04em] text-[#171717]">{title}</h1>
-        {description ? <p className="mt-1 max-w-2xl text-xs leading-5 text-[#7A7A74]">{description}</p> : null}
+    <div
+      className={twMerge(
+        "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-neutral-200 mb-6",
+        className
+      )}
+    >
+      <div>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-bold text-neutral-900">{title}</h1>
+          {badge}
+        </div>
+        {description && (
+          <p className="mt-1 text-xs text-neutral-500">{description}</p>
+        )}
       </div>
-      {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
-    </header>
+
+      {actions && (
+        <div className="flex items-center gap-2">
+          {actions}
+        </div>
+      )}
+    </div>
   );
 }

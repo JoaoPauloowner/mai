@@ -49,7 +49,7 @@ export default async function TestDrivesPage() {
             </div>
           ) : (
             <div className="divide-y divide-[#E7E7E4]">
-              {appointments.map((app) => (
+              {appointments.map((app: any) => (
                 <div key={app.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-[#FFF3D6] text-[#A15C00] border border-[#E8D5A8] flex items-center justify-center font-bold">

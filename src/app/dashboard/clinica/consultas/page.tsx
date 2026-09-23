@@ -67,7 +67,7 @@ export default async function ConsultasClinicaPage() {
             </div>
           ) : (
             <div className="divide-y divide-[#E7E7E4]">
-              {appointments.map((app) => (
+              {appointments.map((app: any) => (
                 <div key={app.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-[#FDE8E8] text-[#B42318] border border-red-200 flex items-center justify-center font-bold">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 
 interface DemoSwitcherProps {
   currentSlug: string;
@@ -10,13 +10,13 @@ interface DemoSwitcherProps {
 }
 
 const DEMO_TENANTS = [
-  { slug: "omni-demo", nome: "Omni Growth Hub", segmento: "GENERAL", icone: "🌐", cor: "#00ddd7" },
-  { slug: "autoprime", nome: "AutoPrime Seminovos", segmento: "AUTO", icone: "🚗", cor: "#f59e0b" },
-  { slug: "apex-seguros", nome: "Apex Corretora", segmento: "INSURANCE", icone: "🛡️", cor: "#3b82f6" },
-  { slug: "odontoprev", nome: "OdontoPrev Estética", segmento: "CLINIC", icone: "🏥", cor: "#ec4899" },
+  { slug: "omni-demo", nome: "Omni Growth Hub", segmento: "GENERAL", icone: "🌐" },
+  { slug: "autoprime", nome: "AutoPrime Seminovos", segmento: "AUTO", icone: "🚗" },
+  { slug: "apex-seguros", nome: "Apex Corretora", segmento: "INSURANCE", icone: "🛡️" },
+  { slug: "odontoprev", nome: "OdontoPrev Estética", segmento: "CLINIC", icone: "🏥" },
 ];
 
-export function DemoSwitcher({ currentSlug, currentSegmento }: DemoSwitcherProps) {
+export function DemoSwitcher({ currentSlug }: DemoSwitcherProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -53,25 +53,22 @@ export function DemoSwitcher({ currentSlug, currentSegmento }: DemoSwitcherProps
       <button
         onClick={() => setOpen(!open)}
         disabled={loading}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#161d2d] border border-[#2e3b54] hover:border-[#00ddd7] transition text-xs font-medium text-white shadow-sm"
+        className="flex items-center gap-2 px-2.5 py-1.5 rounded border border-neutral-300 bg-white hover:bg-neutral-50 text-xs font-medium text-neutral-800"
       >
-        <span className="flex items-center gap-1.5 text-[#00ddd7]">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline font-mono uppercase text-[10px] text-gray-400">Demo Nicho:</span>
-        </span>
-        <span className="flex items-center gap-1 font-semibold">
+        <span className="text-neutral-500 font-mono text-[10px]">Nicho:</span>
+        <span className="flex items-center gap-1 font-medium">
           <span>{activeDemo.icone}</span>
           <span>{activeDemo.nome}</span>
         </span>
-        <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+        <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
       </button>
 
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 mt-2 w-64 rounded-xl bg-[#111622] border border-[#1e2638] shadow-2xl z-50 p-2 space-y-1">
-            <div className="px-2 py-1.5 text-[10px] uppercase font-mono tracking-wider text-gray-400">
-              Alternar Visão de Demonstração (Super Admin)
+          <div className="absolute right-0 mt-1 w-56 rounded bg-white border border-neutral-200 shadow-lg z-50 p-1 space-y-0.5">
+            <div className="px-2 py-1 text-[10px] uppercase font-mono text-neutral-400">
+              Alternar Nicho Demo
             </div>
             {DEMO_TENANTS.map((tenant) => {
               const isSelected = tenant.slug === currentSlug;
@@ -79,20 +76,17 @@ export function DemoSwitcher({ currentSlug, currentSegmento }: DemoSwitcherProps
                 <button
                   key={tenant.slug}
                   onClick={() => switchTenant(tenant.slug)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition ${
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded text-xs transition ${
                     isSelected
-                      ? "bg-[#1c2438] text-white font-semibold border border-[#2e3b54]"
-                      : "text-gray-300 hover:bg-[#161d2d] hover:text-white"
+                      ? "bg-neutral-900 text-white font-medium"
+                      : "text-neutral-700 hover:bg-neutral-100"
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-base">{tenant.icone}</span>
-                    <div className="text-left">
-                      <div>{tenant.nome}</div>
-                      <div className="text-[10px] text-gray-500 font-mono">{tenant.segmento}</div>
-                    </div>
+                    <span>{tenant.icone}</span>
+                    <span className="truncate">{tenant.nome}</span>
                   </div>
-                  {isSelected && <Check className="w-4 h-4 text-[#00ddd7]" />}
+                  {isSelected && <Check className="w-3.5 h-3.5" />}
                 </button>
               );
             })}

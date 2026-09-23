@@ -4,16 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import {
-  Sparkles,
   ChevronRight,
   GripVertical,
-  Plus,
-  Phone,
-  MessageSquare,
-  CalendarCheck,
 } from "lucide-react";
-import { StatusBadge } from "@/components/ui/StatusBadge";
-import { Button } from "@/components/ui/Button";
 
 interface LeadItem {
   id: string;
@@ -32,11 +25,11 @@ interface LeadItem {
 }
 
 const COLUMNS = [
-  { id: "NOVO", label: "Novos Leads", bgHeader: "bg-[#FFF3D6]/40 text-[#A15C00]" },
-  { id: "QUALIFICADO", label: "Qualificados (SQL)", bgHeader: "bg-[#EAF7EF] text-[#247A4A]" },
-  { id: "AGENDADO", label: "Visita / Reunião", bgHeader: "bg-[#F3F3F0] text-[#171717]" },
-  { id: "GANHO", label: "Venda Concluída", bgHeader: "bg-[#FF6A2A] text-[#171717]" },
-  { id: "PERDIDO", label: "Desqualificados", bgHeader: "bg-[#FDE8E8] text-[#B42318]" },
+  { id: "NOVO", label: "Novos Leads", badgeStyle: "bg-[var(--warning-bg)] text-[var(--warning-text)] border-[var(--warning-border)]" },
+  { id: "QUALIFICADO", label: "Qualificados (SQL)", badgeStyle: "bg-[var(--success-bg)] text-[var(--success-text)] border-[var(--success-border)]" },
+  { id: "AGENDADO", label: "Visita / Reunião", badgeStyle: "bg-[var(--bg-subtle)] text-[var(--text-main)] border-[var(--border-subtle)]" },
+  { id: "GANHO", label: "Venda Concluída", badgeStyle: "bg-[var(--accent-soft)] text-[var(--accent-ink)] border-[var(--accent-primary)]/30" },
+  { id: "PERDIDO", label: "Desqualificados", badgeStyle: "bg-[var(--danger-bg)] text-[var(--danger-text)] border-[var(--danger-border)]" },
 ];
 
 export function CrmKanbanClient({ initialLeads }: { initialLeads: LeadItem[] }) {
@@ -46,7 +39,6 @@ export function CrmKanbanClient({ initialLeads }: { initialLeads: LeadItem[] }) 
   const [dragOverColId, setDragOverColId] = useState<string | null>(null);
 
   const moveLead = async (leadId: string, targetStatus: string) => {
-    // Atualização otimista imediata na UI
     setLeads((prev) =>
       prev.map((l) => (l.id === leadId ? { ...l, status: targetStatus } : l))
     );
@@ -96,7 +88,7 @@ export function CrmKanbanClient({ initialLeads }: { initialLeads: LeadItem[] }) 
   };
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-4 select-none min-h-[calc(100vh-200px)] text-[#171717]">
+    <div className="flex gap-4 overflow-x-auto pb-4 select-none min-h-[calc(100vh-220px)] text-[var(--text-main)]">
       {COLUMNS.map((col) => {
         const colLeads = leads.filter((l) => l.status === col.id);
         const colTotalValor = colLeads.reduce(
@@ -112,20 +104,20 @@ export function CrmKanbanClient({ initialLeads }: { initialLeads: LeadItem[] }) 
             onDragOver={(e) => handleDragOver(e, col.id)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, col.id)}
-            className={`w-80 shrink-0 flex flex-col rounded-2xl bg-[#F4F4F2] border transition-all ${
-              isOver ? "border-[#FF6A2A] bg-[#F4F4F2]" : "border-[#E7E7E4]"
+            className={`w-80 shrink-0 flex flex-col rounded-[var(--radius-lg)] bg-[var(--bg-canvas)] border transition-all ${
+              isOver ? "border-[var(--accent-primary)] bg-[var(--bg-subtle)]" : "border-[var(--border-subtle)]"
             }`}
           >
             {/* Header da Coluna */}
-            <div className="p-4 border-b border-[#E7E7E4] bg-white rounded-t-2xl flex items-center justify-between">
+            <div className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] rounded-t-[var(--radius-lg)] flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold font-mono ${col.bgHeader}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold font-mono border ${col.badgeStyle}`}>
                     {colLeads.length}
                   </span>
-                  <h3 className="font-bold text-xs text-[#171717]">{col.label}</h3>
+                  <h3 className="font-bold text-xs text-[var(--text-main)]">{col.label}</h3>
                 </div>
-                <span className="text-[11px] font-mono text-[#8A8A84] mt-0.5 block">
+                <span className="text-[11px] font-mono text-[var(--text-subtle)] mt-0.5 block">
                   {colTotalValor > 0 ? formatCurrency(colTotalValor) : "R$ 0,00"}
                 </span>
               </div>
@@ -138,38 +130,38 @@ export function CrmKanbanClient({ initialLeads }: { initialLeads: LeadItem[] }) 
                   key={lead.id}
                   draggable
                   onDragStart={(e) => handleDragStart(e, lead.id)}
-                  className={`p-4 rounded-xl bg-white border border-[#E7E7E4] shadow-2xs hover:shadow-xs transition cursor-grab active:cursor-grabbing space-y-2.5 ${
+                  className={`p-4 rounded-[var(--radius-md)] bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-[var(--shadow-card)] hover:border-[var(--accent-primary)] transition cursor-grab active:cursor-grabbing space-y-2.5 ${
                     movingLeadId === lead.id ? "opacity-50" : ""
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 overflow-hidden">
-                      <GripVertical className="w-3.5 h-3.5 text-[#B0B0AA] shrink-0" />
-                      <span className="font-bold text-xs text-[#171717] truncate">{lead.nome}</span>
+                      <GripVertical className="w-3.5 h-3.5 text-[var(--text-subtle)] shrink-0" />
+                      <span className="font-bold text-xs text-[var(--text-main)] truncate">{lead.nome}</span>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#EAF7EF] text-[#247A4A]">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[var(--success-bg)] border border-[var(--success-border)] text-[var(--success-text)]">
                       Score {lead.score}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] text-[#6F6F6F]">
+                  <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
                     <span className="font-mono">{lead.telefone}</span>
-                    <span className="font-mono font-bold text-[#171717]">
+                    <span className="font-mono font-bold text-[var(--text-main)]">
                       {lead.valorNegocio ? formatCurrency(lead.valorNegocio) : "—"}
                     </span>
                   </div>
 
                   {lead.utmCampaign && (
-                    <div className="text-[10px] font-mono text-[#8A8A84] bg-[#F4F4F2] px-2 py-0.5 rounded border border-[#E7E7E4] truncate">
+                    <div className="text-[10px] font-mono text-[var(--text-subtle)] bg-[var(--bg-subtle)] px-2 py-0.5 rounded-[var(--radius-sm)] border border-[var(--border-subtle)] truncate">
                       Campanha: {lead.utmCampaign}
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between pt-1 border-t border-[#F4F4F2] text-[10px]">
-                    <span className="text-[#8A8A84] font-mono">{lead.origemCanal || "WhatsApp"}</span>
+                  <div className="flex items-center justify-between pt-1 border-t border-[var(--border-subtle)] text-[10px]">
+                    <span className="text-[var(--text-subtle)] font-mono">{lead.origemCanal || "WhatsApp"}</span>
                     <Link
                       href={`/dashboard/leads/${lead.id}`}
-                      className="font-bold text-[#171717] hover:text-[#FF6A2A] flex items-center gap-0.5 transition"
+                      className="font-bold text-[var(--accent-ink)] hover:underline flex items-center gap-0.5 transition"
                     >
                       <span>Ver Dossiê</span>
                       <ChevronRight className="w-3 h-3" />
@@ -179,7 +171,7 @@ export function CrmKanbanClient({ initialLeads }: { initialLeads: LeadItem[] }) 
               ))}
 
               {colLeads.length === 0 && (
-                <div className="py-8 text-center text-xs text-[#B0B0AA] border border-dashed border-[#E7E7E4] rounded-xl">
+                <div className="py-8 text-center text-xs text-[var(--text-subtle)] border border-dashed border-[var(--border-subtle)] rounded-[var(--radius-md)]">
                   Nenhum lead nesta etapa
                 </div>
               )}

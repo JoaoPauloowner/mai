@@ -36,7 +36,7 @@ export default async function EstoqueAutoPage() {
             Nenhum veículo cadastrado ainda. Use a demo da AutoPrime no seletor para visualizar o pátio completo.
           </div>
         ) : (
-          vehicles.map((v) => (
+          vehicles.map((v: any) => (
             <div
               key={v.id}
               className="rounded-2xl bg-white border border-[#E7E7E4] overflow-hidden shadow-xs hover:border-[#FF6A2A] transition group"

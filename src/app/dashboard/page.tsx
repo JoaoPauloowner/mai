@@ -3,19 +3,35 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
 import {
-  ArrowUpRight, BarChart3, Bot, ChevronRight, MessageSquare,
-  MoreHorizontal, Plus, Sparkles, Target, TrendingUp, Users
+  Users,
+  Sparkles,
+  Target,
+  TrendingUp,
+  MessageSquare,
+  BarChart3,
+  ArrowUpRight,
+  Bot,
+  ChevronRight,
+  Plus,
 } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+
+interface DashboardPageProps {
+  searchParams: Promise<{
+    period?: "7d" | "30d" | "3m" | "6m" | "1y";
+  }>;
+}
 
 function MiniBars({ values }: { values: number[] }) {
   const max = Math.max(...values, 1);
   return (
-    <div className="flex h-24 items-end gap-2">
-      {values.map((value, i) => (
-        <div key={i} className="flex flex-1 flex-col items-center justify-end gap-1">
+    <div className="flex h-16 items-end gap-1.5">
+      {values.map((v, i) => (
+        <div key={i} className="flex-1 flex flex-col items-center gap-1">
           <div
-            className={`w-full max-w-5 rounded-t-md transition-all ${i === values.length - 1 ? "bg-[#FF6A2A]" : "bg-[#E5E5E2]"}`}
-            style={{ height: `${Math.max(8, (value / max) * 82)}px` }}
+            className="w-full rounded-t-[var(--radius-sm)] bg-[var(--accent-primary)] opacity-85 transition-all"
+            style={{ height: `${Math.max(6, (v / max) * 48)}px` }}
           />
         </div>
       ))}
@@ -23,30 +39,17 @@ function MiniBars({ values }: { values: number[] }) {
   );
 }
 
-export default async function DashboardOverviewPage({
-  searchParams,
-}: {
-  searchParams: { period?: string };
-}) {
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const session = await requireAuth();
+  const { period = "30d" } = await searchParams;
 
-  const periodMap: Record<string, number> = { "7d": 7, "30d": 30, "3m": 90, "6m": 180, "1y": 365 };
-  const days = periodMap[searchParams.period || "30d"] ?? 30;
-  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const periodDays =
+    period === "7d" ? 7 : period === "30d" ? 30 : period === "3m" ? 90 : period === "6m" ? 180 : 365;
+  const since = new Date(now.getTime() - periodDays * 24 * 60 * 60 * 1000);
 
-  const [recentLeads, chartLeads, totalLeads, qualifiedLeads, appointmentsCount, wonLeads] =
+  const [totalLeads, qualifiedLeads, appointmentsCount, wonLeads, recentLeads, chartLeads] =
     await Promise.all([
-      prisma.lead.findMany({
-        where: { organizationId: session.organizationId, createdAt: { gte: since } },
-        orderBy: { createdAt: "desc" },
-        take: 8,
-      }),
-      prisma.lead.findMany({
-        where: { organizationId: session.organizationId, createdAt: { gte: since } },
-        select: { createdAt: true },
-        take: 500,
-        orderBy: { createdAt: "asc" },
-      }),
       prisma.lead.count({
         where: { organizationId: session.organizationId, createdAt: { gte: since } },
       }),
@@ -64,154 +67,283 @@ export default async function DashboardOverviewPage({
         where: { organizationId: session.organizationId, createdAt: { gte: since }, status: "GANHO" },
         select: { valorNegocio: true },
       }),
+      prisma.lead.findMany({
+        where: { organizationId: session.organizationId },
+        orderBy: { createdAt: "desc" },
+        take: 6,
+      }),
+      prisma.lead.findMany({
+        where: { organizationId: session.organizationId, createdAt: { gte: since } },
+        select: { createdAt: true },
+      }),
     ]);
 
-  const revenue = wonLeads.reduce((sum, lead) => sum + (lead.valorNegocio || 0), 0);
+  const revenue = wonLeads.reduce((sum: number, lead: any) => sum + (lead.valorNegocio || 0), 0);
 
   const chartValues = Array.from({ length: 7 }, (_, index) => {
     const date = new Date();
     date.setDate(date.getDate() - (6 - index));
     const key = date.toISOString().slice(0, 10);
-    return chartLeads.filter((lead) => new Date(lead.createdAt).toISOString().slice(0, 10) === key).length;
+    return chartLeads.filter((lead: any) => new Date(lead.createdAt).toISOString().slice(0, 10) === key).length;
   });
 
   const conversion = totalLeads ? Math.round((qualifiedLeads / totalLeads) * 100) : 0;
-  const periodLabel = searchParams.period || "30d";
 
   return (
-    <div className="mx-auto max-w-[1440px] space-y-5 text-[#171717]">
+    <div className="mx-auto max-w-[1440px] space-y-5 text-[var(--text-main)]">
+      {/* Top Controls Header */}
       <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-[22px] font-semibold tracking-[-0.04em]">Dashboard</h1>
-            <span className="rounded-full bg-[#EAF7EF] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-[#247A4A]">
-              Live
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl font-bold tracking-tight">Torre de Atribuição</h1>
+            <span className="rounded-full bg-[var(--success-bg)] border border-[var(--success-border)] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--success-text)] font-mono">
+              Live Feed
             </span>
           </div>
-          <p className="mt-1 text-xs text-[#8A8A84]">Visão geral da operação comercial da sua organização.</p>
+          <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+            Acompanhamento operacional, conversão em tempo real e retorno de tráfego.
+          </p>
         </div>
+
         <div className="flex items-center gap-2">
-          <Link href="/dashboard/campanhas" className="inline-flex items-center gap-1.5 rounded-lg border border-[#E7E7E4] bg-white px-3 py-2 text-xs font-semibold text-[#171717] hover:bg-[#FAFAFA]">
-            <Plus className="h-3.5 w-3.5" /> Add widget
+          <Link href="/dashboard/campanhas">
+            <Button variant="secondary" size="sm">
+              <Plus className="h-3.5 w-3.5" /> Nova Campanha
+            </Button>
           </Link>
-          <Link href="/dashboard/inbox" className="inline-flex items-center gap-1.5 rounded-lg bg-[#171717] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#2A2A2A]">
-            <MessageSquare className="h-3.5 w-3.5" /> Abrir atendimento
+          <Link href="/dashboard/inbox">
+            <Button variant="primary" size="sm">
+              <MessageSquare className="h-3.5 w-3.5" /> Abrir Atendimento
+            </Button>
           </Link>
         </div>
       </section>
 
+      {/* KPI Cards Grid */}
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {[
-          ["Leads", totalLeads.toLocaleString("pt-BR"), "+18,4%", Users],
-          ["Qualificados", qualifiedLeads.toLocaleString("pt-BR"), "+12,6%", Sparkles],
+        {([
+          ["Leads Totais", totalLeads.toLocaleString("pt-BR"), "+18,4%", Users],
+          ["Qualificados por IA", qualifiedLeads.toLocaleString("pt-BR"), "+12,6%", Sparkles],
           ["Agendamentos", appointmentsCount.toLocaleString("pt-BR"), "+8,2%", Target],
-          ["Receita atribuída", formatCurrency(revenue), "+24,2%", TrendingUp],
-        ].map(([label, value, delta, Icon]) => (
-          <div key={String(label)} className="rounded-xl border border-[#E7E7E4] bg-white p-5 shadow-[0_2px_8px_rgba(23,23,23,0.03)]">
+          ["Receita Atribuída", formatCurrency(revenue), "+24,2%", TrendingUp],
+        ] as [string, string, string, any][]).map(([label, value, delta, Icon]) => (
+          <div
+            key={label}
+            className="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 shadow-[var(--shadow-card)]"
+          >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[#6F6F6F]">{label}</span>
-              <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#F4F4F2] text-[#FF6A2A]"><Icon className="h-3.5 w-3.5" /></span>
+              <span className="text-xs font-semibold text-[var(--text-muted)]">{label}</span>
+              <span className="grid h-7 w-7 place-items-center rounded-[var(--radius-md)] bg-[var(--bg-subtle)] text-[var(--accent-ink)]">
+                <Icon className="h-4 w-4" />
+              </span>
             </div>
             <div className="mt-4 flex items-end justify-between gap-2">
-              <strong className="text-[26px] font-semibold tracking-[-0.04em]">{value}</strong>
-              <span className="rounded-full bg-[#EAF7EF] px-2 py-1 text-[9px] font-bold text-[#247A4A]">{delta}</span>
+              <strong className="text-2xl font-bold font-mono tracking-tight text-[var(--text-main)]">{value}</strong>
+              <span className="rounded-full bg-[var(--success-bg)] border border-[var(--success-border)] px-2 py-0.5 text-[10px] font-bold text-[var(--success-text)] font-mono">
+                {delta}
+              </span>
             </div>
-            <p className="mt-2 text-[10px] text-[#9A9A94]">vs. período anterior</p>
+            <p className="mt-1.5 text-[10px] text-[var(--text-subtle)]">vs. período anterior</p>
           </div>
         ))}
       </section>
 
-      <section className="grid gap-3 xl:grid-cols-[1.65fr_0.85fr]">
-        <div className="rounded-xl border border-[#E7E7E4] bg-white p-5">
+      {/* Main Charts & Breakdown */}
+      <section className="grid gap-4 xl:grid-cols-[1.65fr_0.85fr]">
+        <div className="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 shadow-[var(--shadow-card)]">
           <div className="flex items-start justify-between">
             <div>
-              <div className="text-[10px] uppercase tracking-[0.15em] text-[#9A9A94]">Performance</div>
-              <h2 className="mt-1 text-sm font-semibold">Entrada de leads</h2>
+              <div className="text-[10px] uppercase tracking-wider text-[var(--text-subtle)] font-mono font-bold">
+                Fluxo de Entrada
+              </div>
+              <h3 className="mt-1 text-sm font-bold text-[var(--text-main)]">Volume de Leads por Dia</h3>
             </div>
-            <button className="inline-flex items-center gap-1 rounded-md border border-[#E7E7E4] px-2.5 py-1.5 text-[10px] font-semibold text-[#6F6F6F]">
-              Últimos {periodLabel} <ChevronRight className="h-3 w-3 rotate-90" />
-            </button>
+            <span className="text-[10px] font-mono px-2 py-1 rounded-[var(--radius-sm)] bg-[var(--bg-subtle)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
+              Últimos {period}
+            </span>
           </div>
-          <div className="mt-5 grid grid-cols-[1fr_auto] items-end gap-5">
+
+          <div className="mt-6 grid grid-cols-[1fr_auto] items-end gap-6">
             <div>
-              <div className="text-4xl font-semibold tracking-[-0.05em]">{totalLeads.toLocaleString("pt-BR")}</div>
-              <div className="mt-1 text-[10px] text-[#9A9A94]">leads registrados no período</div>
+              <div className="text-3xl font-bold font-mono tracking-tight text-[var(--text-main)]">
+                {totalLeads.toLocaleString("pt-BR")}
+              </div>
+              <div className="mt-1 text-[11px] text-[var(--text-muted)]">leads capturados na janela</div>
             </div>
-            <div className="w-2/3 min-w-[220px]"><MiniBars values={chartValues} /></div>
+            <div className="w-2/3 min-w-[220px]">
+              <MiniBars values={chartValues} />
+            </div>
           </div>
-          <div className="mt-3 flex justify-between text-[9px] text-[#B0B0AA]">
-            {["6d","5d","4d","3d","2d","1d","Hoje"].map((x) => <span key={x}>{x}</span>)}
+          <div className="mt-3 flex justify-between text-[10px] font-mono text-[var(--text-subtle)]">
+            {["-6d", "-5d", "-4d", "-3d", "-2d", "-1d", "Hoje"].map((x) => (
+              <span key={x}>{x}</span>
+            ))}
           </div>
         </div>
 
-        <div className="rounded-xl border border-[#E7E7E4] bg-white p-5">
-          <div className="flex items-center justify-between">
-            <div><div className="text-[10px] uppercase tracking-[0.15em] text-[#9A9A94]">Conversão</div><h2 className="mt-1 text-sm font-semibold">Qualificação dos leads</h2></div>
-            <MoreHorizontal className="h-4 w-4 text-[#B0B0AA]" />
+        <div className="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 shadow-[var(--shadow-card)] flex flex-col justify-between">
+          <div>
+            <div className="text-[10px] uppercase tracking-wider text-[var(--text-subtle)] font-mono font-bold">
+              Eficiência
+            </div>
+            <h3 className="mt-1 text-sm font-bold text-[var(--text-main)]">Taxa de Qualificação</h3>
           </div>
-          <div className="mt-7 flex items-center justify-center">
-            <div className="relative grid h-36 w-36 place-items-center rounded-full" style={{ background: `conic-gradient(#FF6A2A ${conversion * 3.6}deg, #F0F0ED 0deg)` }}>
-              <div className="grid h-28 w-28 place-items-center rounded-full bg-white"><div className="text-center"><div className="text-3xl font-semibold">{conversion}%</div><div className="text-[9px] text-[#9A9A94]">qualificados</div></div></div>
+
+          <div className="py-5 flex items-center justify-center">
+            <div
+              className="relative grid h-32 w-32 place-items-center rounded-full"
+              style={{
+                background: `conic-gradient(var(--accent-primary) ${conversion * 3.6}deg, var(--bg-subtle) 0deg)`,
+              }}
+            >
+              <div className="grid h-24 w-24 place-items-center rounded-full bg-[var(--bg-surface)]">
+                <div className="text-center">
+                  <div className="text-2xl font-bold font-mono text-[var(--text-main)]">{conversion}%</div>
+                  <div className="text-[9px] text-[var(--text-subtle)] uppercase">qualificados</div>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="mt-5 flex justify-between border-t border-[#F0F0ED] pt-4 text-[10px]"><span className="text-[#6F6F6F]">SQL / total</span><strong>{qualifiedLeads} / {totalLeads}</strong></div>
+
+          <div className="flex justify-between border-t border-[var(--border-subtle)] pt-3 text-xs">
+            <span className="text-[var(--text-muted)]">Leads Qualificados</span>
+            <strong className="font-mono text-[var(--text-main)]">
+              {qualifiedLeads} / {totalLeads}
+            </strong>
+          </div>
         </div>
       </section>
 
-      <section className="grid gap-3 xl:grid-cols-[1.4fr_0.8fr]">
-        <div className="rounded-xl border border-[#E7E7E4] bg-white">
-          <div className="flex items-center justify-between border-b border-[#F0F0ED] px-5 py-4">
-            <div><h2 className="text-sm font-semibold">Leads recentes</h2><p className="mt-0.5 text-[10px] text-[#9A9A94]">Acompanhe a atividade mais recente da operação.</p></div>
-            <Link href="/dashboard/crm" className="text-[10px] font-bold text-[#FF6A2A]">Ver pipeline <ArrowUpRight className="ml-0.5 inline h-3 w-3" /></Link>
+      {/* Recent Activity Table & AI Assistant */}
+      <section className="grid gap-4 xl:grid-cols-[1.4fr_0.8fr]">
+        <div className="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[var(--shadow-card)] overflow-hidden">
+          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-4">
+            <div>
+              <h3 className="text-sm font-bold text-[var(--text-main)]">Leads Recentes</h3>
+              <p className="mt-0.5 text-[10px] text-[var(--text-muted)]">Entrada contínua de oportunidades.</p>
+            </div>
+            <Link
+              href="/dashboard/crm"
+              className="text-xs font-bold text-[var(--accent-ink)] hover:underline flex items-center gap-1"
+            >
+              Ver Kanban <ArrowUpRight className="h-3 w-3" />
+            </Link>
           </div>
+
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] text-left text-xs">
-              <thead className="border-b border-[#F0F0ED] bg-[#FAFAFA] text-[9px] uppercase tracking-[0.12em] text-[#9A9A94]">
-                <tr><th className="px-5 py-3 font-semibold">Lead</th><th className="px-3 py-3 font-semibold">Origem</th><th className="px-3 py-3 font-semibold">Status</th><th className="px-3 py-3 font-semibold">Valor</th><th className="px-5 py-3 text-right font-semibold">Score</th></tr>
+            <table className="w-full min-w-[640px] text-left text-xs">
+              <thead className="border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)] text-[10px] uppercase font-mono tracking-wider text-[var(--text-muted)]">
+                <tr>
+                  <th className="px-5 py-3 font-semibold">Lead</th>
+                  <th className="px-3 py-3 font-semibold">Canal / Origem</th>
+                  <th className="px-3 py-3 font-semibold">Status</th>
+                  <th className="px-3 py-3 font-semibold">Valor Negócio</th>
+                  <th className="px-5 py-3 text-right font-semibold">Score</th>
+                </tr>
               </thead>
-              <tbody className="divide-y divide-[#F0F0ED]">
-                {recentLeads.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-[#FAFAFA]">
-                    <td className="px-5 py-3.5"><div className="font-semibold">{lead.nome || "Lead sem nome"}</div><div className="mt-0.5 text-[10px] text-[#9A9A94]">{lead.telefone}</div></td>
-                    <td className="px-3 py-3.5 text-[10px] text-[#6F6F6F]">{lead.origemCanal || "WhatsApp"}{lead.utmCampaign ? ` · ${lead.utmCampaign}` : ""}</td>
-                    <td className="px-3 py-3.5"><span className="rounded-full bg-[#F4F4F2] px-2.5 py-1 text-[9px] font-semibold text-[#6F6F6F]">{lead.status}</span></td>
-                    <td className="px-3 py-3.5 font-semibold">{lead.valorNegocio ? formatCurrency(lead.valorNegocio) : "—"}</td>
-                    <td className="px-5 py-3.5 text-right font-semibold text-[#FF6A2A]">{lead.score || 0}</td>
+              <tbody className="divide-y divide-[var(--border-subtle)]">
+                {recentLeads.map((lead: any) => (
+                  <tr key={lead.id} className="hover:bg-[var(--bg-subtle)] transition-colors">
+                    <td className="px-5 py-3.5">
+                      <div className="font-semibold text-[var(--text-main)]">{lead.nome || "Lead sem nome"}</div>
+                      <div className="text-[10px] text-[var(--text-subtle)] font-mono">{lead.telefone}</div>
+                    </td>
+                    <td className="px-3 py-3.5 text-xs text-[var(--text-muted)]">
+                      {lead.origemCanal || "WhatsApp"}
+                      {lead.utmCampaign ? ` · ${lead.utmCampaign}` : ""}
+                    </td>
+                    <td className="px-3 py-3.5">
+                      <StatusBadge status={lead.status} />
+                    </td>
+                    <td className="px-3 py-3.5 font-semibold font-mono text-[var(--text-main)]">
+                      {lead.valorNegocio ? formatCurrency(lead.valorNegocio) : "—"}
+                    </td>
+                    <td className="px-5 py-3.5 text-right font-bold font-mono text-[var(--accent-ink)]">
+                      {lead.score || 0}
+                    </td>
                   </tr>
                 ))}
-                {recentLeads.length === 0 && <tr><td colSpan={5} className="px-5 py-12 text-center text-xs text-[#9A9A94]">Nenhum lead no período selecionado.</td></tr>}
+                {recentLeads.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-5 py-12 text-center text-xs text-[var(--text-muted)]">
+                      Nenhum lead registrado no período.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
         </div>
 
-        <div className="rounded-xl border border-[#E7E7E4] bg-white p-5">
-          <div className="flex items-center justify-between"><div><div className="text-[10px] uppercase tracking-[0.15em] text-[#9A9A94]">AI Assistant</div><h2 className="mt-1 text-sm font-semibold">Inteligência da operação</h2></div><Bot className="h-4 w-4 text-[#FF6A2A]" /></div>
-          <div className="mt-6 rounded-xl bg-[#F7F7F5] p-5 text-center">
-            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-white shadow-[0_8px_25px_rgba(255,106,42,0.16)]"><div className="grid h-10 w-10 place-items-center rounded-full bg-[#FF6A2A] text-white"><Sparkles className="h-5 w-5" /></div></div>
-            <h3 className="mt-4 text-sm font-semibold">Pronto para analisar.</h3>
-            <p className="mx-auto mt-1 max-w-[220px] text-[10px] leading-5 text-[#8A8A84]">Pergunte sobre seus leads, campanhas, conversões ou oportunidades.</p>
-            <Link href="/dashboard/inbox" className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-[#171717] px-3.5 py-2 text-[10px] font-bold text-white">Abrir atendimento <ArrowUpRight className="h-3 w-3" /></Link>
+        {/* AI Assistant Card */}
+        <div className="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 shadow-[var(--shadow-card)] space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-subtle)] font-bold">
+                Motor IA
+              </div>
+              <h3 className="mt-0.5 text-sm font-bold text-[var(--text-main)]">Inteligência Comercial</h3>
+            </div>
+            <Bot className="h-4 w-4 text-[var(--accent-ink)]" />
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <div className="rounded-lg border border-[#E7E7E4] p-3"><div className="text-[9px] text-[#9A9A94]">Taxa de qualificação</div><div className="mt-1 text-sm font-semibold">{conversion}%</div></div>
-            <div className="rounded-lg border border-[#E7E7E4] p-3"><div className="text-[9px] text-[#9A9A94]">Vendas</div><div className="mt-1 text-sm font-semibold">{wonLeads.length}</div></div>
+
+          <div className="rounded-[var(--radius-md)] bg-[var(--bg-subtle)] border border-[var(--border-subtle)] p-4 text-center space-y-3">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[var(--accent-soft)] text-[var(--accent-ink)]">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <h4 className="text-xs font-bold text-[var(--text-main)]">Triagem e Qualificação Automáticas</h4>
+            <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+              O motor de IA conversa via WhatsApp, aplica mini-quizzes e encaminha leads prontos ao seu time.
+            </p>
+            <Link href="/dashboard/inbox">
+              <Button variant="primary" size="sm" className="w-full mt-2">
+                Acessar Atendimento Ativo
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[var(--border-subtle)]">
+            <div className="rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--bg-subtle)] p-3">
+              <div className="text-[10px] text-[var(--text-subtle)]">Taxa Qualificação</div>
+              <div className="mt-1 text-base font-bold font-mono text-[var(--text-main)]">{conversion}%</div>
+            </div>
+            <div className="rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--bg-subtle)] p-3">
+              <div className="text-[10px] text-[var(--text-subtle)]">Vendas Concluídas</div>
+              <div className="mt-1 text-base font-bold font-mono text-[var(--success-text)]">{wonLeads.length}</div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="rounded-xl border border-[#E7E7E4] bg-white p-5">
-        <div className="flex items-center justify-between"><div><h2 className="text-sm font-semibold">Operação comercial</h2><p className="mt-0.5 text-[10px] text-[#9A9A94]">Atalhos para as áreas mais usadas.</p></div><BarChart3 className="h-4 w-4 text-[#B0B0AA]" /></div>
-        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+      {/* Quick Access Grid */}
+      <section className="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 shadow-[var(--shadow-card)]">
+        <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
+          <div>
+            <h3 className="text-sm font-bold text-[var(--text-main)]">Módulos da Operação</h3>
+            <p className="text-[11px] text-[var(--text-muted)]">Navegue pelas ferramentas integradas.</p>
+          </div>
+          <BarChart3 className="h-4 w-4 text-[var(--text-subtle)]" />
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
           {[
-            ["Caixa de entrada", "WhatsApp + Instagram", "/dashboard/inbox", MessageSquare],
-            ["CRM Kanban", "Pipeline e oportunidades", "/dashboard/crm", Target],
-            ["Campanhas", "UTMs e atribuição", "/dashboard/campanhas", BarChart3],
+            ["Caixa de Entrada", "WhatsApp + Instagram Direct", "/dashboard/inbox", MessageSquare],
+            ["CRM Kanban", "Funil comercial e oportunidades", "/dashboard/crm", Target],
+            ["Campanhas", "UTMs e Atribuição de Tráfego", "/dashboard/campanhas", BarChart3],
           ].map(([title, description, href, Icon]) => (
-            <Link key={String(title)} href={String(href)} className="group flex items-center gap-3 rounded-lg border border-[#E7E7E4] p-3.5 hover:border-[#FFB18A] hover:bg-[#FFF9F5]">
-              <span className="grid h-9 w-9 place-items-center rounded-lg bg-[#F4F4F2] text-[#FF6A2A]"><Icon className="h-4 w-4" /></span>
-              <span className="min-w-0"><span className="block text-xs font-semibold">{String(title)}</span><span className="mt-0.5 block text-[10px] text-[#9A9A94]">{String(description)}</span></span>
-              <ChevronRight className="ml-auto h-3.5 w-3.5 text-[#B0B0AA] group-hover:text-[#FF6A2A]" />
+            <Link
+              key={String(title)}
+              href={String(href)}
+              className="group flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--border-subtle)] p-3.5 hover:border-[var(--accent-primary)] hover:bg-[var(--bg-subtle)] transition-all"
+            >
+              <span className="grid h-9 w-9 place-items-center rounded-[var(--radius-md)] bg-[var(--bg-subtle)] text-[var(--accent-ink)] group-hover:scale-105 transition-transform">
+                <Icon className="h-4 w-4" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-xs font-bold text-[var(--text-main)]">{String(title)}</span>
+                <span className="mt-0.5 block text-[10px] text-[var(--text-muted)]">{String(description)}</span>
+              </span>
+              <ChevronRight className="ml-auto h-3.5 w-3.5 text-[var(--text-subtle)] group-hover:text-[var(--accent-ink)]" />
             </Link>
           ))}
         </div>
