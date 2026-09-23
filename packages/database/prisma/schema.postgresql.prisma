@@ -1,0 +1,263 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [vector]
+}
+
+model Organization {
+  id                   String            @id @default(cuid())
+  nome                 String
+  slug                 String            @unique
+  segmento             String            @default("GENERAL")
+  logoUrl              String?
+  corPrimaria          String?           @default("#00DDD7")
+  plano                String            @default("pro")
+  statusPlano          String            @default("ativo")
+  whatsappNumber       String?
+  telefoneComercial    String?
+  cnpj                 String?
+  emailNotificacoes    String?
+  instagramHandle      String?
+  
+  whatsappTipoConexao  String?           @default("QR_CODE")
+  whatsappStatus       String?           @default("DISCONNECTED")
+  metaPhoneNumberId    String?
+  metaWabaId           String?
+  metaAccessToken      String?
+  
+  instagramConnected   Boolean?          @default(false)
+  instagramKeywordsJson String?
+  quizConfigJson       String?
+
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  users                User[]
+  leads                Lead[]
+  conversations        Conversation[]
+  appointments         Appointment[]
+  vehicles             Vehicle[]
+  insurancePolicies    InsurancePolicy[]
+  taxGuides            TaxGuide[]
+  auditLogs            AuditLog[]
+  knowledgeDocuments   KnowledgeDocument[]
+  knowledgeChunks      KnowledgeChunk[]
+}
+
+model User {
+  id             String       @id @default(cuid())
+  organizationId String
+  nome           String
+  email          String       @unique
+  senhaHash      String
+  role           String       @default("ADMIN_EMPRESA")
+  avatarUrl      String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignedLeads  Lead[]       @relation("AssignedUser")
+  auditLogs      AuditLog[]
+
+  @@index([organizationId])
+  @@index([email])
+}
+
+model Lead {
+  id                 String       @id @default(cuid())
+  organizationId     String
+  assignedUserId     String?
+  nome               String
+  telefone           String
+  telefoneHash       String
+  email              String?
+  status             String       @default("NOVO")
+  prioridade         String       @default("WARM")
+  score              Int          @default(50)
+  scoreJustificativa String?
+  valorNegocio       Float?       @default(0)
+
+  origemCanal        String       @default("WHATSAPP")
+  utmSource          String?
+  utmCampaign        String?
+  utmMedium          String?
+  directKeyword      String?
+  quizAnswersJson    String?
+  notasInternasJson  String?
+  
+  empresa            String?
+  ramoInteresse      String?
+  resumoIa           String?
+
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignedUser       User?        @relation("AssignedUser", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  conversations      Conversation[]
+  appointments       Appointment[]
+
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([organizationId, score])
+  @@index([telefoneHash])
+}
+
+model Conversation {
+  id             String       @id @default(cuid())
+  organizationId String
+  leadId         String
+  canal          String       @default("WHATSAPP")
+  status         String       @default("ABERTO")
+  ultimoContato  DateTime     @default(now())
+  createdAt      DateTime     @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead           Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  messages       Message[]
+
+  @@index([organizationId])
+  @@index([leadId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  remetenteTipo  String
+  tipoConteudo   String       @default("TEXTO")
+  conteudo       String
+  mediaUrl       String?
+  audioDuration  Int?
+  statusEnvio    String       @default("ENVIADO")
+  createdAt      DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+}
+
+model Appointment {
+  id             String       @id @default(cuid())
+  organizationId String
+  leadId         String
+  titulo         String
+  descricao      String?
+  dataHorario    DateTime
+  status         String       @default("AGENDADO")
+  tipo           String       @default("VISITA")
+  lembreteEnviado Boolean     @default(false)
+  createdAt      DateTime     @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead           Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([organizationId, dataHorario])
+}
+
+model Vehicle {
+  id             String       @id @default(cuid())
+  organizationId String
+  modelo         String
+  marca          String
+  ano            Int
+  preco          Float
+  km             Int
+  placa          String?
+  cor            String?
+  fotosJson      String?
+  status         String       @default("DISPONIVEL")
+  createdAt      DateTime     @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model InsurancePolicy {
+  id              String       @id @default(cuid())
+  organizationId  String
+  numeroApolice   String?
+  seguradora      String
+  ramo            String
+  premio          Float        @default(0)
+  dataVencimento  DateTime
+  status          String       @default("ATIVA")
+  createdAt       DateTime     @default(now())
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([organizationId, dataVencimento])
+}
+
+model TaxGuide {
+  id              String       @id @default(cuid())
+  organizationId  String
+  titulo          String
+  valor           Float
+  dataVencimento  DateTime
+  pixCopiaECola   String?
+  codigoBarras    String?
+  status          String       @default("PENDENTE")
+  createdAt       DateTime     @default(now())
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model AuditLog {
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String?
+  acao           String
+  detalhes       String?
+  ipAddress      String?
+  createdAt      DateTime     @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+}
+
+model KnowledgeDocument {
+  id             String           @id @default(cuid())
+  organizationId String
+  titulo         String
+  tipo           String
+  urlOriginal    String?
+  tamanhoBytes   Int?             @default(0)
+  totalChunks    Int              @default(0)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  chunks         KnowledgeChunk[]
+
+  @@index([organizationId])
+}
+
+model KnowledgeChunk {
+  id             String                 @id @default(cuid())
+  organizationId String
+  documentId     String
+  chunkIndex     Int                    @default(0)
+  conteudoTexto  String
+  embeddingJson  String?
+  embedding      Unsupported("vector(1536)")?
+  createdAt      DateTime               @default(now())
+
+  organization   Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  document       KnowledgeDocument      @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([documentId])
+}

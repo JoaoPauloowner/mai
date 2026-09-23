@@ -1,12 +1,23 @@
 {
-  "name": "omni-service-saas",
+  "name": "omni-sdr-monorepo",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "next dev",
+    "dev:landing": "npm run dev --workspace=@omni/landing",
+    "dev:web": "npm run dev --workspace=@omni/web",
+    "dev:api": "npm run dev --workspace=@omni/api",
     "build": "next build",
+    "build:landing": "npm run build --workspace=@omni/landing",
+    "build:web": "npm run build --workspace=@omni/web",
+    "build:api": "npm run build --workspace=@omni/api",
     "start": "next start",
     "lint": "eslint",
+    "db:generate": "npm run db:generate --workspace=@omni/database",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts"
   },
