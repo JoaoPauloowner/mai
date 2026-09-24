@@ -7,19 +7,19 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "next dev",
+    "dev": "npm run dev:web",
     "dev:landing": "npm run dev --workspace=@omni/landing",
     "dev:web": "npm run dev --workspace=@omni/web",
     "dev:api": "npm run dev --workspace=@omni/api",
-    "build": "next build",
+    "build": "npm run build:landing && npm run build:web && npm run build:api",
     "build:landing": "npm run build --workspace=@omni/landing",
     "build:web": "npm run build --workspace=@omni/web",
     "build:api": "npm run build --workspace=@omni/api",
-    "start": "next start",
+    "start": "npm run start --workspace=@omni/web",
     "lint": "eslint",
     "db:generate": "npm run db:generate --workspace=@omni/database",
-    "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:push": "prisma db push --schema=packages/database/prisma/schema.prisma",
+    "db:seed": "tsx packages/database/prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
