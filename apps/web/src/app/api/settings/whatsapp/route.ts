@@ -25,7 +25,7 @@ export async function GET() {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const webhookUrl = `${appUrl}/api/webhooks/whatsapp`;
-    const verifyToken = process.env.META_WEBHOOK_VERIFY_TOKEN || "omni_verify_token_2026";
+    const verifyToken = process.env.META_WEBHOOK_VERIFY_TOKEN || "";
 
     return NextResponse.json({
       config: org,

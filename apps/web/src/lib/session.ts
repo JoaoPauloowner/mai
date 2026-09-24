@@ -14,10 +14,14 @@ export interface SessionData {
   isDemoMode?: boolean;
 }
 
+const sessionSecret = process.env.SESSION_SECRET;
+
+if (!sessionSecret && process.env.NODE_ENV === "production") {
+  throw new Error("CRITICAL SECURITY ERROR: SESSION_SECRET environment variable is missing in production.");
+}
+
 export const sessionOptions: SessionOptions = {
-  password:
-    process.env.SESSION_SECRET ||
-    "omni_saas_ultra_secure_secret_key_change_in_production_2026_at_least_32_bytes",
+  password: sessionSecret || "omni_saas_ultra_secure_secret_key_development_only_min_32_bytes",
   cookieName: "omni-session",
   cookieOptions: {
     httpOnly: true,

@@ -214,7 +214,7 @@ export function InboxClient({
           {filteredConversations.length === 0 ? (
             <div className="p-8 text-center text-xs text-[var(--text-muted)] space-y-1">
               <div>Nenhuma conversa no canal selecionado.</div>
-              <div className="text-[10px]">Alterne para a aba "Todos" para ver todas as mensagens.</div>
+              <div className="text-[10px]">Alterne para a aba &quot;Todos&quot; para ver todas as mensagens.</div>
             </div>
           ) : (
             filteredConversations.map((conv) => {

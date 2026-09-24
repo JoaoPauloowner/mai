@@ -1,10 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { checkRateLimit } from "@/lib/rate-limit";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
+    const ip = req.headers.get("x-forwarded-for") || "unknown_ip";
+    
+    // 1. Rate Limiting (3 cadastros por IP a cada 1 hora)
+    const limit = checkRateLimit(`register_${ip}`, 3, 60 * 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Limite de cadastros excedido para este IP. Tente novamente mais tarde." },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const { empresaNome, nome, email, telefone, senha } = body;
 
@@ -17,7 +29,7 @@ export async function POST(req: Request) {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // Verifica se o e-mail já está em uso
+    // 2. Verifica se o e-mail já está em uso
     const existingUser = await prisma.user.findUnique({
       where: { email: cleanEmail },
     });
@@ -29,7 +41,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Gera o slug da organização a partir do nome da empresa
+    // 3. Gera o slug da organização a partir do nome da empresa
     const baseSlug = empresaNome
       .toLowerCase()
       .normalize("NFD")
@@ -40,19 +52,19 @@ export async function POST(req: Request) {
 
     const uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
 
-    // Cria a Organização do novo cliente
+    // 4. Cria a Organização do novo cliente
     const org = await prisma.organization.create({
       data: {
         nome: empresaNome.trim(),
         slug: uniqueSlug,
         segmento: "GENERAL",
         plano: "starter",
-        statusPlano: "ativo",
+        statusPlano: "trial",
         whatsappNumber: telefone ? telefone.trim() : null,
       },
     });
 
-    // Cria o Usuário Administrador da Empresa
+    // 5. Cria o Usuário Administrador da Empresa
     const passwordHash = await bcrypt.hash(senha, 10);
     const user = await prisma.user.create({
       data: {
@@ -64,7 +76,22 @@ export async function POST(req: Request) {
       },
     });
 
-    // Cria a Sessão Criptografada do novo cliente
+    // 6. Grava no AuditLog (Item 8)
+    try {
+      await prisma.auditLog.create({
+        data: {
+          organizationId: org.id,
+          userId: user.id,
+          acao: "ORGANIZATION_REGISTER",
+          detalhes: `Organização "${org.nome}" cadastrada por ${user.nome} (${user.email}).`,
+          ipAddress: ip,
+        },
+      });
+    } catch (auditError) {
+      console.error("[AuditLog Register Error]", auditError);
+    }
+
+    // 7. Cria a Sessão Criptografada do novo cliente
     const session = await getSession();
     session.userId = user.id;
     session.organizationId = org.id;

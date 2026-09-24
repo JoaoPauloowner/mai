@@ -293,3 +293,13 @@ model KnowledgeChunk {
   @@index([organizationId])
   @@index([documentId])
 }
+
+model OtpVerification {
+  id        String   @id @default(cuid())
+  telefone  String   @unique
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([telefone])
+}

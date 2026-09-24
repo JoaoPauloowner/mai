@@ -1,15 +1,50 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import crypto from "crypto";
 
-// Mapa em memória com TTL de 10 minutos para códigos OTP
-const otpStore = new Map<string, { code: string; expiresAt: number }>();
+// Envio de OTP via Meta WhatsApp Cloud API v20.0
+async function sendWhatsAppOtp(phone: string, code: string) {
+  const metaToken = process.env.META_ACCESS_TOKEN;
+  const phoneId = process.env.META_PHONE_NUMBER_ID;
 
-// 1. Gerar e disparar código OTP via WhatsApp
+  if (!metaToken || !phoneId) {
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`[WhatsApp OTP Dev Mode] Código para ${phone}: ${code}`);
+    }
+    return { sent: false, reason: "META_ACCESS_TOKEN_NOT_CONFIGURED" };
+  }
+
+  try {
+    const cleanTo = phone.replace(/\D/g, "");
+    const res = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${metaToken}`,
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: cleanTo,
+        type: "text",
+        text: {
+          preview_url: false,
+          body: `🔒 *Seu código de acesso ao Omni Service SaaS é:* *${code}*\n\nEle expira em 10 minutos. Nunca compartilhe este código.`,
+        },
+      }),
+    });
+
+    const data = await res.json();
+    return { sent: res.ok, data };
+  } catch (err: any) {
+    console.error("[WhatsApp OTP Error]", err);
+    return { sent: false, error: err.message };
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { telefone, action } = body; // action: "REQUEST_CODE" ou "VERIFY_CODE"
+    const { telefone, action } = body;
 
     if (!telefone) {
       return NextResponse.json(
@@ -20,30 +55,35 @@ export async function POST(req: Request) {
 
     const cleanPhone = telefone.replace(/\D/g, "");
 
-    // Geração do código OTP de 6 dígitos
+    // 1. Gerar e salvar código OTP no banco de dados
     if (action === "REQUEST_CODE") {
       const code = Math.floor(100000 + Math.random() * 900000).toString();
-      const expiresAt = Date.now() + 1000 * 60 * 10; // 10 minutos
+      const expiresAt = new Date(Date.now() + 1000 * 60 * 10); // 10 minutos
 
-      otpStore.set(cleanPhone, { code, expiresAt });
+      // Upsert no banco de dados (substitui o Map em memória)
+      await prisma.otpVerification.upsert({
+        where: { telefone: cleanPhone },
+        update: { code, expiresAt },
+        create: { telefone: cleanPhone, code, expiresAt },
+      });
 
-      const mensagemWhatsApp = `🔒 *Seu código de acesso ao Omni Service SaaS é:* *${code}*\n\nEle expira em 10 minutos. Nunca compartilhe este código.`;
-
-      // Log para visualização imediata no console/ambiente
-      console.log(`[WhatsApp 2FA] Código gerado para ${cleanPhone}: ${code}`);
+      // Disparo real via Meta WhatsApp API
+      await sendWhatsAppOtp(cleanPhone, code);
 
       return NextResponse.json({
         success: true,
         message: "Código de verificação enviado para o seu WhatsApp.",
-        // Em ambiente de teste/local, retornamos o código para facilidade
         debugCode: process.env.NODE_ENV !== "production" ? code : undefined,
       });
     }
 
-    // Validação do código OTP
+    // 2. Validação do código OTP consultando o banco de dados
     if (action === "VERIFY_CODE") {
       const { code } = body;
-      const stored = otpStore.get(cleanPhone);
+
+      const stored = await prisma.otpVerification.findUnique({
+        where: { telefone: cleanPhone },
+      });
 
       if (!stored) {
         return NextResponse.json(
@@ -52,23 +92,23 @@ export async function POST(req: Request) {
         );
       }
 
-      if (Date.now() > stored.expiresAt) {
-        otpStore.delete(cleanPhone);
+      if (new Date() > stored.expiresAt) {
+        await prisma.otpVerification.delete({ where: { telefone: cleanPhone } });
         return NextResponse.json(
           { error: "Código expirado. Solicite um novo código." },
           { status: 400 }
         );
       }
 
-      if (stored.code !== code.trim()) {
+      if (stored.code !== code?.trim()) {
         return NextResponse.json(
           { error: "Código incorreto. Verifique o WhatsApp e tente novamente." },
           { status: 400 }
         );
       }
 
-      // Código válido: remove do store
-      otpStore.delete(cleanPhone);
+      // Código válido: apaga o registro no banco
+      await prisma.otpVerification.delete({ where: { telefone: cleanPhone } });
 
       return NextResponse.json({
         success: true,

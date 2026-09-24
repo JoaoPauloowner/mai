@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       "Data Cadastro",
     ];
 
-    const rows = leads.map((l) => [
+    const rows = leads.map((l: any) => [
       l.id,
       `"${(l.nome || "").replace(/"/g, '""')}"`,
       `"${(l.telefone || "").replace(/"/g, '""')}"`,
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       l.createdAt.toISOString(),
     ]);
 
-    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map((r: (string | number)[]) => r.join(","))].join("\n");
 
     return new NextResponse(csvContent, {
       status: 200,

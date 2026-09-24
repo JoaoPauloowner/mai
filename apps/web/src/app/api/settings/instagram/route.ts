@@ -35,7 +35,7 @@ export async function GET() {
       instagramConnected: Boolean(org?.instagramConnected),
       keywords,
       webhookUrl,
-      verifyToken: "omni_verify_token_2026",
+      verifyToken: process.env.META_WEBHOOK_VERIFY_TOKEN || "",
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

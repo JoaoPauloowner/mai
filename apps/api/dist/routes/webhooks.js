@@ -181,18 +181,39 @@ exports.webhookRouter.post("/voice", async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 });
-// 5. Billing Webhook (Asaas)
+// 5. Billing Webhook (Asaas com Verificação de Token & AuditLog)
 exports.webhookRouter.post("/billing", async (req, res) => {
     try {
+        const asaasSecret = process.env.ASAAS_WEBHOOK_SECRET;
+        const incomingToken = req.headers["asaas-access-token"];
+        if (asaasSecret && incomingToken !== asaasSecret) {
+            console.warn("[Billing Webhook Asaas] Token de acesso inválido no header asaas-access-token. Rejeitado.");
+            return res.status(401).json({ error: "Token de webhook inválido" });
+        }
         const body = req.body;
         const event = body?.event; // ex: PAYMENT_RECEIVED, PAYMENT_OVERDUE
         const customerEmail = body?.payment?.customerEmail || body?.customer;
-        console.log(`[Billing Webhook Asaas] Evento: ${event} para cliente: ${customerEmail}`);
+        if (process.env.NODE_ENV !== "production") {
+            console.log(`[Billing Webhook Asaas] Evento: ${event} para cliente: ${customerEmail}`);
+        }
         if (event === "PAYMENT_RECEIVED" || event === "PAYMENT_CONFIRMED") {
-            await database_1.prisma.organization.updateMany({
+            const org = await database_1.prisma.organization.findFirst({
                 where: { emailNotificacoes: customerEmail },
-                data: { statusPlano: "ativo" },
             });
+            if (org) {
+                await database_1.prisma.organization.update({
+                    where: { id: org.id },
+                    data: { statusPlano: "ativo" },
+                });
+                // Grava no AuditLog (Item 8)
+                await database_1.prisma.auditLog.create({
+                    data: {
+                        organizationId: org.id,
+                        acao: "PAYMENT_CONFIRMED",
+                        detalhes: `Pagamento recebido via Asaas. Plano reativado para a organização ${org.nome}. Evento: ${event}`,
+                    },
+                });
+            }
         }
         return res.status(200).json({ received: true });
     }

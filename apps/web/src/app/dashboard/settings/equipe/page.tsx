@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Users,
   UserPlus,
@@ -46,7 +46,7 @@ export default function TeamSettingsPage() {
     telefone: string;
   } | null>(null);
 
-  const fetchTeam = async () => {
+  const fetchTeam = useCallback(async () => {
     try {
       const res = await fetch("/api/settings/team");
       const data = await res.json();
@@ -56,11 +56,11 @@ export default function TeamSettingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchTeam();
-  }, []);
+  }, [fetchTeam]);
 
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
