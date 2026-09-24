@@ -28,9 +28,13 @@ app.get("/health", (_req, res) => {
   });
 });
 
-// Rotas de Webhooks e IA
+// Rotas de Webhooks e IA (suporta tanto /webhooks quanto /api/webhooks)
+app.use("/webhooks", webhookRouter);
 app.use("/api/webhooks", webhookRouter);
 
-app.listen(port, () => {
-  console.log(`🚀 [Railway AI Engine] Servidor ativo e ouvindo na porta ${port}`);
+const PORT = Number(process.env.PORT) || 8080;
+const HOST = "0.0.0.0";
+
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 [Railway AI Engine] Servidor ativo e ouvindo em ${HOST}:${PORT}`);
 });
