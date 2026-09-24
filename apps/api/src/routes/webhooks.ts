@@ -28,13 +28,24 @@ webhookRouter.get("/whatsapp", (req: Request, res: Response) => {
 
 // 2. WhatsApp Incoming Messages Webhook (Processamento Assíncrono com IA & RAG)
 webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
-  // Validação de HMAC com META_APP_SECRET
+  // Validação de HMAC com META_APP_SECRET (Falha fechada em produção)
   const signature = req.headers["x-hub-signature-256"] as string | undefined;
   const appSecret = process.env.META_APP_SECRET;
 
-  if (appSecret && !verifyMetaSignature(JSON.stringify(req.body), signature, appSecret)) {
-    console.warn("[Webhook WhatsApp] Assinatura HMAC X-Hub-Signature-256 inválida. Requisição rejeitada.");
-    return res.status(401).json({ error: "Assinatura HMAC inválida" });
+  if (process.env.NODE_ENV === "production") {
+    if (!appSecret) {
+      console.error("[Webhook WhatsApp CRITICAL] META_APP_SECRET não está configurado em produção. Rejeitando requisição.");
+      return res.status(500).json({ error: "Configuração de segurança incompleta" });
+    }
+    if (!signature || !verifyMetaSignature(JSON.stringify(req.body), signature, appSecret)) {
+      console.warn("[Webhook WhatsApp] Assinatura HMAC X-Hub-Signature-256 ausente ou inválida. Requisição rejeitada.");
+      return res.status(401).json({ error: "Assinatura HMAC inválida ou ausente" });
+    }
+  } else if (appSecret && signature) {
+    if (!verifyMetaSignature(JSON.stringify(req.body), signature, appSecret)) {
+      console.warn("[Webhook WhatsApp Dev] Assinatura HMAC inválida.");
+      return res.status(401).json({ error: "Assinatura HMAC inválida" });
+    }
   }
 
   // Responde 200 OK imediatamente para a Meta (em < 50ms)
@@ -149,6 +160,25 @@ webhookRouter.get("/instagram", (req: Request, res: Response) => {
 });
 
 webhookRouter.post("/instagram", async (req: Request, res: Response) => {
+  // Validação de HMAC com META_APP_SECRET (Falha fechada em produção)
+  const signature = req.headers["x-hub-signature-256"] as string | undefined;
+  const appSecret = process.env.META_APP_SECRET;
+
+  if (process.env.NODE_ENV === "production") {
+    if (!appSecret) {
+      console.error("[Webhook Instagram CRITICAL] META_APP_SECRET não está configurado em produção. Rejeitando requisição.");
+      return res.status(500).json({ error: "Configuração de segurança incompleta" });
+    }
+    if (!signature || !verifyMetaSignature(JSON.stringify(req.body), signature, appSecret)) {
+      console.warn("[Webhook Instagram] Assinatura HMAC X-Hub-Signature-256 ausente ou inválida. Requisição rejeitada.");
+      return res.status(401).json({ error: "Assinatura HMAC inválida ou ausente" });
+    }
+  } else if (appSecret && signature) {
+    if (!verifyMetaSignature(JSON.stringify(req.body), signature, appSecret)) {
+      return res.status(401).json({ error: "Assinatura HMAC inválida" });
+    }
+  }
+
   res.status(200).json({ status: "received" });
 
   (async () => {
@@ -212,15 +242,26 @@ webhookRouter.post("/voice", async (req: Request, res: Response) => {
   }
 });
 
-// 5. Billing Webhook (Asaas com Verificação de Token & AuditLog)
+// 5. Billing Webhook (Asaas com Verificação de Token & AuditLog - Falha Fechada em Produção)
 webhookRouter.post("/billing", async (req: Request, res: Response) => {
   try {
-    const asaasSecret = process.env.ASAAS_WEBHOOK_SECRET;
+    const asaasSecret = process.env.ASAAS_WEBHOOK_SECRET || process.env.ASAAS_WEBHOOK_ACCESS_TOKEN;
     const incomingToken = req.headers["asaas-access-token"] as string | undefined;
 
-    if (asaasSecret && incomingToken !== asaasSecret) {
-      console.warn("[Billing Webhook Asaas] Token de acesso inválido no header asaas-access-token. Rejeitado.");
-      return res.status(401).json({ error: "Token de webhook inválido" });
+    if (process.env.NODE_ENV === "production") {
+      if (!asaasSecret) {
+        console.error("[Billing Webhook CRITICAL] ASAAS_WEBHOOK_SECRET / ASAAS_WEBHOOK_ACCESS_TOKEN ausente em produção. Rejeitado.");
+        return res.status(500).json({ error: "Configuração de webhook de faturamento incompleta" });
+      }
+      if (!incomingToken || incomingToken !== asaasSecret) {
+        console.warn("[Billing Webhook Asaas] Token ausente ou inválido no header asaas-access-token. Rejeitado.");
+        return res.status(401).json({ error: "Token de webhook inválido ou ausente" });
+      }
+    } else if (asaasSecret) {
+      if (!incomingToken || incomingToken !== asaasSecret) {
+        console.warn("[Billing Webhook Asaas Dev] Token de acesso inválido no header asaas-access-token. Rejeitado.");
+        return res.status(401).json({ error: "Token de webhook inválido" });
+      }
     }
 
     const body = req.body;

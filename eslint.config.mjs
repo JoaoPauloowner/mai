@@ -27,6 +27,14 @@ export default [
         },
       },
     },
+    settings: {
+      next: {
+        rootDir: ["apps/web/", "apps/landing/"],
+      },
+      react: {
+        version: "detect",
+      },
+    },
     plugins: {
       "@next/next": nextPlugin,
       react: reactPlugin,

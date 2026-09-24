@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // Envio de OTP via Meta WhatsApp Cloud API v20.0
 async function sendWhatsAppOtp(phone: string, code: string) {
@@ -43,6 +44,16 @@ async function sendWhatsAppOtp(phone: string, code: string) {
 
 export async function POST(req: Request) {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
+    const { allowed } = checkRateLimit(`otp:${ip}`, 5, 10 * 60 * 1000); // 5 requisições por 10 min por IP
+
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Muitas tentativas de verificação por WhatsApp. Tente novamente em alguns minutos." },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const { telefone, action } = body;
 
