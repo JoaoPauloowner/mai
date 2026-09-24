@@ -1,57 +1,73 @@
-# 🚀 MAI — Motor de Atendimento & Inteligência (Omni Service SaaS)
+# ⚡ OmniSDR — SaaS B2B de SDR com IA & Atendimento Omnichannel
 
-> **Plataforma B2B Modular & Agnóstica de Pré-Vendas (SDR), Atendimento Multicanal e Atribuição de ROI com Inteligência Artificial.**
-
----
-
-## 🌟 Visão Geral & Arquitetura Universal
-
-O **MAI** opera sob a arquitetura **One Core Agnóstico**: um produto enxuto, rápido e universal que atende qualquer segmento comercial (Varejo, Automotivo, Seguros, Saúde, Serviços e B2B) sem necessidade de código ou telas engessadas.
-
-A inteligência operacional é moldada dinamicamente no **painel de configurações** através de:
-
-1. 📚 **Base de Conhecimento Dinâmica (RAG):** Upload de manuais, tabelas de preços, estoques e políticas da empresa para consulta instantânea da IA.
-2. 📅 **Agendamentos & Anti No-Show:** Integração de agenda para marcação de visitas, test-drives, consultas e reuniões com régua de confirmação 24h e 2h antes.
-3. 🎯 **Atribuição Ponta a Ponta:** Rastreamento completo do ROI (UTMs do tráfego pago até a venda fechada no CRM).
+> Plataforma B2B para qualificação automática de leads, atendimento 24/7 e agendamento comercial com Inteligência Artificial via WhatsApp, Instagram Direct e Voz.
 
 ---
 
-## 🛠️ Stack Tecnológica
+## 🏛️ Arquitetura de Produção Desacoplada
 
-* **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS, Lucide Icons.
-* **Backend & APIs:** Next.js Route Handlers + Node.js + Microserviço WhatsApp (QR Code / Meta Cloud API).
-* **Banco de Dados:** Prisma ORM com SQLite (local) ou PostgreSQL (produção) com isolamento multi-tenant via `organizationId`.
-* **Segurança & Sessão:** `iron-session` criptografada com cookies HttpOnly, senhas em BCrypt e conformidade com LGPD.
-* **Motores de IA:** GPT-4o-mini, Gemini 1.5 Flash (contexto longo/RAG), Vapi.ai (voz) e Whisper (áudio PTT).
+O projeto é estruturado como um **Monorepo** com NPM Workspaces para permitir deploys independentes e econômicos:
 
----
-
-## 📖 Documentações do Repositório
-
-* 🏗️ [Arquitetura Modular & RAG (docs/ARCHITECTURE_MODULAR_RAG.md)](./docs/ARCHITECTURE_MODULAR_RAG.md)
-* 📐 [Arquitetura de Dados e Multi-Tenancy (docs/ARCHITECTURE.md)](./docs/ARCHITECTURE.md)
-* 🧠 [Engenharia de Prompts e Agentes (docs/AGENTS_AND_PROMPTS.md)](./docs/AGENTS_AND_PROMPTS.md)
-* 🔒 [Segurança e LGPD (docs/CYBERSECURITY_LGPD.md)](./docs/CYBERSECURITY_LGPD.md)
-* 🚢 [Guia de Deploy (docs/DEPLOYMENT_GUIDE.md)](./docs/DEPLOYMENT_GUIDE.md)
+* **`apps/landing`** $\rightarrow$ Site institucional e Quiz público de diagnóstico ([Vercel](https://vercel.com) — Plano Gratuito $0).
+* **`apps/web`** $\rightarrow$ Painel B2B com CRM Kanban, Inbox Unificado, RAG e Supabase Auth ([Vercel](https://vercel.com) — Plano Gratuito $0).
+* **`apps/api`** $\rightarrow$ Motor de IA, Webhooks assíncronos da Meta e background workers ([Railway](https://railway.app) — ~$5/mês).
+* **`packages/database`** $\rightarrow$ Esquema centralizado do Prisma com PostgreSQL e extensão `pgvector` ([Supabase](https://supabase.com)).
 
 ---
 
-## ⚡ Como Rodar o Projeto Localmente
+## 🚀 Como Rodar Localmente
 
+### Pré-requisitos
+* Node.js 20+
+* NPM 10+
+
+### Instalação
 ```bash
-# 1. Instalar dependências
+# 1. Clonar o repositório
+git clone https://github.com/JoaoPauloowner/mai.git
+cd mai
+
+# 2. Instalar todas as dependências do monorepo
 npm install
 
-# 2. Configurar variáveis de ambiente
-cp .env.example .env
-
-# 3. Gerar banco e rodar seed de teste
-npx prisma db push
-npm run db:seed
-
-# 4. Iniciar servidor de desenvolvimento
-npm run dev
+# 3. Gerar o cliente do banco de dados
+npm run db:generate
 ```
 
-Acesse em: `http://localhost:3000`  
-**Credenciais de Acesso:** `admin@omni.com.br` / `admin123`
+### Comandos de Desenvolvimento
+```bash
+# Rodar o Painel B2B (Porta 3000)
+npm run dev:web
+
+# Rodar a Landing Page (Porta 3001)
+npm run dev:landing
+
+# Rodar a API / Webhooks no Railway (Porta 8080)
+npm run dev:api
+```
+
+---
+
+## 📚 Documentação do Projeto
+
+| Documento | Descrição |
+| :--- | :--- |
+| **[`PRD.md`](./PRD.md)** | Documento de Requisitos de Produto (Regras de negócio, personas e jornadas). |
+| **[`TRD.md`](./TRD.md)** | Documento de Requisitos Técnicos (Arquitetura, pgvector, SSE e APIs). |
+| **[`DEPLOY.md`](./DEPLOY.md)** | Manual passo a passo para deploy na Vercel, Railway e Supabase. |
+| **[`INTEGRATIONS.md`](./INTEGRATIONS.md)** | Mapa de integração com Meta (WhatsApp/Instagram), OpenAI, ElevenLabs, Vapi e Stripe. |
+| **[`ARCHITECTURE.md`](./ARCHITECTURE.md)** | Diagrama de fluxo de dados, estrutura de pastas e modelo de entidades. |
+| **[`PROMPTS.md`](./PROMPTS.md)** | Engenharia de Prompts do SDR IA, System Prompts e Function Calling. |
+| **[`LEGAL.md`](./LEGAL.md)** | Termos de Uso e Política de Privacidade compatíveis com a LGPD. |
+| **[`TESTING.md`](./TESTING.md)** | 5 cenários de estresse e auditoria de respostas da IA. |
+
+---
+
+## 🔒 Segurança e Conformidade
+* Criptografia de senhas com **bcrypt** e isolamento estrito multi-tenant por `organizationId`.
+* Sanitização de entradas contra Prompt Injection e SQL Injection parametrizado.
+* Em conformidade com a **LGPD (Lei Geral de Proteção de Dados)**.
+
+---
+
+© 2026 OmniSDR Technologies. Todos os direitos reservados.
