@@ -10,7 +10,7 @@ export const QuizSubmitSchema = z.object({
     .max(25)
     .regex(/^[0-9+()\s-]+$/, "Telefone contém caracteres inválidos"),
   email: z.string().email("E-mail inválido").optional().or(z.literal("")),
-  answers: z.record(z.any()).optional(),
+  answers: z.record(z.string(), z.any()).optional(),
   utmSource: z.string().max(100).optional(),
   utmCampaign: z.string().max(150).optional(),
   utmMedium: z.string().max(100).optional(),
