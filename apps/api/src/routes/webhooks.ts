@@ -3,6 +3,7 @@ import { prisma } from "@omni/database";
 import { verifyMetaSignature, sendWhatsAppMessage, sendInstagramMessage } from "../services/meta.js";
 import { generateSDRResponse } from "../services/ai.js";
 import { findOrCreateLeadAndConversation, recordIncomingMessage, recordOutgoingMessage, getRecentHistory } from "../services/conversation.js";
+import { captureProductionError } from "../services/monitoring.js";
 
 export const webhookRouter = Router();
 
@@ -35,6 +36,11 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
   if (process.env.NODE_ENV === "production") {
     if (!appSecret) {
       console.error("[Webhook WhatsApp CRITICAL] META_APP_SECRET não está configurado em produção. Rejeitando requisição.");
+      await captureProductionError({
+        service: "api-railway",
+        context: "webhook_whatsapp_auth",
+        error: new Error("META_APP_SECRET não configurado em produção"),
+      });
       return res.status(500).json({ error: "Configuração de segurança incompleta" });
     }
     if (!signature || !verifyMetaSignature(JSON.stringify(req.body), signature, appSecret)) {
@@ -137,9 +143,16 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
       }
     } catch (error) {
       console.error("[Webhook WhatsApp] Erro no processamento em background:", error);
+      await captureProductionError({
+        service: "api-railway",
+        context: "whatsapp_message_pipeline",
+        error,
+        metadata: { body: req.body },
+      });
     }
   })();
 });
+
 
 // 3. Instagram Direct Webhook Handshake & Dispatcher
 webhookRouter.get("/instagram", (req: Request, res: Response) => {
@@ -227,6 +240,12 @@ webhookRouter.post("/instagram", async (req: Request, res: Response) => {
       }
     } catch (error) {
       console.error("[Webhook Instagram] Erro:", error);
+      await captureProductionError({
+        service: "api-railway",
+        context: "instagram_message_pipeline",
+        error,
+        metadata: { body: req.body },
+      });
     }
   })();
 });
@@ -238,6 +257,11 @@ webhookRouter.post("/voice", async (req: Request, res: Response) => {
     console.log("[Webhook Voice] Evento recebido:", JSON.stringify(body).slice(0, 150));
     return res.status(200).json({ status: "success" });
   } catch (error) {
+    await captureProductionError({
+      service: "api-railway",
+      context: "voice_agent_webhook",
+      error,
+    });
     return res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -251,6 +275,11 @@ webhookRouter.post("/billing", async (req: Request, res: Response) => {
     if (process.env.NODE_ENV === "production") {
       if (!asaasSecret) {
         console.error("[Billing Webhook CRITICAL] ASAAS_WEBHOOK_SECRET / ASAAS_WEBHOOK_ACCESS_TOKEN ausente em produção. Rejeitado.");
+        await captureProductionError({
+          service: "api-railway",
+          context: "billing_webhook_security",
+          error: new Error("Chave ASAAS_WEBHOOK_SECRET ausente em produção"),
+        });
         return res.status(500).json({ error: "Configuração de webhook de faturamento incompleta" });
       }
       if (!incomingToken || incomingToken !== asaasSecret) {
@@ -265,30 +294,50 @@ webhookRouter.post("/billing", async (req: Request, res: Response) => {
     }
 
     const body = req.body;
-    const event = body?.event; // ex: PAYMENT_RECEIVED, PAYMENT_OVERDUE
+    const event = body?.event; // ex: PAYMENT_RECEIVED, PAYMENT_OVERDUE, PAYMENT_DELETED
     const customerEmail = body?.payment?.customerEmail || body?.customer;
 
     if (process.env.NODE_ENV !== "production") {
       console.log(`[Billing Webhook Asaas] Evento: ${event} para cliente: ${customerEmail}`);
     }
 
-    if (event === "PAYMENT_RECEIVED" || event === "PAYMENT_CONFIRMED") {
-      const org = await prisma.organization.findFirst({
-        where: { emailNotificacoes: customerEmail },
-      });
+    const org = await prisma.organization.findFirst({
+      where: { emailNotificacoes: customerEmail },
+    });
 
-      if (org) {
+    if (org) {
+      if (event === "PAYMENT_RECEIVED" || event === "PAYMENT_CONFIRMED") {
         await prisma.organization.update({
           where: { id: org.id },
           data: { statusPlano: "ativo" },
         });
 
-        // Grava no AuditLog (Item 8)
         await prisma.auditLog.create({
           data: {
             organizationId: org.id,
             acao: "PAYMENT_CONFIRMED",
-            detalhes: `Pagamento recebido via Asaas. Plano reativado para a organização ${org.nome}. Evento: ${event}`,
+            detalhes: `Pagamento recebido via Asaas. Plano ativado para a organização ${org.nome}. Evento: ${event}`,
+          },
+        });
+      } else if (event === "PAYMENT_OVERDUE") {
+        await prisma.organization.update({
+          where: { id: org.id },
+          data: { statusPlano: "inadimplente" },
+        });
+
+        await prisma.auditLog.create({
+          data: {
+            organizationId: org.id,
+            acao: "PAYMENT_OVERDUE",
+            detalhes: `Fatura vencida via Asaas. Status alterado para inadimplente para ${org.nome}.`,
+          },
+        });
+      } else if (event === "PAYMENT_DELETED" || event === "SUBSCRIPTION_CANCELLED") {
+        await prisma.auditLog.create({
+          data: {
+            organizationId: org.id,
+            acao: "BILLING_SUBSCRIPTION_CANCELLED",
+            detalhes: `Cobrança/assinatura cancelada no Asaas para ${org.nome}. Evento: ${event}`,
           },
         });
       }
@@ -296,6 +345,14 @@ webhookRouter.post("/billing", async (req: Request, res: Response) => {
 
     return res.status(200).json({ received: true });
   } catch (error) {
+    console.error("[Billing Webhook] Erro:", error);
+    await captureProductionError({
+      service: "api-railway",
+      context: "billing_webhook_pipeline",
+      error,
+      metadata: { body: req.body },
+    });
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+

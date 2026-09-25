@@ -77,6 +77,16 @@ export async function POST(req: Request) {
 
     const paymentData = await paymentRes.json();
 
+    // Grava no AuditLog (Item 5)
+    await prisma.auditLog.create({
+      data: {
+        organizationId: org.id,
+        userId: session.userId,
+        acao: "BILLING_CHECKOUT_INITIATED",
+        detalhes: `Checkout iniciado para plano ${plano.toUpperCase()} (${billingType}) no valor de R$ ${valor.toFixed(2)}. Fatura Asaas: ${paymentData.id || "N/A"}`,
+      },
+    });
+
     return NextResponse.json({
       success: true,
       paymentId: paymentData.id,
@@ -89,3 +99,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+

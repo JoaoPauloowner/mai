@@ -71,3 +71,9 @@ graph TD
 * **Tempo Médio de Primeira Resposta (FRT):** < 5 segundos.
 * **Taxa de Qualificação Automática:** > 65% dos leads respondem às 3 perguntas chave de qualificação.
 * **Redução de No-Show:** Diminuição de pelo menos 30% em faltas de consultas/test-drives com lembretes automáticos.
+
+---
+
+## 6. Pendências Conhecidas & Roadmap (v1.1)
+* **E-mails Transacionais (Resend / AWS SES):** Na versão inicial (v1.0), as notificações operacionais e convites de novos membros da equipe são realizadas prioritariamente via WhatsApp e links diretos no painel. O provedor de e-mail transacional automatizado (Recuperação de Senha / E-mail de Boas-Vindas) está documentado como backlog imediato da v1.1.
+
