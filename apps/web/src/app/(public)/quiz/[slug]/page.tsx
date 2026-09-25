@@ -255,12 +255,12 @@ export default function PublicQuizPage() {
                 </div>
 
                 <a
-                  href={`https://wa.me/${companyWhatsapp.replace(/\D/g, "")}?text=Olá! Acabei de preencher o diagnóstico pelo site e gostaria de falar com um especialista.`}
+                  href={`https://wa.me/${companyWhatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá! Sou ${nome} e acabei de concluir o diagnóstico no site. Gostaria de dar andamento no atendimento.`)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-sm transition shadow-sm"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition shadow-sm"
                 >
-                  <MessageSquare className="w-4 h-4" /> Abrir Conversa no WhatsApp Agora
+                  <MessageSquare className="w-4 h-4" /> Conversar no WhatsApp Agora
                 </a>
               </div>
             )}

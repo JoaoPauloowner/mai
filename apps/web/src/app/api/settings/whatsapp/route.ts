@@ -66,6 +66,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, organization: updated });
     }
 
+    // 1.1 Salvar número de WhatsApp Direto (para redirecionamento manual / wa.me)
+    if (action === "SAVE_PHONE") {
+      const { whatsappNumber } = body;
+
+      const updated = await prisma.organization.update({
+        where: { id: session.organizationId },
+        data: {
+          whatsappNumber: whatsappNumber ? normalizePhone(whatsappNumber) : undefined,
+        },
+      });
+
+      return NextResponse.json({ success: true, organization: updated });
+    }
+
+
     // 2. Conexão via QR Code (Evolution API v2 / Baileys)
     if (action === "FETCH_QR" || action === "CONNECT_QR") {
       const org = await prisma.organization.findUnique({
