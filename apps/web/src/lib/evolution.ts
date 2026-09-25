@@ -37,6 +37,7 @@ export async function createOrFetchInstanceQrCode(
       body: JSON.stringify({
         instanceName,
         token: apiKey,
+        integration: "WHATSAPP-BAILEYS",
         qrcode: true,
         webhook: {
           url: webhookUrl,
