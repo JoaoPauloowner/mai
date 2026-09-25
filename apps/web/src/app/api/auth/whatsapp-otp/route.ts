@@ -81,10 +81,14 @@ export async function POST(req: Request) {
       // Disparo real via Meta WhatsApp API
       await sendWhatsAppOtp(cleanPhone, code);
 
+      const isMetaConfigured = Boolean(process.env.META_ACCESS_TOKEN && process.env.META_PHONE_NUMBER_ID);
+
       return NextResponse.json({
         success: true,
-        message: "Código de verificação enviado para o seu WhatsApp.",
-        debugCode: process.env.NODE_ENV !== "production" ? code : undefined,
+        message: isMetaConfigured
+          ? "Código de verificação enviado para o seu WhatsApp."
+          : "Meta WhatsApp API não configurada. Use o código de teste gerado abaixo.",
+        debugCode: !isMetaConfigured ? code : undefined,
       });
     }
 
