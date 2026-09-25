@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Bot, ShieldCheck, Zap, MessageSquare, Target, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Bot, ShieldCheck, Zap, MessageSquare, Target, CheckCircle2, Sparkles } from "lucide-react";
 
 export default function LandingPage() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://omnisdr-app.vercel.app";
@@ -16,28 +16,35 @@ export default function LandingPage() {
             <span>OmniSDR</span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <a
               href={`${appUrl}/quiz/omni-demo`}
-              className="text-xs font-semibold text-zinc-600 hover:text-zinc-900 transition"
+              className="text-xs font-semibold text-zinc-600 hover:text-zinc-900 transition hidden sm:inline-block"
             >
-              Fazer Diagnóstico
+              Diagnóstico Gratuito
             </a>
             <a
               href={`${appUrl}/login`}
-              className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition shadow-xs"
+              className="text-xs font-semibold text-zinc-600 hover:text-zinc-900 transition"
             >
-              Acessar Painel
+              Entrar
+            </a>
+            <a
+              href={`${appUrl}/cadastro`}
+              className="px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition shadow-xs flex items-center gap-1.5"
+            >
+              <span>Criar Conta</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </a>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <main className="flex-1 max-w-6xl mx-auto px-6 py-20 lg:py-28 flex flex-col items-center text-center">
+      <main className="flex-1 max-w-6xl mx-auto px-6 py-16 sm:py-24 flex flex-col items-center text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-zinc-200 bg-zinc-50 text-xs font-medium text-zinc-700 mb-8">
-          <Zap className="w-3.5 h-3.5 text-zinc-900" />
-          <span>Atendimento Imediato & Qualificação 24 Horas</span>
+          <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+          <span>SDR com IA 24/7 para WhatsApp & Instagram</span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-zinc-950 max-w-3xl leading-tight">
@@ -45,26 +52,33 @@ export default function LandingPage() {
         </h1>
 
         <p className="mt-6 text-base sm:text-lg text-zinc-600 max-w-2xl leading-relaxed">
-          SDRs com Inteligência Artificial treinados no seu catálogo e regras de negócio para responder em menos de 5 segundos, qualificar leads e agendar reuniões comerciais.
+          SDRs com Inteligência Artificial treinados no seu catálogo e regras de negócio para responder em menos de 5 segundos, qualificar leads e agendar reuniões comerciais no piloto automático.
         </p>
 
-        <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">
+        {/* CTA Area */}
+        <div className="mt-10 flex flex-col sm:flex-row items-center gap-3.5 w-full sm:w-auto">
           <a
-            href={`${appUrl}/quiz/omni-demo`}
-            className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm"
+            href={`${appUrl}/cadastro`}
+            className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm"
           >
-            Iniciar Diagnóstico Gratuito <ArrowRight className="w-4 h-4" />
+            Começar Teste Grátis <ArrowRight className="w-4 h-4" />
           </a>
           <a
-            href={`${appUrl}/login`}
-            className="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-zinc-300 hover:bg-zinc-50 text-zinc-900 text-sm font-semibold transition flex items-center justify-center"
+            href={`${appUrl}/quiz/omni-demo`}
+            className="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-zinc-300 hover:bg-zinc-50 text-zinc-900 text-sm font-semibold transition flex items-center justify-center gap-2"
           >
-            Entrar como Empresa
+            Fazer Diagnóstico Comercial
           </a>
         </div>
 
+        <div className="mt-4 flex items-center gap-4 text-xs text-zinc-500">
+          <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Teste imediato</span>
+          <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Sem cartão de crédito</span>
+          <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Multi-segmento</span>
+        </div>
+
         {/* Features Grid */}
-        <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8 text-left w-full">
+        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 text-left w-full">
           <div className="p-6 rounded-2xl border border-zinc-200 bg-zinc-50/50">
             <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center mb-4">
               <MessageSquare className="w-5 h-5" />
@@ -79,7 +93,7 @@ export default function LandingPage() {
             <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center mb-4">
               <Bot className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-bold text-zinc-900 mb-2">RAG & Conhecimento Dinâmico</h3>
+            <h3 className="text-base font-bold text-zinc-900 mb-2">RAG & Base de Conhecimento</h3>
             <p className="text-sm text-zinc-600 leading-relaxed">
               Faça upload de PDFs, tabelas de preços e manuais. A IA responde estritamente conforme suas diretrizes.
             </p>
@@ -89,9 +103,9 @@ export default function LandingPage() {
             <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center mb-4">
               <Target className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-bold text-zinc-900 mb-2">Atribuição de Tráfego</h3>
+            <h3 className="text-base font-bold text-zinc-900 mb-2">Atribuição de Tráfego & CRM</h3>
             <p className="text-sm text-zinc-600 leading-relaxed">
-              Rastreamento ponta a ponta de UTMs do Meta Ads e palavras-chave de Direct direto no CRM Kanban.
+              Rastreamento ponta a ponta de UTMs do Meta Ads e palavras-chave de Direct direto no Pipeline CRM Kanban.
             </p>
           </div>
         </div>
@@ -110,3 +124,4 @@ export default function LandingPage() {
     </div>
   );
 }
+
