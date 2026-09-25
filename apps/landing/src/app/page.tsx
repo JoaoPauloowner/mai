@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Bot, ShieldCheck, Zap, MessageSquare, Target, CheckCircle2 } from "lucide-react";
 
 export default function LandingPage() {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://omnisdr-app.vercel.app";
 
   return (
     <div className="min-h-screen bg-white text-zinc-900 flex flex-col justify-between">
@@ -17,12 +17,12 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link
-              href="/quiz/diagnostico"
+            <a
+              href={`${appUrl}/quiz/omni-demo`}
               className="text-xs font-semibold text-zinc-600 hover:text-zinc-900 transition"
             >
               Fazer Diagnóstico
-            </Link>
+            </a>
             <a
               href={`${appUrl}/login`}
               className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition shadow-xs"
@@ -49,12 +49,12 @@ export default function LandingPage() {
         </p>
 
         <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">
-          <Link
-            href="/quiz/diagnostico"
+          <a
+            href={`${appUrl}/quiz/omni-demo`}
             className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm"
           >
             Iniciar Diagnóstico Gratuito <ArrowRight className="w-4 h-4" />
-          </Link>
+          </a>
           <a
             href={`${appUrl}/login`}
             className="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-zinc-300 hover:bg-zinc-50 text-zinc-900 text-sm font-semibold transition flex items-center justify-center"
