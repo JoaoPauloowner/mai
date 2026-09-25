@@ -20,7 +20,8 @@
     "lint": "eslint",
     "db:generate": "npm run db:generate --workspace=@omni/database",
     "db:push": "prisma db push --schema=packages/database/prisma/schema.prisma",
-    "db:seed": "tsx packages/database/prisma/seed.ts"
+    "db:seed": "tsx packages/database/prisma/seed.ts",
+    "test": "vitest run"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -48,7 +49,9 @@
     "postcss": "^8",
     "tailwindcss": "^4",
     "tsx": "^4.23.13",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.1"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
