@@ -1,26 +1,17 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.findOrCreateLeadAndConversation = findOrCreateLeadAndConversation;
-exports.recordIncomingMessage = recordIncomingMessage;
-exports.recordOutgoingMessage = recordOutgoingMessage;
-exports.getRecentHistory = getRecentHistory;
-const crypto_1 = __importDefault(require("crypto"));
-const database_1 = require("@omni/database");
-async function findOrCreateLeadAndConversation({ organizationId, phone, name, channel = "WHATSAPP", }) {
+import crypto from "crypto";
+import { prisma } from "@omni/database";
+export async function findOrCreateLeadAndConversation({ organizationId, phone, name, channel = "WHATSAPP", }) {
     const cleanPhone = phone.replace(/\D/g, "");
-    const phoneHash = crypto_1.default.createHash("sha256").update(cleanPhone).digest("hex");
+    const phoneHash = crypto.createHash("sha256").update(cleanPhone).digest("hex");
     // 1. Buscar Lead existente ou criar novo
-    let lead = await database_1.prisma.lead.findFirst({
+    let lead = await prisma.lead.findFirst({
         where: {
             organizationId,
             telefoneHash: phoneHash,
         },
     });
     if (!lead) {
-        lead = await database_1.prisma.lead.create({
+        lead = await prisma.lead.create({
             data: {
                 organizationId,
                 nome: name || `Lead ${cleanPhone.slice(-4)}`,
@@ -34,7 +25,7 @@ async function findOrCreateLeadAndConversation({ organizationId, phone, name, ch
         });
     }
     // 2. Buscar ou criar Conversa ativa
-    let conversation = await database_1.prisma.conversation.findFirst({
+    let conversation = await prisma.conversation.findFirst({
         where: {
             organizationId,
             leadId: lead.id,
@@ -43,7 +34,7 @@ async function findOrCreateLeadAndConversation({ organizationId, phone, name, ch
         orderBy: { createdAt: "desc" },
     });
     if (!conversation) {
-        conversation = await database_1.prisma.conversation.create({
+        conversation = await prisma.conversation.create({
             data: {
                 organizationId,
                 leadId: lead.id,
@@ -54,8 +45,8 @@ async function findOrCreateLeadAndConversation({ organizationId, phone, name, ch
     }
     return { lead, conversation };
 }
-async function recordIncomingMessage({ conversationId, text, }) {
-    return await database_1.prisma.message.create({
+export async function recordIncomingMessage({ conversationId, text, }) {
+    return await prisma.message.create({
         data: {
             conversationId,
             remetenteTipo: "LEAD",
@@ -65,8 +56,8 @@ async function recordIncomingMessage({ conversationId, text, }) {
         },
     });
 }
-async function recordOutgoingMessage({ conversationId, text, }) {
-    return await database_1.prisma.message.create({
+export async function recordOutgoingMessage({ conversationId, text, }) {
+    return await prisma.message.create({
         data: {
             conversationId,
             remetenteTipo: "AGENT_IA",
@@ -76,8 +67,8 @@ async function recordOutgoingMessage({ conversationId, text, }) {
         },
     });
 }
-async function getRecentHistory(conversationId) {
-    const messages = await database_1.prisma.message.findMany({
+export async function getRecentHistory(conversationId) {
+    const messages = await prisma.message.findMany({
         where: { conversationId },
         orderBy: { createdAt: "desc" },
         take: 6,

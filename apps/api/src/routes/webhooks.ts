@@ -27,47 +27,118 @@ webhookRouter.get("/whatsapp", (req: Request, res: Response) => {
   return res.status(403).json({ error: "Token de verificação inválido" });
 });
 
-// 2. WhatsApp Incoming Messages Webhook (Processamento Assíncrono com IA & RAG)
+// 2. WhatsApp Incoming Messages Webhook (Meta Cloud API & Evolution API v2)
 webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
-  // Validação de HMAC com META_APP_SECRET (Falha fechada em produção)
+  const isEvolutionEvent = Boolean(req.body?.event === "messages.upsert" || req.body?.data?.key || req.body?.instance);
   const signature = req.headers["x-hub-signature-256"] as string | undefined;
   const appSecret = process.env.META_APP_SECRET;
 
-  if (process.env.NODE_ENV === "production") {
-    if (!appSecret) {
-      console.error("[Webhook WhatsApp CRITICAL] META_APP_SECRET não está configurado em produção. Rejeitando requisição.");
-      await captureProductionError({
-        service: "api-railway",
-        context: "webhook_whatsapp_auth",
-        error: new Error("META_APP_SECRET não configurado em produção"),
-      });
-      return res.status(500).json({ error: "Configuração de segurança incompleta" });
-    }
-    if (!signature || !verifyMetaSignature(JSON.stringify(req.body), signature, appSecret)) {
-      console.warn("[Webhook WhatsApp] Assinatura HMAC X-Hub-Signature-256 ausente ou inválida. Requisição rejeitada.");
-      return res.status(401).json({ error: "Assinatura HMAC inválida ou ausente" });
-    }
-  } else if (appSecret && signature) {
-    if (!verifyMetaSignature(JSON.stringify(req.body), signature, appSecret)) {
-      console.warn("[Webhook WhatsApp Dev] Assinatura HMAC inválida.");
-      return res.status(401).json({ error: "Assinatura HMAC inválida" });
+  // Se for evento Meta Cloud API, valida assinatura HMAC
+  if (!isEvolutionEvent) {
+    if (process.env.NODE_ENV === "production") {
+      if (!appSecret) {
+        console.error("[Webhook WhatsApp CRITICAL] META_APP_SECRET não está configurado em produção. Rejeitando requisição.");
+        await captureProductionError({
+          service: "api-railway",
+          context: "webhook_whatsapp_auth",
+          error: new Error("META_APP_SECRET não configurado em produção"),
+        });
+        return res.status(500).json({ error: "Configuração de segurança incompleta" });
+      }
+      if (!signature || !verifyMetaSignature(JSON.stringify(req.body), signature, appSecret)) {
+        console.warn("[Webhook WhatsApp] Assinatura HMAC X-Hub-Signature-256 ausente ou inválida. Requisição rejeitada.");
+        return res.status(401).json({ error: "Assinatura HMAC inválida ou ausente" });
+      }
+    } else if (appSecret && signature) {
+      if (!verifyMetaSignature(JSON.stringify(req.body), signature, appSecret)) {
+        console.warn("[Webhook WhatsApp Dev] Assinatura HMAC inválida.");
+        return res.status(401).json({ error: "Assinatura HMAC inválida" });
+      }
     }
   }
 
-  // Responde 200 OK imediatamente para a Meta (em < 50ms)
+  // Responde 200 OK imediatamente para o webhook
   res.status(200).json({ status: "received" });
 
   // Processamento assíncrono em background
   (async () => {
     try {
       const body = req.body;
+
+      // ==========================================
+      // A) PROCESSAMENTO EVOLUTION API v2 (QR CODE)
+      // ==========================================
+      if (isEvolutionEvent) {
+        const data = body.data || body;
+        const key = data.key;
+        if (!key || key.fromMe) return; // Ignora mensagens enviadas pelo próprio bot
+
+        const senderPhone = (key.remoteJid || "").replace(/@.*$/, "");
+        const contactName = data.pushName || `Lead ${senderPhone.slice(-4)}`;
+        const messageText = (data.message?.conversation || data.message?.extendedTextMessage?.text || "").trim();
+        const instanceName = body.instance || "omni_demo";
+
+        if (!senderPhone || !messageText) return;
+
+        console.log(`[Webhook Evolution API] Mensagem de ${senderPhone} (${contactName}): "${messageText}"`);
+
+        const orgSlug = instanceName.replace(/^omni_/, "");
+        const org =
+          (await prisma.organization.findFirst({
+            where: { OR: [{ slug: orgSlug }, { whatsappTipoConexao: "QR_CODE" }] },
+          })) ||
+          (await prisma.organization.findFirst());
+
+        if (!org) return;
+
+        const { lead, conversation } = await findOrCreateLeadAndConversation({
+          organizationId: org.id,
+          phone: senderPhone,
+          name: contactName,
+          channel: "WHATSAPP",
+        });
+
+        await recordIncomingMessage({
+          conversationId: conversation.id,
+          text: messageText,
+        });
+
+        const history = await getRecentHistory(conversation.id);
+
+        const { replyText, toolCalled } = await generateSDRResponse({
+          organizationId: org.id,
+          leadId: lead.id,
+          leadName: lead.nome,
+          leadPhone: lead.telefone,
+          userMessage: messageText,
+          history,
+        });
+
+        await recordOutgoingMessage({
+          conversationId: conversation.id,
+          text: replyText,
+        });
+
+        // Envio via Evolution API
+        const { sendEvolutionWhatsAppMessage } = await import("../services/meta.js");
+        await sendEvolutionWhatsAppMessage({
+          instanceName,
+          to: senderPhone,
+          text: replyText,
+        });
+        return;
+      }
+
+      // ==========================================
+      // B) PROCESSAMENTO META CLOUD API OFICIAL
+      // ==========================================
       const entry = body?.entry?.[0];
       const changes = entry?.changes?.[0];
       const value = changes?.value;
       const message = value?.messages?.[0];
 
       if (!message || message.type !== "text") {
-        return; // Ignora eventos de status de entrega ou mensagens não textuais por enquanto
+        return;
       }
 
       const senderPhone = message.from;
@@ -76,21 +147,19 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
 
       if (!senderPhone || !messageText) return;
 
-      console.log(`[Webhook WhatsApp] Mensagem recebida de ${senderPhone}: "${messageText}"`);
+      console.log(`[Webhook WhatsApp Meta] Mensagem recebida de ${senderPhone}: "${messageText}"`);
 
-      // 1. Identificar a Organização dona do número
       const org =
         (await prisma.organization.findFirst({
           where: { metaPhoneNumberId: phoneNumberId },
         })) ||
-        (await prisma.organization.findFirst()); // Fallback para a primeira organização para testes
+        (await prisma.organization.findFirst());
 
       if (!org) {
         console.warn("[Webhook WhatsApp] Nenhuma organização encontrada para este número.");
         return;
       }
 
-      // 2. Criar ou recuperar Lead e Conversa no banco
       const contactName = value?.contacts?.[0]?.profile?.name || `Lead ${senderPhone.slice(-4)}`;
       const { lead, conversation } = await findOrCreateLeadAndConversation({
         organizationId: org.id,
@@ -99,16 +168,13 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
         channel: "WHATSAPP",
       });
 
-      // 3. Registrar mensagem de entrada
       await recordIncomingMessage({
         conversationId: conversation.id,
         text: messageText,
       });
 
-      // 4. Buscar histórico recente da conversa
       const history = await getRecentHistory(conversation.id);
 
-      // 5. Executar o Motor de IA (RAG + GPT-4o-mini + Function Calling)
       const { replyText, toolCalled } = await generateSDRResponse({
         organizationId: org.id,
         leadId: lead.id,
@@ -118,15 +184,13 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
         history,
       });
 
-      console.log(`[Webhook WhatsApp] Resposta gerada pela IA (Tool: ${toolCalled || "none"}): "${replyText}"`);
+      console.log(`[Webhook WhatsApp Meta] Resposta gerada (Tool: ${toolCalled || "none"}): "${replyText}"`);
 
-      // 6. Registrar resposta de saída no banco
       await recordOutgoingMessage({
         conversationId: conversation.id,
         text: replyText,
       });
 
-      // 7. Enviar mensagem de volta ao cliente via Meta Graph API v20.0
       const metaToken = org.metaAccessToken || process.env.META_ACCESS_TOKEN;
       const targetPhoneId = org.metaPhoneNumberId || phoneNumberId || process.env.META_PHONE_NUMBER_ID;
 
@@ -137,9 +201,7 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
           to: senderPhone,
           text: replyText,
         });
-        console.log(`[Webhook WhatsApp] Disparo Graph API: ${sendResult.success ? "Sucesso" : "Falha: " + sendResult.error}`);
-      } else {
-        console.log(`[Webhook WhatsApp (Simulação Local)] Resposta gravada no banco. Configure META_ACCESS_TOKEN para envio real.`);
+        console.log(`[Webhook WhatsApp Meta] Disparo Graph API: ${sendResult.success ? "Sucesso" : "Falha: " + sendResult.error}`);
       }
     } catch (error) {
       console.error("[Webhook WhatsApp] Erro no processamento em background:", error);

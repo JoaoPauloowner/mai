@@ -107,14 +107,56 @@ export async function sendInstagramMessage({
 
     const data = await res.json();
 
-    if (!res.ok) {
-      console.error("[Meta API Instagram] Erro no envio:", data);
-      return { success: false, error: data?.error?.message || "Erro na API do Instagram" };
-    }
-
     return { success: true, data };
   } catch (error: any) {
     console.error("[Meta API Instagram] Falha na requisição:", error);
     return { success: false, error: error.message };
   }
 }
+
+// 4. Envio de mensagem de texto via Evolution API v2 (Baileys / QR Code)
+export async function sendEvolutionWhatsAppMessage({
+  instanceName,
+  to,
+  text,
+}: {
+  instanceName: string;
+  to: string;
+  text: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const evolutionUrl = process.env.EVOLUTION_API_URL?.replace(/\/$/, "");
+  const apiKey = process.env.EVOLUTION_API_KEY;
+
+  if (!evolutionUrl || !apiKey) {
+    return { success: false, error: "EVOLUTION_API_URL ou EVOLUTION_API_KEY não configurados." };
+  }
+
+  const cleanPhone = to.replace(/\D/g, "");
+
+  try {
+    const res = await fetch(`${evolutionUrl}/message/sendText/${instanceName}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: apiKey,
+      },
+      body: JSON.stringify({
+        number: cleanPhone,
+        text,
+        delay: 1200,
+      }),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      console.error("[Evolution API WhatsApp] Erro no envio:", errData);
+      return { success: false, error: JSON.stringify(errData) };
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("[Evolution API WhatsApp] Falha na requisição:", error);
+    return { success: false, error: error.message };
+  }
+}
+

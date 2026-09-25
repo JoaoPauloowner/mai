@@ -25,6 +25,9 @@ export default function SettingsWhatsappPage() {
 
   const [status, setStatus] = useState<"CONNECTED" | "DISCONNECTED" | "CONNECTING">("DISCONNECTED");
   const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [qrImage, setQrImage] = useState<string | null>(null);
+  const [qrLoading, setQrLoading] = useState(false);
+  const [phoneSaved, setPhoneSaved] = useState(false);
 
   // Meta Cloud API inputs
   const [metaPhoneNumberId, setMetaPhoneNumberId] = useState("");
@@ -33,6 +36,28 @@ export default function SettingsWhatsappPage() {
 
   const [webhookUrl, setWebhookUrl] = useState("");
   const [verifyToken, setVerifyToken] = useState("");
+
+  const fetchQr = async () => {
+    setQrLoading(true);
+    try {
+      const res = await fetch("/api/settings/whatsapp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "FETCH_QR" }),
+      });
+      const data = await res.json();
+      if (data.evolution?.qrcodeBase64) {
+        setQrImage(data.evolution.qrcodeBase64);
+      }
+      if (data.evolution?.status === "connected") {
+        setStatus("CONNECTED");
+      }
+    } catch (e) {
+      console.error("Falha ao buscar QR Code Evolution API", e);
+    } finally {
+      setQrLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetch("/api/settings/whatsapp")
@@ -52,13 +77,41 @@ export default function SettingsWhatsappPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (tab === "QR_CODE" && status !== "CONNECTED" && !loading) {
+      fetchQr();
+    }
+  }, [tab, status, loading]);
+
   const copyToClipboard = (text: string, fieldName: string) => {
     navigator.clipboard.writeText(text);
     setCopiedField(fieldName);
     setTimeout(() => setCopiedField(""), 3000);
   };
 
-  const handleSimulateQrPair = async () => {
+  const handleSavePhone = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setPhoneSaved(false);
+    try {
+      const res = await fetch("/api/settings/whatsapp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "SAVE_PHONE",
+          whatsappNumber,
+        }),
+      });
+      if (res.ok) {
+        setPhoneSaved(true);
+        setTimeout(() => setPhoneSaved(false), 3000);
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleVerifyOrConnectQr = async () => {
     setSaving(true);
     try {
       const res = await fetch("/api/settings/whatsapp", {
@@ -69,9 +122,13 @@ export default function SettingsWhatsappPage() {
           whatsappNumber: whatsappNumber || "+5511999990001",
         }),
       });
-      if (res.ok) {
+      const data = await res.json();
+      if (data.evolution?.status === "connected" || res.ok) {
         setStatus("CONNECTED");
         setWhatsappNumber(whatsappNumber || "+5511999990001");
+      }
+      if (data.evolution?.qrcodeBase64) {
+        setQrImage(data.evolution.qrcodeBase64);
       }
     } finally {
       setSaving(false);
@@ -111,6 +168,8 @@ export default function SettingsWhatsappPage() {
       });
       if (res.ok) {
         setStatus("DISCONNECTED");
+        setQrImage(null);
+        fetchQr();
       }
     } finally {
       setSaving(false);
@@ -128,7 +187,7 @@ export default function SettingsWhatsappPage() {
           Conexão do WhatsApp Comercial
         </h1>
         <p className="text-xs text-[#63695B] mt-0.5">
-          Escolha como conectar o número da sua empresa: via escaneamento de QR Code (Web) ou via API Oficial da Meta (Cloud API).
+          Escolha como conectar o número da sua empresa: via escaneamento de QR Code (Evolution API v2) ou via API Oficial da Meta (Cloud API).
         </p>
       </div>
 
@@ -138,9 +197,9 @@ export default function SettingsWhatsappPage() {
           <StatusBadge status={status} size="md" />
           <div>
             <div className="text-xs font-bold text-[#2C2E2A]">
-              Sessão WhatsApp: {status === "CONNECTED" ? "Operação Ativa" : "Aguardando Conexão"}
+              Sessão WhatsApp: {status === "CONNECTED" ? "Operação Ativa (Pareado)" : "Aguardando Conexão"}
             </div>
-            {status === "CONNECTED" && whatsappNumber && (
+            {whatsappNumber && (
               <p className="text-[11px] text-[#63695B] font-mono mt-0.5">
                 Número Vinculado: {whatsappNumber}
               </p>
@@ -155,6 +214,26 @@ export default function SettingsWhatsappPage() {
           </Button>
         )}
       </div>
+
+      {/* Box de Número de WhatsApp Direto */}
+      <form onSubmit={handleSavePhone} className="p-5 rounded-2xl bg-white border border-[#E0E3DE] flex flex-col sm:flex-row sm:items-end justify-between gap-4 shadow-xs">
+        <div className="flex-1 space-y-1">
+          <label className="block text-xs font-bold text-[#2C2E2A]">
+            Número do WhatsApp Comercial (Destino de Leads e Links wa.me)
+          </label>
+          <input
+            type="text"
+            required
+            placeholder="Ex: +55 (11) 98765-4321"
+            value={whatsappNumber}
+            onChange={(e) => setWhatsappNumber(e.target.value)}
+            className="w-full px-4 py-2 bg-[#F5F5F5] border border-[#E0E3DE] rounded-xl text-xs text-[#2C2E2A] font-mono focus:outline-none focus:border-[#7A8E75]"
+          />
+        </div>
+        <Button variant="primary" size="sm" type="submit" disabled={saving || !whatsappNumber.trim()}>
+          {saving ? "Salvando..." : phoneSaved ? "Salvo com Sucesso!" : "Salvar Número"}
+        </Button>
+      </form>
 
       {/* Seletor de Modo / Abas */}
       <div className="flex gap-2 p-1 bg-[#E7EBE6] border border-[#D0D5CD] rounded-xl w-fit">
@@ -195,12 +274,26 @@ export default function SettingsWhatsappPage() {
 
           <div className="flex flex-col md:flex-row items-center gap-8 justify-center py-4">
             {/* Box do QR Code */}
-            <div className="w-56 h-56 rounded-2xl bg-[#F5F5F5] border border-[#E0E3DE] p-3 flex flex-col items-center justify-center shadow-xs relative overflow-hidden">
+            <div className="w-60 h-60 rounded-2xl bg-[#F5F5F5] border border-[#E0E3DE] p-3 flex flex-col items-center justify-center shadow-xs relative overflow-hidden">
               {status === "CONNECTED" ? (
                 <div className="text-center p-4">
                   <CheckCircle2 className="w-14 h-14 text-[#2D6A4F] mx-auto mb-2" />
                   <span className="text-xs font-bold text-[#2C2E2A] block">WhatsApp Conectado!</span>
                   <span className="text-[10px] text-[#63695B]">Sessão ativa e sincronizada</span>
+                </div>
+              ) : qrLoading ? (
+                <div className="text-center space-y-2">
+                  <RefreshCw className="w-8 h-8 text-[#7A8E75] animate-spin mx-auto" />
+                  <span className="text-[11px] text-[#63695B] block font-mono">Gerando QR Code...</span>
+                </div>
+              ) : qrImage ? (
+                <div className="text-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={qrImage.startsWith("data:") ? qrImage : `data:image/png;base64,${qrImage}`}
+                    alt="QR Code WhatsApp Evolution API"
+                    className="w-48 h-48 rounded-xl object-contain bg-white border border-[#E0E3DE] shadow-2xs"
+                  />
                 </div>
               ) : (
                 <div className="text-center">
@@ -229,16 +322,29 @@ export default function SettingsWhatsappPage() {
               </div>
 
               {status !== "CONNECTED" && (
-                <Button
-                  variant="primary"
-                  size="md"
-                  className="w-full"
-                  onClick={handleSimulateQrPair}
-                  disabled={saving}
-                >
-                  <RefreshCw className={`w-4 h-4 ${saving ? "animate-spin" : ""}`} />
-                  <span>{saving ? "Pareando com WhatsApp..." : "Conectar / Simular Pareamento QR"}</span>
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    variant="primary"
+                    size="md"
+                    className="w-full"
+                    onClick={handleVerifyOrConnectQr}
+                    disabled={saving || qrLoading}
+                  >
+                    <RefreshCw className={`w-4 h-4 ${saving || qrLoading ? "animate-spin" : ""}`} />
+                    <span>{saving ? "Verificando Conexão..." : "Verificar / Confirmar Pareamento"}</span>
+                  </Button>
+
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="w-full"
+                    onClick={fetchQr}
+                    disabled={qrLoading}
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${qrLoading ? "animate-spin" : ""}`} />
+                    <span>Atualizar QR Code</span>
+                  </Button>
+                </div>
               )}
             </div>
           </div>

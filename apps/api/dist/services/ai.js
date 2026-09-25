@@ -1,10 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchRAGContext = searchRAGContext;
-exports.generateSDRResponse = generateSDRResponse;
-const database_1 = require("@omni/database");
+import { prisma } from "@omni/database";
 // 1. Busca semântica de contexto na base RAG
-async function searchRAGContext(organizationId, userMessage) {
+export async function searchRAGContext(organizationId, userMessage) {
     const apiKey = process.env.OPENAI_API_KEY;
     // Gerar embedding do texto do usuário
     let queryEmbedding = [];
@@ -34,7 +30,7 @@ async function searchRAGContext(organizationId, userMessage) {
     if (queryEmbedding.length > 0) {
         try {
             const vectorStr = `[${queryEmbedding.join(",")}]`;
-            const pgResults = await database_1.prisma.$queryRaw `SELECT * FROM match_knowledge_chunks(${vectorStr}::vector, 0.15, 4, ${organizationId})`;
+            const pgResults = await prisma.$queryRaw `SELECT * FROM match_knowledge_chunks(${vectorStr}::vector, 0.15, 4, ${organizationId})`;
             if (pgResults && pgResults.length > 0) {
                 return pgResults.map((r) => `[Doc: ${r.documento_titulo}]\n${r.conteudo_texto}`).join("\n\n");
             }
@@ -44,7 +40,7 @@ async function searchRAGContext(organizationId, userMessage) {
         }
     }
     // Fallback: Busca os chunks mais recentes da organização
-    const chunks = await database_1.prisma.knowledgeChunk.findMany({
+    const chunks = await prisma.knowledgeChunk.findMany({
         where: { organizationId },
         include: { document: true },
         take: 4,
@@ -101,9 +97,9 @@ const SDR_TOOLS = [
     },
 ];
 // 3. Execução do pipeline de resposta com OpenAI GPT-4o-mini
-async function generateSDRResponse({ organizationId, leadId, leadName, leadPhone, userMessage, history, }) {
+export async function generateSDRResponse({ organizationId, leadId, leadName, leadPhone, userMessage, history, }) {
     const apiKey = process.env.OPENAI_API_KEY;
-    const org = await database_1.prisma.organization.findUnique({
+    const org = await prisma.organization.findUnique({
         where: { id: organizationId },
     });
     const orgNome = org?.nome || "Nossa Empresa";
@@ -166,7 +162,7 @@ ${ragContext}`;
             catch { }
             if (fnName === "agendar_atendimento") {
                 try {
-                    await database_1.prisma.appointment.create({
+                    await prisma.appointment.create({
                         data: {
                             organizationId,
                             leadId,
@@ -178,7 +174,7 @@ ${ragContext}`;
                         },
                     });
                     // Atualiza status do Lead no CRM para AGENDADO
-                    await database_1.prisma.lead.update({
+                    await prisma.lead.update({
                         where: { id: leadId },
                         data: { status: "AGENDADO", prioridade: "HOT" },
                     });
@@ -192,7 +188,7 @@ ${ragContext}`;
                 };
             }
             if (fnName === "transferir_para_humano") {
-                await database_1.prisma.lead.update({
+                await prisma.lead.update({
                     where: { id: leadId },
                     data: { prioridade: "HOT" },
                 });
