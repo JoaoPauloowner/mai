@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 3000",
-    "build": "next build",
+    "build": "prisma generate --schema=../../packages/database/prisma/schema.prisma && next build",
     "start": "next start --port 3000",
     "lint": "eslint"
   },
@@ -29,6 +29,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "postcss": "^8",
+    "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
