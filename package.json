@@ -18,7 +18,7 @@
     "start": "node apps/api/dist/server.js",
     "start:web": "npm run start --workspace=@omni/web",
     "lint": "eslint",
-    "db:generate": "npm run db:generate --workspace=@omni/database",
+    "db:generate": "prisma generate --schema=packages/database/prisma/schema.prisma",
     "db:push": "prisma db push --schema=packages/database/prisma/schema.prisma",
     "db:seed": "tsx packages/database/prisma/seed.ts",
     "test": "vitest run"
