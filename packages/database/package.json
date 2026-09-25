@@ -10,11 +10,10 @@
     "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.3"
-  },
-  "devDependencies": {
+    "@prisma/client": "^6.19.3",
     "prisma": "^6.19.3",
     "tsx": "^4.23.13",
     "typescript": "^5"
   }
 }
+
