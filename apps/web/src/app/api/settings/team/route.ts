@@ -94,7 +94,7 @@ export async function POST(req: Request) {
     });
 
     // Mensagem de convite via WhatsApp se o telefone foi informado
-    const inviteLink = `https://omnisdr-app.vercel.app/login?email=${encodeURIComponent(newUser.email)}`;
+    const inviteLink = `https://rushai-app.vercel.app/login?email=${encodeURIComponent(newUser.email)}`;
     const inviteMessage = `Olá ${nome}! Você foi adicionado à equipe no Omni Service SaaS como ${role === "ADMIN_EMPRESA" ? "Gerente" : "Vendedor"}. Acesse o painel pelo link: ${inviteLink} (Senha inicial: ${passwordToHash})`;
 
     return NextResponse.json({

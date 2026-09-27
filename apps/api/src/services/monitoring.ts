@@ -37,7 +37,7 @@ export async function captureProductionError({
   if (webhookUrl) {
     try {
       const messageContent = {
-        content: `🚨 **[ALERTA CRÍTICO OMNISDR]** Falha no serviço \`${service}\`\n**Contexto:** \`${context}\`\n**Erro:** \`${errorMessage}\`\n**Data:** \`${timestamp}\`\n\`\`\`json\n${JSON.stringify(metadata, null, 2)}\n\`\`\``,
+        content: `🚨 **[ALERTA CRÍTICO RUSHAI]** Falha no serviço \`${service}\`\n**Contexto:** \`${context}\`\n**Erro:** \`${errorMessage}\`\n**Data:** \`${timestamp}\`\n\`\`\`json\n${JSON.stringify(metadata, null, 2)}\n\`\`\``,
       };
 
       await fetch(webhookUrl, {

@@ -14,7 +14,7 @@ Este manual foi escrito para que qualquer pessoa consiga publicar o SaaS em meno
 
 ## 🟢 Passo 1: Configurar o Banco de Dados no Supabase (5 minutos)
 
-1. Acesse [supabase.com](https://supabase.com) e crie um novo projeto (ex: `omnisdr-db`).
+1. Acesse [supabase.com](https://supabase.com) e crie um novo projeto (ex: `rushai-db`).
 2. Defina uma senha forte para o banco e selecione a região `sa-east-1` (São Paulo) ou `us-east-1`.
 3. Vá no menu lateral esquerdo em **SQL Editor** (ícone de terminal `>_`) e clique em **New Query**.
 4. Abra o arquivo [`packages/database/prisma/migrations_supabase/init_supabase_pgvector.sql`](./packages/database/prisma/migrations_supabase/init_supabase_pgvector.sql), copie todo o texto, cole no editor do Supabase e clique no botão verde **Run**.
@@ -26,7 +26,7 @@ Este manual foi escrito para que qualquer pessoa consiga publicar o SaaS em meno
 
 1. Acesse [vercel.com/new](https://vercel.com/new) e clique em **Import** ao lado do seu repositório.
 2. Na tela de configuração:
-   * **Project Name:** `omnisdr-landing`
+   * **Project Name:** `rushai-landing`
    * **Framework Preset:** `Next.js`
    * **Root Directory:** Clique em **Edit** e selecione a pasta `apps/landing`.
 3. Em **Environment Variables**, adicione:
@@ -39,7 +39,7 @@ Este manual foi escrito para que qualquer pessoa consiga publicar o SaaS em meno
 
 1. Na Vercel, clique em **Add New...** $\rightarrow$ **Project** e selecione o **mesmo repositório**.
 2. Na tela de configuração:
-   * **Project Name:** `omnisdr-dashboard`
+   * **Project Name:** `rushai-dashboard`
    * **Framework Preset:** `Next.js`
    * **Root Directory:** Clique em **Edit** e selecione a pasta `apps/web`.
 3. Em **Environment Variables**, adicione:

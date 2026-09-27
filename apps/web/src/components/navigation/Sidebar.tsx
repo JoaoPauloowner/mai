@@ -53,7 +53,7 @@ export function Sidebar({ segmento, orgNome }: SidebarProps) {
   // Load persistence preference
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("omnisdr_sidebar_collapsed");
+      const saved = localStorage.getItem("rushai_sidebar_collapsed");
       if (saved !== null) {
         setIsCollapsed(saved === "true");
       }
@@ -64,7 +64,7 @@ export function Sidebar({ segmento, orgNome }: SidebarProps) {
     setIsCollapsed((prev) => {
       const next = !prev;
       try {
-        localStorage.setItem("omnisdr_sidebar_collapsed", String(next));
+        localStorage.setItem("rushai_sidebar_collapsed", String(next));
       } catch {}
       return next;
     });

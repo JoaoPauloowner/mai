@@ -44,11 +44,21 @@ export async function PATCH(
 ) {
   try {
     const session = await getSession();
-    if (!session.userId) {
+    if (!session.userId || !session.organizationId) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
     const { id } = await context.params;
+
+    // Garante isolamento estrito multi-tenant antes de qualquer alteração
+    const existingLead = await prisma.lead.findFirst({
+      where: { id, organizationId: session.organizationId },
+    });
+
+    if (!existingLead) {
+      return NextResponse.json({ error: "Lead não encontrado ou acesso não permitido." }, { status: 404 });
+    }
+
     const body = await req.json();
     const {
       status,

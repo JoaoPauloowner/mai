@@ -1,6 +1,6 @@
 # 🧠 PROMPTS.md — Engenharia de Prompts & Agentes de IA
 
-Este documento define a governança de inteligência artificial, diretrizes de tom de voz, System Prompts e definições de **Function Calling** para o SDR do **OmniSDR**.
+Este documento define a governança de inteligência artificial, diretrizes de tom de voz, System Prompts e definições de **Function Calling** para o SDR do **RushAI**.
 
 ---
 

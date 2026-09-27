@@ -1,9 +1,9 @@
-# 📄 PRD (Product Requirement Document) — OmniSDR B2B
+# 📄 PRD (Product Requirement Document) — RushAI B2B
 
 ---
 
 ## 1. Visão Geral do Produto
-O **OmniSDR** é uma plataforma SaaS B2B de automação comercial e pré-vendas orientada por Inteligência Artificial. Seu propósito é eliminar o tempo ocioso no atendimento inicial, respondendo leads em menos de 5 segundos, qualificando o interesse do comprador e agendando reuniões diretamente no calendário dos vendedores humanos.
+O **RushAI** é uma plataforma SaaS B2B de automação comercial e pré-vendas orientada por Inteligência Artificial. Seu propósito é eliminar o tempo ocioso no atendimento inicial, respondendo leads em menos de 5 segundos, qualificando o interesse do comprador e agendando reuniões diretamente no calendário dos vendedores humanos.
 
 ---
 

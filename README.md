@@ -1,4 +1,4 @@
-# ⚡ OmniSDR — SaaS B2B de SDR com IA & Atendimento Omnichannel
+# ⚡ RushAI — SaaS B2B de SDR com IA & Atendimento Omnichannel
 
 > Plataforma B2B para qualificação automática de leads, atendimento 24/7 e agendamento comercial com Inteligência Artificial via WhatsApp, Instagram Direct e Voz.
 
@@ -70,4 +70,4 @@ npm run dev:api
 
 ---
 
-© 2026 OmniSDR Technologies. Todos os direitos reservados.
+© 2026 RushAI Technologies. Todos os direitos reservados.

@@ -1,4 +1,4 @@
-# 🏛️ ARCHITECTURE.md — Arquitetura Canônica do OmniSDR
+# 🏛️ ARCHITECTURE.md — Arquitetura Canônica do RushAI
 
 ---
 

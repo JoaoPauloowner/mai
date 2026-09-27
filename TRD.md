@@ -1,4 +1,4 @@
-# ⚙️ TRD (Technical Requirement Document) — OmniSDR B2B
+# ⚙️ TRD (Technical Requirement Document) — RushAI B2B
 
 ---
 

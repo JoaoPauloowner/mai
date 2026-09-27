@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Bot, ShieldCheck, Zap, MessageSquare, Target, CheckCircle2, Sparkles } from "lucide-react";
 
 export default function LandingPage() {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://omnisdr-app.vercel.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://rushai-app.vercel.app";
 
   return (
     <div className="min-h-screen bg-white text-zinc-900 flex flex-col justify-between">
@@ -13,7 +13,7 @@ export default function LandingPage() {
             <span className="w-8 h-8 rounded-lg bg-zinc-900 text-white flex items-center justify-center text-sm font-extrabold">
               AI
             </span>
-            <span>OmniSDR</span>
+            <span>RushAI</span>
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4">
@@ -118,7 +118,7 @@ export default function LandingPage() {
             <ShieldCheck className="w-4 h-4 text-zinc-400" />
             <span>Infraestrutura em conformidade com a LGPD e criptografia de ponta a ponta.</span>
           </div>
-          <div>© {new Date().getFullYear()} OmniSDR B2B. Todos os direitos reservados.</div>
+          <div>© {new Date().getFullYear()} RushAI B2B. Todos os direitos reservados.</div>
         </div>
       </footer>
     </div>

@@ -1,6 +1,6 @@
 # 🔌 INTEGRATIONS.md — Mapa Completo de APIs e Webhooks
 
-Este documento mapeia todas as conexões externas, provedores de inteligência e rotas de webhooks do **OmniSDR**.
+Este documento mapeia todas as conexões externas, provedores de inteligência e rotas de webhooks do **RushAI**.
 
 ---
 

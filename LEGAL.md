@@ -1,13 +1,13 @@
 # ⚖️ LEGAL.md — Termos de Uso e Política de Privacidade (Conformidade LGPD)
 
-Este documento estabelece a estrutura jurídica e de privacidade de dados para a operação do **OmniSDR** em conformidade com a **Lei Geral de Proteção de Dados (Lei Federal nº 13.709/2018 - LGPD)**.
+Este documento estabelece a estrutura jurídica e de privacidade de dados para a operação do **RushAI** em conformidade com a **Lei Geral de Proteção de Dados (Lei Federal nº 13.709/2018 - LGPD)**.
 
 ---
 
 ## 1. Definições de Papéis perante a LGPD
 
 * **Controlador dos Dados:** A empresa cliente do SaaS (ex: Concessionária, Corretora, Clínica), responsável por definir as finalidades do atendimento aos seus próprios consumidores (leads).
-* **Operador dos Dados:** O **OmniSDR**, que fornece a infraestrutura tecnológica, inteligência artificial e banco de dados para processamento estrito das instruções do Controlador.
+* **Operador dos Dados:** O **RushAI**, que fornece a infraestrutura tecnológica, inteligência artificial e banco de dados para processamento estrito das instruções do Controlador.
 * **Titular dos Dados:** O consumidor/lead final que interage via WhatsApp, Instagram ou formulário de Quiz.
 
 ---
@@ -31,7 +31,7 @@ Este documento estabelece a estrutura jurídica e de privacidade de dados para a
 
 ## 4. Direitos dos Titulares de Dados
 
-O OmniSDR disponibiliza ferramentas no painel para que o Controlador atenda às solicitações dos Titulares:
+O RushAI disponibiliza ferramentas no painel para que o Controlador atenda às solicitações dos Titulares:
 1. **Acesso e Confirmação:** Visualização do histórico completo do lead no CRM.
 2. **Anonimização ou Exclusão Definitiva:** Botão de exclusão rápida no painel de detalhes do lead, apagando mensagens, agendamentos e registros vinculados.
 3. **Opt-Out de IA:** Comando automático que permite ao lead solicitar transferência imediata para um operador humano digitando palavras como *"Falar com atendente"* ou *"Humano"*.
