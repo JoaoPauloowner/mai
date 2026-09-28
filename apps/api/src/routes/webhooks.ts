@@ -5,6 +5,24 @@ import { generateSDRResponse } from "../services/ai.js";
 import { findOrCreateLeadAndConversation, recordIncomingMessage, recordOutgoingMessage, getRecentHistory } from "../services/conversation.js";
 import { captureProductionError } from "../services/monitoring.js";
 
+const processedMessagesCache = new Map<string, number>();
+
+export function isDuplicateWebhookMessage(msgId: string | undefined): boolean {
+  if (!msgId) return false;
+  const now = Date.now();
+  // Limpeza de mensagens com mais de 10 minutos
+  for (const [id, timestamp] of processedMessagesCache.entries()) {
+    if (now - timestamp > 10 * 60 * 1000) {
+      processedMessagesCache.delete(id);
+    }
+  }
+  if (processedMessagesCache.has(msgId)) {
+    return true;
+  }
+  processedMessagesCache.set(msgId, now);
+  return false;
+}
+
 export const webhookRouter = Router();
 
 // 1. Meta Webhook Handshake (WhatsApp & Instagram)
@@ -78,6 +96,9 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
     try {
       const body = req.body;
 
+      // Deduplicação e Idempotência de Webhook
+      const processedMessageIds = new Set<string>();
+
       // ==========================================
       // A) PROCESSAMENTO EVOLUTION API v2 (QR CODE)
       // ==========================================
@@ -85,6 +106,12 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
         const data = body.data || body;
         const key = data.key;
         if (!key || key.fromMe) return; // Ignora mensagens enviadas pelo próprio bot
+
+        const messageId = key.id;
+        if (messageId && isDuplicateWebhookMessage(messageId)) {
+          console.log(`[Webhook Evolution] Mensagem ${messageId} já processada (idempotência). Descartando.`);
+          return;
+        }
 
         const senderPhone = (key.remoteJid || "").replace(/@.*$/, "");
         const contactName = data.pushName || `Lead ${senderPhone.slice(-4)}`;
@@ -122,6 +149,12 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
           conversationId: conversation.id,
           text: messageText,
         });
+
+        // P2: Se a conversa estiver sob controle humano, registrar mensagem no inbox mas NÃO gerar resposta da IA
+        if (conversation.status === "PAUSADO_HUMANO" || conversation.status === "TRANSFERIDO_HUMANO") {
+          console.log(`[Webhook Evolution API] Conversa ${conversation.id} está pausada para operador humano. Resposta de IA suprimida.`);
+          return;
+        }
 
         const history = await getRecentHistory(conversation.id);
 
@@ -161,6 +194,12 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
         return;
       }
 
+      const wamid = message.id;
+      if (wamid && isDuplicateWebhookMessage(wamid)) {
+        console.log(`[Webhook WhatsApp Meta] Mensagem ${wamid} já processada (idempotência). Descartando.`);
+        return;
+      }
+
       const senderPhone = message.from;
       const messageText = message.text?.body?.trim();
       const phoneNumberId = value.metadata?.phone_number_id;
@@ -191,6 +230,12 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
         conversationId: conversation.id,
         text: messageText,
       });
+
+      // P2: Se a conversa estiver sob controle humano, registrar mensagem no inbox mas NÃO gerar resposta da IA
+      if (conversation.status === "PAUSADO_HUMANO" || conversation.status === "TRANSFERIDO_HUMANO") {
+        console.log(`[Webhook WhatsApp Meta] Conversa ${conversation.id} está pausada para operador humano. Resposta de IA suprimida.`);
+        return;
+      }
 
       const history = await getRecentHistory(conversation.id);
 
@@ -284,6 +329,12 @@ webhookRouter.post("/instagram", async (req: Request, res: Response) => {
 
       if (!messaging || !messaging.message?.text) return;
 
+      const mid = messaging.message.mid;
+      if (mid && isDuplicateWebhookMessage(mid)) {
+        console.log(`[Webhook Instagram] Mensagem ${mid} já processada (idempotência). Descartando.`);
+        return;
+      }
+
       const senderId = messaging.sender?.id;
       const recipientId = messaging.recipient?.id;
       const messageText = messaging.message.text.trim();
@@ -313,6 +364,12 @@ webhookRouter.post("/instagram", async (req: Request, res: Response) => {
       });
 
       await recordIncomingMessage({ conversationId: conversation.id, text: messageText });
+
+      if (conversation.status === "PAUSADO_HUMANO" || conversation.status === "TRANSFERIDO_HUMANO") {
+        console.log(`[Webhook Instagram] Conversa ${conversation.id} está sob atendimento humano. IA pausada.`);
+        return;
+      }
+
       const history = await getRecentHistory(conversation.id);
 
       const { replyText } = await generateSDRResponse({
