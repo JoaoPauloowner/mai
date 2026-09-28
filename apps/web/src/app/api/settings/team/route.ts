@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+
+const ALLOWED_ROLES = ["ADMIN_EMPRESA", "VENDEDOR"] as const;
+type AllowedRole = (typeof ALLOWED_ROLES)[number];
 
 // Listar membros da equipe da organização
 export async function GET() {
@@ -28,7 +32,7 @@ export async function GET() {
 
     return NextResponse.json({ users });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao listar equipe." }, { status: 500 });
   }
 }
 
@@ -57,9 +61,20 @@ export async function POST(req: Request) {
       );
     }
 
-    // Verifica se o e-mail já existe
+    const cleanEmail = email.trim().toLowerCase();
+
+    // S1: Allowlist estrita de roles (SUPER_ADMIN NUNCA atribuível via API de tenant)
+    const targetRole: AllowedRole = role && ALLOWED_ROLES.includes(role) ? role : "VENDEDOR";
+    if (role && !ALLOWED_ROLES.includes(role)) {
+      return NextResponse.json(
+        { error: "Função não permitida para gestão de equipe no tenant." },
+        { status: 400 }
+      );
+    }
+
+    // S1: Verifica se o e-mail já existe com normalização
     const existing = await prisma.user.findUnique({
-      where: { email },
+      where: { email: cleanEmail },
     });
 
     if (existing) {
@@ -69,17 +84,28 @@ export async function POST(req: Request) {
       );
     }
 
-    // Senha padrão temporária ou definida
-    const passwordToHash = senha || "Mudar@123";
+    // S1: Validação de senha segura ou geração de senha temporária criptograficamente aleatória
+    let passwordToHash = senha;
+    if (passwordToHash) {
+      if (passwordToHash.length < 8) {
+        return NextResponse.json(
+          { error: "A senha deve conter no mínimo 8 caracteres." },
+          { status: 400 }
+        );
+      }
+    } else {
+      passwordToHash = crypto.randomBytes(8).toString("hex") + "A1!";
+    }
+
     const passwordHash = await bcrypt.hash(passwordToHash, 10);
 
     const newUser = await prisma.user.create({
       data: {
         organizationId: session.organizationId,
         nome: nome.trim(),
-        email: email.trim().toLowerCase(),
+        email: cleanEmail,
         senhaHash: passwordHash,
-        role: role || "VENDEDOR",
+        role: targetRole,
       },
     });
 
@@ -93,9 +119,7 @@ export async function POST(req: Request) {
       },
     });
 
-    // Mensagem de convite via WhatsApp se o telefone foi informado
-    const inviteLink = `https://rushai-app.vercel.app/login?email=${encodeURIComponent(newUser.email)}`;
-    const inviteMessage = `Olá ${nome}! Você foi adicionado à equipe no OMNAI como ${role === "ADMIN_EMPRESA" ? "Gerente" : "Vendedor"}. Acesse o painel pelo link: ${inviteLink} (Senha inicial: ${passwordToHash})`;
+    const inviteLink = `https://omnisdr-app.vercel.app/login?email=${encodeURIComponent(newUser.email)}`;
 
     return NextResponse.json({
       success: true,
@@ -105,10 +129,10 @@ export async function POST(req: Request) {
         email: newUser.email,
         role: newUser.role,
       },
-      inviteMessage,
+      inviteLink,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao convidar membro da equipe." }, { status: 500 });
   }
 }
 
@@ -131,6 +155,22 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "ID do usuário e nova função são obrigatórios." }, { status: 400 });
     }
 
+    // S1: Impede alterar a própria função (auto-promoção ou auto-rebaixamento)
+    if (targetUserId === session.userId) {
+      return NextResponse.json(
+        { error: "Você não pode alterar sua própria função de permissão." },
+        { status: 400 }
+      );
+    }
+
+    // S1: Validação de role permitida
+    if (!ALLOWED_ROLES.includes(newRole)) {
+      return NextResponse.json(
+        { error: "Função não permitida para o tenant." },
+        { status: 400 }
+      );
+    }
+
     const targetUser = await prisma.user.findFirst({
       where: { id: targetUserId, organizationId: session.organizationId },
     });
@@ -139,10 +179,24 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "Usuário não encontrado na organização." }, { status: 404 });
     }
 
+    // S1: Impede rebaixar o último ADMIN_EMPRESA da organização
+    if (targetUser.role === "ADMIN_EMPRESA" && newRole !== "ADMIN_EMPRESA") {
+      const adminCount = await prisma.user.count({
+        where: { organizationId: session.organizationId, role: "ADMIN_EMPRESA" },
+      });
+      if (adminCount <= 1) {
+        return NextResponse.json(
+          { error: "Não é possível rebaixar o único administrador da organização." },
+          { status: 400 }
+        );
+      }
+    }
+
     const oldRole = targetUser.role;
     const updated = await prisma.user.update({
       where: { id: targetUserId },
       data: { role: newRole },
+      select: { id: true, nome: true, email: true, role: true },
     });
 
     // Grava no AuditLog (Item 5)
@@ -157,7 +211,7 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({ success: true, user: updated });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao atualizar permissão." }, { status: 500 });
   }
 }
 
@@ -192,6 +246,19 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "Usuário não encontrado na organização." }, { status: 404 });
     }
 
+    // S1: Impede remover o último ADMIN_EMPRESA
+    if (targetUser.role === "ADMIN_EMPRESA") {
+      const adminCount = await prisma.user.count({
+        where: { organizationId: session.organizationId, role: "ADMIN_EMPRESA" },
+      });
+      if (adminCount <= 1) {
+        return NextResponse.json(
+          { error: "Não é possível remover o único administrador da organização." },
+          { status: 400 }
+        );
+      }
+    }
+
     await prisma.user.delete({ where: { id: targetUserId } });
 
     // Grava no AuditLog (Item 5)
@@ -206,7 +273,7 @@ export async function DELETE(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao remover usuário." }, { status: 500 });
   }
 }
 
