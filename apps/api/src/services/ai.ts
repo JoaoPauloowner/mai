@@ -1,4 +1,5 @@
 import { prisma } from "@omni/database";
+import { sanitizeUserPrompt, buildSecureSystemPrompt } from "./ai-guard.js";
 
 export interface SDRMessageHistory {
   role: "user" | "assistant" | "system";
@@ -17,10 +18,11 @@ export interface SDRGenerateParams {
 // 1. Busca semântica de contexto na base RAG
 export async function searchRAGContext(organizationId: string, userMessage: string): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
+  const safeMessage = sanitizeUserPrompt(userMessage, 1000);
 
   // Gerar embedding do texto do usuário
   let queryEmbedding: number[] = [];
-  if (apiKey) {
+  if (apiKey && safeMessage) {
     try {
       const res = await fetch("https://api.openai.com/v1/embeddings", {
         method: "POST",
@@ -29,7 +31,7 @@ export async function searchRAGContext(organizationId: string, userMessage: stri
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          input: userMessage.slice(0, 4000),
+          input: safeMessage.slice(0, 4000),
           model: "text-embedding-3-small",
         }),
       });
@@ -135,32 +137,24 @@ export async function generateSDRResponse({
   });
 
   const orgNome = org?.nome || "Nossa Empresa";
-  const ragContext = await searchRAGContext(organizationId, userMessage);
+  const safeMessage = sanitizeUserPrompt(userMessage, 1500);
+  const ragContext = await searchRAGContext(organizationId, safeMessage);
 
-  const systemPrompt = `Você é a assistente de pré-vendas (SDR) inteligente da empresa "${orgNome}".
-Seu objetivo é atender o lead ${leadName || ""}, responder dúvidas com base EXCLUSIVAMENTE nas informações fornecidas no contexto da empresa e conduzir o cliente para um agendamento ou contato com a equipe comercial.
-
-DIRETRIZES FUNDAMENTAIS:
-1. Responda em português do Brasil, em tom educado, dinâmico e humanizado.
-2. Seja CONCISO: no máximo 2 a 3 frases por mensagem. Nunca mande blocos gigantes de texto.
-3. Não invente informações que não estejam no contexto da empresa.
-4. Encerre sempre com uma pergunta ou chamada para ação clara.
-5. Se o cliente concordar com um dia/horário, chame a função "agendar_atendimento".
-6. Se o cliente pedir expressamente para falar com humano, chame a função "transferir_para_humano".
-
-INFORMAÇÕES DA EMPRESA (RAG):
-${ragContext}`;
+  const systemPrompt = buildSecureSystemPrompt(orgNome, leadName, ragContext);
 
   const messages: any[] = [
     { role: "system", content: systemPrompt },
-    ...history.slice(-6).map((h) => ({ role: h.role, content: h.content })),
-    { role: "user", content: userMessage },
+    ...history.slice(-6).map((h) => ({
+      role: h.role,
+      content: h.role === "user" ? sanitizeUserPrompt(h.content, 1500) : h.content,
+    })),
+    { role: "user", content: `<user_query>\n${safeMessage}\n</user_query>` },
   ];
 
   if (!apiKey) {
     // Modo de demonstração / local sem chave OpenAI
     return {
-      replyText: `Olá ${leadName || ""}! Recebi sua mensagem sobre "${userMessage}". Como posso te ajudar a agendar ou tirar dúvidas hoje?`,
+      replyText: `Olá ${sanitizeUserPrompt(leadName, 50) || ""}! Recebi sua mensagem sobre "${safeMessage}". Como posso te ajudar a agendar ou tirar dúvidas hoje?`,
     };
   }
 
@@ -231,6 +225,16 @@ ${ragContext}`;
         await prisma.lead.update({
           where: { id: leadId },
           data: { prioridade: "HOT" },
+        });
+
+        // Pausar IA na conversa para que o atendente humano assuma
+        await prisma.conversation.updateMany({
+          where: {
+            organizationId,
+            leadId,
+            status: "ABERTO",
+          },
+          data: { status: "PAUSADO_HUMANO" },
         });
 
         return {
