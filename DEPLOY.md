@@ -48,7 +48,7 @@ Este manual foi escrito para que qualquer pessoa consiga publicar o SaaS em meno
    * `NEXT_PUBLIC_SUPABASE_URL` = *(Sua URL do Supabase)*
    * `NEXT_PUBLIC_SUPABASE_ANON_KEY` = *(Sua Anon Key do Supabase)*
    * `SUPABASE_SERVICE_ROLE_KEY` = *(Sua Service Role Key do Supabase)*
-   * `SESSION_SECRET` = `omni_saas_ultra_secure_secret_key_change_in_production_2026_at_least_32_bytes`
+   * `SESSION_SECRET` = *(Gerar chave de 48 bytes via terminal: `openssl rand -base64 48`)*
 4. Clique em **Deploy**.
 
 ---

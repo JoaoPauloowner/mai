@@ -16,12 +16,18 @@ export interface SessionData {
 
 const sessionSecret = process.env.SESSION_SECRET;
 
-if (!sessionSecret && process.env.NODE_ENV === "production") {
-  throw new Error("CRITICAL SECURITY ERROR: SESSION_SECRET environment variable is missing in production.");
+if (process.env.NODE_ENV === "production") {
+  if (!sessionSecret || sessionSecret.length < 32) {
+    throw new Error("CRITICAL SECURITY ERROR: SESSION_SECRET must be at least 32 characters in production.");
+  }
+} else if (sessionSecret && sessionSecret.length < 32) {
+  console.warn("[SECURITY WARNING] SESSION_SECRET is shorter than 32 characters.");
 }
 
 export const sessionOptions: SessionOptions = {
-  password: sessionSecret || "omni_saas_ultra_secure_secret_key_development_only_min_32_bytes",
+  password: sessionSecret && sessionSecret.length >= 32
+    ? sessionSecret
+    : "omni_saas_ultra_secure_secret_key_development_only_min_32_bytes",
   cookieName: "omni-session",
   cookieOptions: {
     httpOnly: true,
