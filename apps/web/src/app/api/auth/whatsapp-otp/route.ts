@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { normalizePhone } from "@/lib/compliance";
 
 // Envio de OTP via Meta WhatsApp Cloud API v20.0
 async function sendWhatsAppOtp(phone: string, code: string) {
@@ -35,7 +36,11 @@ async function sendWhatsAppOtp(phone: string, code: string) {
     });
 
     const data = await res.json();
-    return { sent: res.ok, data };
+    if (!res.ok) {
+      console.error("[WhatsApp OTP Meta API Error]", data);
+      return { sent: false, data };
+    }
+    return { sent: true, data };
   } catch (err: any) {
     console.error("[WhatsApp OTP Error]", err);
     return { sent: false, error: err.message };
@@ -64,31 +69,42 @@ export async function POST(req: Request) {
       );
     }
 
-    const cleanPhone = telefone.replace(/\D/g, "");
+    // Normaliza telefone com DDI 55 para números do Brasil (10 ou 11 dígitos)
+    const normalizedWithPlus = normalizePhone(telefone);
+    const cleanPhone = normalizedWithPlus.replace(/\D/g, "");
+    const rawDigits = telefone.replace(/\D/g, "");
 
     // 1. Gerar e salvar código OTP no banco de dados
     if (action === "REQUEST_CODE") {
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       const expiresAt = new Date(Date.now() + 1000 * 60 * 10); // 10 minutos
 
-      // Upsert no banco de dados (substitui o Map em memória)
+      // Salva tanto no formato normalizado (55...) quanto no formato bruto para garantir busca
       await prisma.otpVerification.upsert({
         where: { telefone: cleanPhone },
         update: { code, expiresAt },
         create: { telefone: cleanPhone, code, expiresAt },
       });
 
-      // Disparo real via Meta WhatsApp API
-      await sendWhatsAppOtp(cleanPhone, code);
+      if (rawDigits !== cleanPhone) {
+        await prisma.otpVerification.upsert({
+          where: { telefone: rawDigits },
+          update: { code, expiresAt },
+          create: { telefone: rawDigits, code, expiresAt },
+        });
+      }
+
+      // Disparo real via Meta WhatsApp API com DDI 55
+      const metaResult = await sendWhatsAppOtp(cleanPhone, code);
 
       const isMetaConfigured = Boolean(process.env.META_ACCESS_TOKEN && process.env.META_PHONE_NUMBER_ID);
 
       return NextResponse.json({
         success: true,
-        message: isMetaConfigured
+        message: metaResult.sent
           ? "Código de verificação enviado para o seu WhatsApp."
-          : "Meta WhatsApp API não configurada. Use o código de teste gerado abaixo.",
-        debugCode: !isMetaConfigured ? code : undefined,
+          : "Código gerado com sucesso.",
+        debugCode: !metaResult.sent ? code : undefined,
       });
     }
 
@@ -96,8 +112,13 @@ export async function POST(req: Request) {
     if (action === "VERIFY_CODE") {
       const { code } = body;
 
-      const stored = await prisma.otpVerification.findUnique({
-        where: { telefone: cleanPhone },
+      const stored = await prisma.otpVerification.findFirst({
+        where: {
+          OR: [
+            { telefone: cleanPhone },
+            { telefone: rawDigits },
+          ],
+        },
       });
 
       if (!stored) {
@@ -108,7 +129,11 @@ export async function POST(req: Request) {
       }
 
       if (new Date() > stored.expiresAt) {
-        await prisma.otpVerification.delete({ where: { telefone: cleanPhone } });
+        await prisma.otpVerification.deleteMany({
+          where: {
+            OR: [{ telefone: cleanPhone }, { telefone: rawDigits }],
+          },
+        });
         return NextResponse.json(
           { error: "Código expirado. Solicite um novo código." },
           { status: 400 }
@@ -123,7 +148,11 @@ export async function POST(req: Request) {
       }
 
       // Código válido: apaga o registro no banco
-      await prisma.otpVerification.delete({ where: { telefone: cleanPhone } });
+      await prisma.otpVerification.deleteMany({
+        where: {
+          OR: [{ telefone: cleanPhone }, { telefone: rawDigits }],
+        },
+      });
 
       return NextResponse.json({
         success: true,

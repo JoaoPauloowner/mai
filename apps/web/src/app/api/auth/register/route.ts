@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { normalizePhone } from "@/lib/compliance";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
@@ -18,13 +19,50 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { empresaNome, nome, email, telefone, senha } = body;
+    const { empresaNome, nome, email, telefone, senha, codigoOtp } = body;
 
     if (!empresaNome || !nome || !email || !senha) {
       return NextResponse.json(
         { error: "Todos os campos são obrigatórios." },
         { status: 400 }
       );
+    }
+
+    // Validação de OTP caso fornecido
+    if (telefone && codigoOtp) {
+      const normalizedWithPlus = normalizePhone(telefone);
+      const cleanPhone = normalizedWithPlus.replace(/\D/g, "");
+      const rawDigits = telefone.replace(/\D/g, "");
+
+      const stored = await prisma.otpVerification.findFirst({
+        where: {
+          OR: [
+            { telefone: cleanPhone },
+            { telefone: rawDigits },
+          ],
+        },
+      });
+
+      if (stored) {
+        if (new Date() > stored.expiresAt) {
+          return NextResponse.json(
+            { error: "Código expirado. Solicite um novo código." },
+            { status: 400 }
+          );
+        }
+        if (stored.code !== codigoOtp.trim()) {
+          return NextResponse.json(
+            { error: "Código de confirmação incorreto." },
+            { status: 400 }
+          );
+        }
+        // Remove o OTP utilizado
+        await prisma.otpVerification.deleteMany({
+          where: {
+            OR: [{ telefone: cleanPhone }, { telefone: rawDigits }],
+          },
+        });
+      }
     }
 
     const cleanEmail = email.trim().toLowerCase();
@@ -60,7 +98,7 @@ export async function POST(req: Request) {
         segmento: "GENERAL",
         plano: "starter",
         statusPlano: "trial",
-        whatsappNumber: telefone ? telefone.trim() : null,
+        whatsappNumber: telefone ? normalizePhone(telefone) : null,
       },
     });
 
