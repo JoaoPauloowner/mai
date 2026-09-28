@@ -51,15 +51,16 @@ model Organization {
 }
 
 model User {
-  id             String       @id @default(cuid())
-  organizationId String
-  nome           String
-  email          String       @unique
-  senhaHash      String
-  role           String       @default("ADMIN_EMPRESA")
-  avatarUrl      String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id              String       @id @default(cuid())
+  organizationId  String
+  nome            String
+  email           String       @unique
+  senhaHash       String
+  role            String       @default("ADMIN_EMPRESA")
+  avatarUrl       String?
+  emailVerificado Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   assignedLeads  Lead[]       @relation("AssignedUser")
@@ -270,4 +271,16 @@ model OtpVerification {
   createdAt DateTime @default(now())
 
   @@index([telefone])
+}
+
+model EmailVerification {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  token     String   @unique
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([token])
 }

@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { normalizePhone } from "@/lib/compliance";
+import { validateRealEmail } from "@/lib/disposable-emails";
+import { generateEmailToken, sendVerificationEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
@@ -26,6 +28,12 @@ export async function POST(req: Request) {
         { error: "Todos os campos são obrigatórios." },
         { status: 400 }
       );
+    }
+
+    // Validação estrita de veracidade de e-mail (bloqueia e-mails temporários/descartáveis)
+    const emailCheck = validateRealEmail(email);
+    if (!emailCheck.valid) {
+      return NextResponse.json({ error: emailCheck.reason }, { status: 400 });
     }
 
     // Validação de OTP caso fornecido
@@ -111,10 +119,30 @@ export async function POST(req: Request) {
         email: cleanEmail,
         senhaHash: passwordHash,
         role: "ADMIN_EMPRESA",
+        emailVerificado: false,
       },
     });
 
-    // 6. Grava no AuditLog (Item 8)
+    // 6. Gera e envia e-mail de verificação de autenticidade
+    try {
+      const { token, code, expiresAt } = generateEmailToken();
+      await prisma.emailVerification.upsert({
+        where: { email: cleanEmail },
+        update: { token, code, expiresAt },
+        create: { email: cleanEmail, token, code, expiresAt },
+      });
+
+      await sendVerificationEmail({
+        to: cleanEmail,
+        nome: user.nome,
+        code,
+        token,
+      });
+    } catch (emailErr) {
+      console.error("[Email Verification Init Error]", emailErr);
+    }
+
+    // 7. Grava no AuditLog (Item 8)
     try {
       await prisma.auditLog.create({
         data: {
@@ -129,7 +157,7 @@ export async function POST(req: Request) {
       console.error("[AuditLog Register Error]", auditError);
     }
 
-    // 7. Cria a Sessão Criptografada do novo cliente
+    // 8. Cria a Sessão Criptografada do novo cliente
     const session = await getSession();
     session.userId = user.id;
     session.organizationId = org.id;
@@ -144,7 +172,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      user: { id: user.id, email: user.email, nome: user.nome },
+      user: { id: user.id, email: user.email, nome: user.nome, emailVerificado: false },
       organization: { id: org.id, slug: org.slug, nome: org.nome },
     });
   } catch (error: any) {
