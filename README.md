@@ -1,6 +1,6 @@
-# ⚡ RushAI — SaaS B2B de SDR com IA & Atendimento Omnichannel
+# ⚡ OMNAI — SaaS B2B com MAI (Motor de Atendimento Inteligente)
 
-> Plataforma B2B para qualificação automática de leads, atendimento 24/7 e agendamento comercial com Inteligência Artificial via WhatsApp, Instagram Direct e Voz.
+> Plataforma B2B para qualificação automática de leads, atendimento 24/7 e agendamento comercial com Inteligência Artificial via WhatsApp, Instagram Direct e Voz. Equipado com o motor **MAI** (Motor de Atendimento Inteligente).
 
 ---
 
@@ -10,7 +10,7 @@ O projeto é estruturado como um **Monorepo** com NPM Workspaces para permitir d
 
 * **`apps/landing`** $\rightarrow$ Site institucional e Quiz público de diagnóstico ([Vercel](https://vercel.com) — Plano Gratuito $0).
 * **`apps/web`** $\rightarrow$ Painel B2B com CRM Kanban, Inbox Unificado, RAG e Supabase Auth ([Vercel](https://vercel.com) — Plano Gratuito $0).
-* **`apps/api`** $\rightarrow$ Motor de IA, Webhooks assíncronos da Meta e background workers ([Railway](https://railway.app) — ~$5/mês).
+* **`apps/api`** $\rightarrow$ Motor MAI de IA, Webhooks assíncronos da Meta e background workers ([Railway](https://railway.app) — ~$5/mês).
 * **`packages/database`** $\rightarrow$ Esquema centralizado do Prisma com PostgreSQL e extensão `pgvector` ([Supabase](https://supabase.com)).
 
 ---
@@ -70,4 +70,4 @@ npm run dev:api
 
 ---
 
-© 2026 RushAI Technologies. Todos os direitos reservados.
+© 2026 OMNAI Technologies. Todos os direitos reservados.

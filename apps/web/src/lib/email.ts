@@ -29,7 +29,7 @@ export async function sendVerificationEmail({
   const verificationLink = `${cleanAppUrl}/verificar-email?token=${token}&email=${encodeURIComponent(to)}`;
 
   const resendApiKey = process.env.RESEND_API_KEY;
-  const fromEmail = process.env.EMAIL_FROM || "Omni SDR <onboarding@resend.dev>";
+  const fromEmail = process.env.EMAIL_FROM || "OMNAI <onboarding@resend.dev>";
 
   // Template HTML profissional e responsivo
   const htmlContent = `
@@ -52,12 +52,13 @@ export async function sendVerificationEmail({
     <body>
       <div class="container">
         <div class="header">
-          <div class="logo">⚡ Omni SDR & AI</div>
+          <div class="logo">⚡ OMNAI</div>
+          <div style="color: #94a3b8; font-size: 11px; margin-top: 4px; letter-spacing: 1px;">MOTOR MAI • ATENDIMENTO INTELIGENTE</div>
         </div>
         <div class="content">
           <h2 style="margin-top: 0; color: #0f172a; font-size: 20px;">Olá, ${nome || "bem-vindo"}! 👋</h2>
           <p style="font-size: 14px; line-height: 1.6; color: #334155;">
-            Obrigado por criar sua conta no <strong>Omni SDR</strong>. Para ativar seu workspace com segurança e verificar a veracidade deste e-mail, utilize o código abaixo:
+            Obrigado por criar sua conta no <strong>OMNAI</strong>. Para ativar seu workspace com segurança e verificar a veracidade deste e-mail, utilize o código abaixo:
           </p>
           
           <div class="code-box">
@@ -74,7 +75,7 @@ export async function sendVerificationEmail({
         </div>
         <div class="footer">
           Se você não solicitou este cadastro, ignore este e-mail com segurança.<br/>
-          © ${new Date().getFullYear()} Omni SDR Platform. Todos os direitos reservados.
+          © ${new Date().getFullYear()} OMNAI Platform. Todos os direitos reservados.
         </div>
       </div>
     </body>
@@ -93,7 +94,7 @@ export async function sendVerificationEmail({
         body: JSON.stringify({
           from: fromEmail,
           to: [to],
-          subject: `🔒 ${code} é o seu código de ativação Omni SDR`,
+          subject: `🔒 ${code} é o seu código de ativação OMNAI`,
           html: htmlContent,
         }),
       });

@@ -30,7 +30,7 @@ async function sendWhatsAppOtp(phone: string, code: string) {
         type: "text",
         text: {
           preview_url: false,
-          body: `🔒 *Seu código de acesso ao Omni Service SaaS é:* *${code}*\n\nEle expira em 10 minutos. Nunca compartilhe este código.`,
+          body: `🔒 *Seu código de acesso ao OMNAI é:* *${code}*\n\nEle expira em 10 minutos. Nunca compartilhe este código.`,
         },
       }),
     });

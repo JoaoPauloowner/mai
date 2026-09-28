@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Bot, ShieldCheck, Zap, MessageSquare, Target, CheckCircle2, Sparkles } from "lucide-react";
 
 export default function LandingPage() {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://rushai-app.vercel.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://omnisdr-app.vercel.app";
 
   return (
     <div className="min-h-screen bg-white text-zinc-900 flex flex-col justify-between">
@@ -11,9 +11,12 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5 font-bold text-lg tracking-tight text-zinc-900">
             <span className="w-8 h-8 rounded-lg bg-zinc-900 text-white flex items-center justify-center text-sm font-extrabold">
-              AI
+              Ω
             </span>
-            <span>RushAI</span>
+            <span>OMNAI</span>
+            <span className="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 bg-zinc-100 border border-zinc-200 text-zinc-600 rounded">
+              Motor MAI
+            </span>
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4">
@@ -44,7 +47,7 @@ export default function LandingPage() {
       <main className="flex-1 max-w-6xl mx-auto px-6 py-16 sm:py-24 flex flex-col items-center text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-zinc-200 bg-zinc-50 text-xs font-medium text-zinc-700 mb-8">
           <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-          <span>SDR com IA 24/7 para WhatsApp & Instagram</span>
+          <span>Equipado com MAI (Motor de Atendimento Inteligente) 24/7</span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-zinc-950 max-w-3xl leading-tight">
@@ -93,7 +96,7 @@ export default function LandingPage() {
             <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center mb-4">
               <Bot className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-bold text-zinc-900 mb-2">RAG & Base de Conhecimento</h3>
+            <h3 className="text-base font-bold text-zinc-900 mb-2">Motor MAI & RAG Vetorial</h3>
             <p className="text-sm text-zinc-600 leading-relaxed">
               Faça upload de PDFs, tabelas de preços e manuais. A IA responde estritamente conforme suas diretrizes.
             </p>
@@ -118,7 +121,7 @@ export default function LandingPage() {
             <ShieldCheck className="w-4 h-4 text-zinc-400" />
             <span>Infraestrutura em conformidade com a LGPD e criptografia de ponta a ponta.</span>
           </div>
-          <div>© {new Date().getFullYear()} RushAI B2B. Todos os direitos reservados.</div>
+          <div>© {new Date().getFullYear()} OMNAI Platform. Todos os direitos reservados.</div>
         </div>
       </footer>
     </div>

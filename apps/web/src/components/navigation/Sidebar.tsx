@@ -107,7 +107,10 @@ export function Sidebar({ segmento, orgNome }: SidebarProps) {
           <div className="min-w-0 flex-1">
             <div className="font-bold text-base text-neutral-900 tracking-tight flex items-center gap-1.5">
               <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-              MAI
+              OMNAI
+              <span className="text-[9px] font-semibold tracking-wider uppercase px-1 py-0.5 bg-neutral-100 border border-neutral-200 text-neutral-600 rounded">
+                MAI
+              </span>
             </div>
             <div className="text-xs text-neutral-500 truncate" title={orgNome || "Workspace"}>
               {orgNome || "Workspace"}
@@ -115,7 +118,7 @@ export function Sidebar({ segmento, orgNome }: SidebarProps) {
           </div>
         ) : (
           <div className="w-full flex justify-center pb-0.5">
-            <span className="font-bold text-base text-neutral-900 tracking-tight">M</span>
+            <span className="font-bold text-base text-neutral-900 tracking-tight">Ω</span>
           </div>
         )}
 

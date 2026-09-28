@@ -14,7 +14,7 @@ export async function POST(req: Request) {
         ? "https://api.asaas.com/v3"
         : "https://sandbox.asaas.com/api/v3";
 
-    // Valores dos planos do RushAI
+    // Valores dos planos do OMNAI
     const planoValores: Record<string, number> = {
       starter: 297.0,
       pro: 497.0,
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
         billingType, // "PIX", "CREDIT_CARD", "BOLETO"
         value: valor,
         dueDate: new Date(Date.now() + 86400000 * 3).toISOString().split("T")[0],
-        description: `Assinatura RushAI B2B - Plano ${plano.toUpperCase()}`,
+        description: `Assinatura OMNAI B2B - Plano ${plano.toUpperCase()}`,
       }),
     });
 
