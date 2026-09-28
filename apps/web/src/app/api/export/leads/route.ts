@@ -43,23 +43,44 @@ export async function GET(request: NextRequest) {
       "Data Cadastro",
     ];
 
+    function sanitizeCsvCell(value: any): string {
+      if (value === null || value === undefined) return '""';
+      let str = String(value);
+      if (/^[=+\-@\t\r]/.test(str)) {
+        str = "'" + str;
+      }
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+
     const rows = leads.map((l: any) => [
-      l.id,
-      `"${(l.nome || "").replace(/"/g, '""')}"`,
-      `"${(l.telefone || "").replace(/"/g, '""')}"`,
-      `"${(l.email || "").replace(/"/g, '""')}"`,
-      `"${(l.empresa || "").replace(/"/g, '""')}"`,
-      l.status,
-      l.score,
-      l.prioridade,
-      l.origemCanal,
-      `"${(l.utmSource || "").replace(/"/g, '""')}"`,
-      `"${(l.utmCampaign || "").replace(/"/g, '""')}"`,
-      l.valorNegocio || 0,
-      l.createdAt.toISOString(),
+      sanitizeCsvCell(l.id),
+      sanitizeCsvCell(l.nome),
+      sanitizeCsvCell(l.telefone),
+      sanitizeCsvCell(l.email),
+      sanitizeCsvCell(l.empresa),
+      sanitizeCsvCell(l.status),
+      sanitizeCsvCell(l.score),
+      sanitizeCsvCell(l.prioridade),
+      sanitizeCsvCell(l.origemCanal),
+      sanitizeCsvCell(l.utmSource),
+      sanitizeCsvCell(l.utmCampaign),
+      sanitizeCsvCell(l.valorNegocio || 0),
+      sanitizeCsvCell(l.createdAt.toISOString()),
     ]);
 
-    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map((r: (string | number)[]) => r.join(","))].join("\n");
+    const csvContent = "\uFEFF" + [headers.map(sanitizeCsvCell).join(","), ...rows.map((r: string[]) => r.join(","))].join("\n");
+
+    // M9: Registra auditoria de exportação
+    try {
+      await prisma.auditLog.create({
+        data: {
+          organizationId: session.organizationId,
+          userId: session.userId,
+          acao: "LEAD_DATA_EXPORT",
+          detalhes: `Exportação de ${leads.length} leads em CSV pelo usuário ${session.nome} (Período: ${period}).`,
+        },
+      });
+    } catch {}
 
     return new NextResponse(csvContent, {
       status: 200,
@@ -69,6 +90,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Erro ao exportar leads" }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao exportar leads." }, { status: 500 });
   }
 }
