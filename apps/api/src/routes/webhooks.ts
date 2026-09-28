@@ -138,6 +138,11 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
           return;
         }
 
+        if (org.statusPlano === "bloqueado" || org.statusPlano === "cancelado") {
+          console.warn(`[Webhook Evolution API] Organização "${org.slug}" com plano ${org.statusPlano}. Mensagem ignorada.`);
+          return;
+        }
+
         const { lead, conversation } = await findOrCreateLeadAndConversation({
           organizationId: org.id,
           phone: senderPhone,
@@ -215,6 +220,11 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
 
       if (!org) {
         console.warn(`[Webhook WhatsApp] Nenhuma organização associada ao Phone ID ${phoneNumberId}. Evento descartado.`);
+        return;
+      }
+
+      if (org.statusPlano === "bloqueado" || org.statusPlano === "cancelado") {
+        console.warn(`[Webhook WhatsApp Meta] Organização "${org.slug}" com plano ${org.statusPlano}. Resposta automática cancelada.`);
         return;
       }
 
@@ -353,6 +363,11 @@ webhookRouter.post("/instagram", async (req: Request, res: Response) => {
 
       if (!org) {
         console.warn(`[Webhook Instagram] Nenhuma organização associada ao Instagram ID ${recipientId}. Evento ignorado.`);
+        return;
+      }
+
+      if (org.statusPlano === "bloqueado" || org.statusPlano === "cancelado") {
+        console.warn(`[Webhook Instagram] Organização "${org.slug}" com plano ${org.statusPlano}. Resposta automática cancelada.`);
         return;
       }
 

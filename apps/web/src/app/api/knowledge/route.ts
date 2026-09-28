@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       const chunk = chunks[i];
       const embedding = await generateEmbedding(chunk);
 
-      await prisma.knowledgeChunk.create({
+      const createdChunk = await prisma.knowledgeChunk.create({
         data: {
           organizationId: session.organizationId,
           documentId: document.id,
@@ -63,6 +63,20 @@ export async function POST(request: NextRequest) {
           embeddingJson: JSON.stringify(embedding),
         },
       });
+
+      // Sincronizar com coluna nativa pgvector se PostgreSQL/Supabase estiver em uso
+      if (embedding && embedding.length > 0) {
+        try {
+          const vectorStr = `[${embedding.join(",")}]`;
+          await prisma.$executeRawUnsafe(
+            `UPDATE "KnowledgeChunk" SET embedding = $1::vector WHERE id = $2`,
+            vectorStr,
+            createdChunk.id
+          );
+        } catch {
+          // Fallback gracioso para banco SQLite local ou sem extensão pgvector
+        }
+      }
     }
 
     // Atualizar contagem total de chunks
