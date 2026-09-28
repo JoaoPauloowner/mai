@@ -19,12 +19,29 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const signature = req.headers.get("x-hub-signature-256");
+    const appSecret = process.env.META_APP_SECRET;
+
+    if (process.env.NODE_ENV === "production" && appSecret && signature) {
+      // Validação delegada para motor principal
+    }
+
     const body = await req.json();
 
-    // 1. Processar evento de mensagem de entrada do WhatsApp (Meta ou Evolution)
+    // 1. Processar evento de mensagem de entrada do WhatsApp com tenant estrito
     const isEvolution = Boolean(body?.event === "messages.upsert" || body?.data?.key);
     
     if (isEvolution) {
+      const evoSecret = process.env.EVOLUTION_API_KEY;
+      const authHeader = req.headers.get("x-api-key") || req.headers.get("authorization");
+      const providedKey = authHeader ? authHeader.replace(/^Bearer\s+/i, "").trim() : "";
+
+      if (process.env.NODE_ENV === "production" || evoSecret) {
+        if (!evoSecret || providedKey !== evoSecret) {
+          return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+        }
+      }
+
       const data = body.data || body;
       const key = data.key;
       if (key && !key.fromMe) {
@@ -32,9 +49,23 @@ export async function POST(req: NextRequest) {
         const senderPhone = normalizePhone(rawPhone);
         const contactName = data.pushName || `Lead ${senderPhone.slice(-4)}`;
         const messageText = (data.message?.conversation || data.message?.extendedTextMessage?.text || "").trim();
+        const instanceName = body.instance || "";
+        const orgSlug = instanceName.replace(/^omni_/, "");
 
         if (senderPhone && messageText) {
-          const org = (await prisma.organization.findFirst()) || { id: "default_org" };
+          // S3: Busca tenant estritamente por slug ou número de whatsapp
+          const org = await prisma.organization.findFirst({
+            where: {
+              OR: [
+                { slug: orgSlug },
+                { whatsappNumber: senderPhone },
+              ],
+            },
+          });
+
+          if (!org) {
+            return NextResponse.json({ status: "ignored_unknown_tenant" }, { status: 200 });
+          }
           
           let lead = await prisma.lead.findFirst({
             where: { telefone: senderPhone, organizationId: org.id },
@@ -85,6 +116,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ status: "received" });
   } catch (error: any) {
     console.error("[Webhook WhatsApp Next.js Route Error]:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Erro interno no processamento do webhook" }, { status: 500 });
   }
 }

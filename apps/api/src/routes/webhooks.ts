@@ -31,10 +31,23 @@ webhookRouter.get("/whatsapp", (req: Request, res: Response) => {
 webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
   const isEvolutionEvent = Boolean(req.body?.event === "messages.upsert" || req.body?.data?.key || req.body?.instance);
   const signature = req.headers["x-hub-signature-256"] as string | undefined;
+  const rawBody = (req as any).rawBody || Buffer.from(JSON.stringify(req.body));
   const appSecret = process.env.META_APP_SECRET;
 
-  // Se for evento Meta Cloud API, valida assinatura HMAC
-  if (!isEvolutionEvent) {
+  // S2: Se for evento Evolution API, EXIGE autenticação por API Key
+  if (isEvolutionEvent) {
+    const evoSecret = process.env.EVOLUTION_API_KEY;
+    const authHeader = (req.headers["x-api-key"] || req.headers["authorization"]) as string | undefined;
+    const providedKey = authHeader ? authHeader.replace(/^Bearer\s+/i, "").trim() : "";
+
+    if (process.env.NODE_ENV === "production" || evoSecret) {
+      if (!evoSecret || !providedKey || providedKey !== evoSecret) {
+        console.warn("[Webhook WhatsApp Evolution] Requisição Evolution não autorizada ou sem chave válida.");
+        return res.status(401).json({ error: "Não autorizado: Chave de API Evolution inválida ou ausente." });
+      }
+    }
+  } else {
+    // Se for evento Meta Cloud API, valida assinatura HMAC sobre o raw body
     if (process.env.NODE_ENV === "production") {
       if (!appSecret) {
         console.error("[Webhook WhatsApp CRITICAL] META_APP_SECRET não está configurado em produção. Rejeitando requisição.");
@@ -45,12 +58,12 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
         });
         return res.status(500).json({ error: "Configuração de segurança incompleta" });
       }
-      if (!signature || !verifyMetaSignature(JSON.stringify(req.body), signature, appSecret)) {
+      if (!signature || !verifyMetaSignature(rawBody, signature, appSecret)) {
         console.warn("[Webhook WhatsApp] Assinatura HMAC X-Hub-Signature-256 ausente ou inválida. Requisição rejeitada.");
         return res.status(401).json({ error: "Assinatura HMAC inválida ou ausente" });
       }
     } else if (appSecret && signature) {
-      if (!verifyMetaSignature(JSON.stringify(req.body), signature, appSecret)) {
+      if (!verifyMetaSignature(rawBody, signature, appSecret)) {
         console.warn("[Webhook WhatsApp Dev] Assinatura HMAC inválida.");
         return res.status(401).json({ error: "Assinatura HMAC inválida" });
       }
@@ -76,20 +89,27 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
         const senderPhone = (key.remoteJid || "").replace(/@.*$/, "");
         const contactName = data.pushName || `Lead ${senderPhone.slice(-4)}`;
         const messageText = (data.message?.conversation || data.message?.extendedTextMessage?.text || "").trim();
-        const instanceName = body.instance || "omni_demo";
+        const instanceName = body.instance || "";
 
         if (!senderPhone || !messageText) return;
 
         console.log(`[Webhook Evolution API] Mensagem de ${senderPhone} (${contactName}): "${messageText}"`);
 
         const orgSlug = instanceName.replace(/^omni_/, "");
-        const org =
-          (await prisma.organization.findFirst({
-            where: { OR: [{ slug: orgSlug }, { whatsappTipoConexao: "QR_CODE" }] },
-          })) ||
-          (await prisma.organization.findFirst());
+        // S3: Resolução estrita de tenant sem fallbacks abertos
+        const org = await prisma.organization.findFirst({
+          where: {
+            OR: [
+              { slug: orgSlug },
+              { whatsappNumber: senderPhone },
+            ],
+          },
+        });
 
-        if (!org) return;
+        if (!org) {
+          console.warn(`[Webhook Evolution API] Nenhuma organização associada à instância "${instanceName}". Mensagem ignorada.`);
+          return;
+        }
 
         const { lead, conversation } = await findOrCreateLeadAndConversation({
           organizationId: org.id,
@@ -145,18 +165,17 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
       const messageText = message.text?.body?.trim();
       const phoneNumberId = value.metadata?.phone_number_id;
 
-      if (!senderPhone || !messageText) return;
+      if (!senderPhone || !messageText || !phoneNumberId) return;
 
       console.log(`[Webhook WhatsApp Meta] Mensagem recebida de ${senderPhone}: "${messageText}"`);
 
-      const org =
-        (await prisma.organization.findFirst({
-          where: { metaPhoneNumberId: phoneNumberId },
-        })) ||
-        (await prisma.organization.findFirst());
+      // S3: Resolução estrita de organização por phone_number_id
+      const org = await prisma.organization.findFirst({
+        where: { metaPhoneNumberId: phoneNumberId },
+      });
 
       if (!org) {
-        console.warn("[Webhook WhatsApp] Nenhuma organização encontrada para este número.");
+        console.warn(`[Webhook WhatsApp] Nenhuma organização associada ao Phone ID ${phoneNumberId}. Evento descartado.`);
         return;
       }
 
@@ -237,6 +256,7 @@ webhookRouter.get("/instagram", (req: Request, res: Response) => {
 webhookRouter.post("/instagram", async (req: Request, res: Response) => {
   // Validação de HMAC com META_APP_SECRET (Falha fechada em produção)
   const signature = req.headers["x-hub-signature-256"] as string | undefined;
+  const rawBody = (req as any).rawBody || Buffer.from(JSON.stringify(req.body));
   const appSecret = process.env.META_APP_SECRET;
 
   if (process.env.NODE_ENV === "production") {
@@ -244,12 +264,12 @@ webhookRouter.post("/instagram", async (req: Request, res: Response) => {
       console.error("[Webhook Instagram CRITICAL] META_APP_SECRET não está configurado em produção. Rejeitando requisição.");
       return res.status(500).json({ error: "Configuração de segurança incompleta" });
     }
-    if (!signature || !verifyMetaSignature(JSON.stringify(req.body), signature, appSecret)) {
+    if (!signature || !verifyMetaSignature(rawBody, signature, appSecret)) {
       console.warn("[Webhook Instagram] Assinatura HMAC X-Hub-Signature-256 ausente ou inválida. Requisição rejeitada.");
       return res.status(401).json({ error: "Assinatura HMAC inválida ou ausente" });
     }
   } else if (appSecret && signature) {
-    if (!verifyMetaSignature(JSON.stringify(req.body), signature, appSecret)) {
+    if (!verifyMetaSignature(rawBody, signature, appSecret)) {
       return res.status(401).json({ error: "Assinatura HMAC inválida" });
     }
   }
@@ -268,7 +288,22 @@ webhookRouter.post("/instagram", async (req: Request, res: Response) => {
       const recipientId = messaging.recipient?.id;
       const messageText = messaging.message.text.trim();
 
-      const org = (await prisma.organization.findFirst()) || { id: "default_org" };
+      if (!recipientId || !senderId || !messageText) return;
+
+      // S3: Resolução de tenant estrita para Instagram
+      const org = await prisma.organization.findFirst({
+        where: {
+          OR: [
+            { instagramHandle: recipientId },
+            { id: recipientId },
+          ],
+        },
+      });
+
+      if (!org) {
+        console.warn(`[Webhook Instagram] Nenhuma organização associada ao Instagram ID ${recipientId}. Evento ignorado.`);
+        return;
+      }
 
       const { lead, conversation } = await findOrCreateLeadAndConversation({
         organizationId: org.id,

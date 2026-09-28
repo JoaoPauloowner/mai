@@ -38,10 +38,21 @@ export function verifyMetaSignature(
   }
 
   const signature = parts[1];
-  const hmac = crypto.createHmac("sha256", appSecret);
-  const digest = hmac.update(rawBody).digest("hex");
+  try {
+    const hmac = crypto.createHmac("sha256", appSecret);
+    const digest = hmac.update(rawBody).digest("hex");
 
-  return crypto.timingSafeEqual(Buffer.from(signature, "hex"), Buffer.from(digest, "hex"));
+    const sigBuf = Buffer.from(signature, "hex");
+    const digestBuf = Buffer.from(digest, "hex");
+
+    if (sigBuf.length !== digestBuf.length || sigBuf.length === 0) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(sigBuf, digestBuf);
+  } catch {
+    return false;
+  }
 }
 
 // 2. Envio de mensagem de texto via Meta WhatsApp Cloud API v20.0
