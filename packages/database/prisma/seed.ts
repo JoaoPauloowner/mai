@@ -9,7 +9,12 @@ function hashPhone(phone: string): string {
 }
 
 async function main() {
-  console.log("🌱 Iniciando Seed do Omni Service SaaS...");
+  if (process.env.NODE_ENV === "production" && !process.env.ALLOW_PRODUCTION_SEED) {
+    console.error("❌ [SECURITY] Seed execution is blocked in production environment.");
+    process.exit(1);
+  }
+
+  console.log("🌱 Iniciando Seed do OMNAI SaaS...");
 
   // Limpar tabelas caso já existam dados
   await prisma.message.deleteMany();
@@ -23,8 +28,11 @@ async function main() {
   await prisma.auditLog.deleteMany();
   await prisma.organization.deleteMany();
 
-  const passwordHash = await bcrypt.hash("admin123", 10);
-  const userPasswordHash = await bcrypt.hash("user123", 10);
+  const adminPass = process.env.SEED_ADMIN_PASSWORD || "admin123";
+  const userPass = process.env.SEED_USER_PASSWORD || "user123";
+
+  const passwordHash = await bcrypt.hash(adminPass, 10);
+  const userPasswordHash = await bcrypt.hash(userPass, 10);
 
   // 1. Organização Mestre / Demo Geral
   const orgDemo = await prisma.organization.create({

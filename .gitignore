@@ -30,5 +30,12 @@ Thumbs.db
 .idea/
 scratch/
 
+# Database files & dist builds (S9)
+*.db
+*.db-journal
+*.sqlite
+dev.db
+dist/
+apps/api/dist/
 
 .vercel

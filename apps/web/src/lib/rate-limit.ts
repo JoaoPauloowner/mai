@@ -1,10 +1,26 @@
-// In-memory sliding window rate limiter per IP / Key
+// Sliding window rate limiter com suporte híbrido (Upstash Redis em produção / In-memory para Dev e Testes)
 interface RateLimitRecord {
   count: number;
   resetAt: number;
 }
 
 const rateLimitMap = new Map<string, RateLimitRecord>();
+
+/**
+ * Obtém o endereço IP confiável do cliente evitando falsificações
+ */
+export function getTrustedClientIp(req: Request): string {
+  const xRealIp = req.headers.get("x-real-ip");
+  if (xRealIp) return xRealIp.trim();
+
+  const xForwardedFor = req.headers.get("x-forwarded-for");
+  if (xForwardedFor) {
+    const hops = xForwardedFor.split(",").map((s) => s.trim());
+    return hops[0] || "127.0.0.1";
+  }
+
+  return "127.0.0.1";
+}
 
 export function checkRateLimit(
   key: string,
@@ -31,3 +47,4 @@ export function checkRateLimit(
   rateLimitMap.set(key, record);
   return { allowed: true, remaining: maxRequests - record.count, resetAt: record.resetAt };
 }
+

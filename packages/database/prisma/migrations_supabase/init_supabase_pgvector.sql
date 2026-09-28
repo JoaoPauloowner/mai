@@ -185,3 +185,29 @@ BEGIN
     LIMIT match_count;
 END;
 $$;
+
+-- ==============================================================================
+-- 9. SEGURANÇA: ROW LEVEL SECURITY (RLS) & RESTRIÇÃO DE ACESSO PÚBLICO (S8)
+-- ==============================================================================
+
+-- Habilita RLS em todas as tabelas do schema public
+ALTER TABLE IF EXISTS "Organization" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "User" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "Lead" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "Conversation" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "Message" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "Appointment" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "Vehicle" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "InsurancePolicy" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "TaxGuide" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "AuditLog" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "KnowledgeDocument" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "KnowledgeChunk" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "OtpVerification" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "EmailVerification" ENABLE ROW LEVEL SECURITY;
+
+-- Revoga permissões de leitura/escrita direta do client anon e authenticated
+-- O acesso do sistema ocorre 100% pelo Prisma através da role segura de serviço (service_role)
+REVOKE ALL ON ALL TABLES IN SCHEMA public FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION match_knowledge_chunks(vector, float, int, text) FROM anon;
+
