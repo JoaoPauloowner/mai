@@ -31,8 +31,19 @@ export async function POST(req: Request) {
     const user = await validateCredentials(email, password);
 
     if (!user) {
+      try {
+        await prisma.auditLog.create({
+          data: {
+            organizationId: "auth_gateway",
+            acao: "LOGIN_FAILED",
+            detalhes: `Tentativa de login falha para o e-mail: ${email.slice(0, 3)}***@${email.split("@")[1] || "domain"}`,
+            ipAddress: ip,
+          },
+        });
+      } catch {}
+
       return NextResponse.json(
-        { error: "Credenciais incorretas" },
+        { error: "Credenciais inválidas. Verifique seu e-mail e senha." },
         { status: 401 }
       );
     }

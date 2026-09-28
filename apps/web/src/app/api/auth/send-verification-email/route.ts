@@ -26,16 +26,25 @@ export async function POST(req: Request) {
 
     const cleanEmail = email.trim().toLowerCase();
 
+    const emailLimit = checkRateLimit(`email_verify_target:${cleanEmail}`, 3, 10 * 60 * 1000);
+    if (!emailLimit.allowed) {
+      return NextResponse.json(
+        { error: "Muitas solicitações para este e-mail. Aguarde 10 minutos." },
+        { status: 429 }
+      );
+    }
+
     // Localiza usuário
     const user = await prisma.user.findUnique({
       where: { email: cleanEmail },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Nenhuma conta encontrada com este e-mail." },
-        { status: 404 }
-      );
+      // Anti-enumeration: retorna mensagem genérica para não revelar se e-mail existe
+      return NextResponse.json({
+        success: true,
+        message: "Se o e-mail estiver cadastrado, o código de confirmação foi enviado.",
+      });
     }
 
     if (user.emailVerificado) {
@@ -62,15 +71,17 @@ export async function POST(req: Request) {
       token,
     });
 
+    const isDev = process.env.NODE_ENV !== "production";
+
     return NextResponse.json({
       success: true,
       message: "E-mail de confirmação enviado com sucesso!",
-      devMode: result.devMode,
-      debugCode: result.devMode ? code : undefined,
-      debugToken: result.devMode ? token : undefined,
+      devMode: isDev && result.devMode,
+      debugCode: isDev && result.devMode ? code : undefined,
+      debugToken: isDev && result.devMode ? token : undefined,
     });
   } catch (error: any) {
     console.error("[Send Verification Email Error]", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao processar envio de confirmação." }, { status: 500 });
   }
 }

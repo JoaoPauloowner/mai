@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { normalizePhone } from "@/lib/compliance";
+import crypto from "crypto";
 
 // Envio de OTP via Meta WhatsApp Cloud API v20.0
 async function sendWhatsAppOtp(phone: string, code: string) {
@@ -76,7 +77,7 @@ export async function POST(req: Request) {
 
     // 1. Gerar e salvar código OTP no banco de dados
     if (action === "REQUEST_CODE") {
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const code = crypto.randomInt(100000, 1000000).toString();
       const expiresAt = new Date(Date.now() + 1000 * 60 * 10); // 10 minutos
 
       // Salva tanto no formato normalizado (55...) quanto no formato bruto para garantir busca
@@ -97,14 +98,14 @@ export async function POST(req: Request) {
       // Disparo real via Meta WhatsApp API com DDI 55
       const metaResult = await sendWhatsAppOtp(cleanPhone, code);
 
-      const isMetaConfigured = Boolean(process.env.META_ACCESS_TOKEN && process.env.META_PHONE_NUMBER_ID);
+      const isDev = process.env.NODE_ENV !== "production";
 
       return NextResponse.json({
         success: true,
         message: metaResult.sent
           ? "Código de verificação enviado para o seu WhatsApp."
           : "Código gerado com sucesso.",
-        debugCode: !metaResult.sent ? code : undefined,
+        debugCode: isDev && !metaResult.sent ? code : undefined,
       });
     }
 
