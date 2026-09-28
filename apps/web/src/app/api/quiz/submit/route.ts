@@ -2,9 +2,20 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { normalizePhone, hashPhone } from "@/lib/compliance";
 import { assignLeadToNextSeller } from "@/lib/round-robin";
+import { checkRateLimit, getTrustedClientIp } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
   try {
+    // 1. Rate limiting por IP do cliente
+    const clientIp = getTrustedClientIp(req);
+    const rateLimit = checkRateLimit(`quiz_submit:${clientIp}`, 10, 15 * 60 * 1000);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Limite de submissões excedido. Aguarde alguns minutos." },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const {
       slug,
@@ -17,21 +28,37 @@ export async function POST(req: Request) {
       utmMedium,
     } = body;
 
-    if (!nome || !telefone) {
+    const trimmedSlug = (slug || "").trim();
+    if (!trimmedSlug) {
+      return NextResponse.json(
+        { error: "Identificador da empresa (slug) é obrigatório." },
+        { status: 400 }
+      );
+    }
+
+    const trimmedName = (nome || "").trim().slice(0, 120);
+    const trimmedPhone = (telefone || "").trim();
+
+    if (!trimmedName || !trimmedPhone) {
       return NextResponse.json(
         { error: "Nome e telefone são obrigatórios" },
         { status: 400 }
       );
     }
 
-    // Busca o tenant pelo slug ou pega o padrão
-    let org = await prisma.organization.findUnique({
-      where: { slug: slug || "omni-demo" },
-    });
-
-    if (!org) {
-      org = await prisma.organization.findFirst();
+    const normalizedPhone = normalizePhone(trimmedPhone);
+    const digitsOnly = normalizedPhone.replace(/\D/g, "");
+    if (digitsOnly.length < 10 || digitsOnly.length > 15) {
+      return NextResponse.json(
+        { error: "Número de telefone inválido. Informe DDD + número." },
+        { status: 400 }
+      );
     }
+
+    // 2. Busca estrita do tenant pelo slug - sem fallback para primeira organização
+    const org = await prisma.organization.findUnique({
+      where: { slug: trimmedSlug },
+    });
 
     if (!org) {
       return NextResponse.json(
@@ -40,7 +67,6 @@ export async function POST(req: Request) {
       );
     }
 
-    const normalizedPhone = normalizePhone(telefone);
     const sha256 = hashPhone(normalizedPhone);
 
     // Algoritmo de Lead Scoring em Tempo Real
@@ -64,18 +90,18 @@ export async function POST(req: Request) {
     const lead = await prisma.lead.create({
       data: {
         organizationId: org.id,
-        nome,
+        nome: trimmedName,
         telefone: normalizedPhone,
         telefoneHash: sha256,
-        email: email || null,
+        email: email ? String(email).trim().toLowerCase().slice(0, 120) : null,
         status: "QUALIFICADO",
         prioridade: score >= 80 ? "HOT" : "WARM",
         score,
         scoreJustificativa: justificativa,
         origemCanal: "QUIZ",
-        utmSource: utmSource || "meta_ads",
-        utmCampaign: utmCampaign || "campanha_quiz_trafego",
-        utmMedium: utmMedium || "stories_cpc",
+        utmSource: utmSource ? String(utmSource).slice(0, 80) : "meta_ads",
+        utmCampaign: utmCampaign ? String(utmCampaign).slice(0, 80) : "campanha_quiz_trafego",
+        utmMedium: utmMedium ? String(utmMedium).slice(0, 80) : "stories_cpc",
         quizAnswersJson: JSON.stringify(answers || {}),
         ramoInteresse: "Captação via Mini-Quiz",
         valorNegocio: 15000,
@@ -100,14 +126,14 @@ export async function POST(req: Request) {
         conversationId: conv.id,
         remetenteTipo: "SISTEMA",
         tipoConteudo: "TEXTO",
-        conteudo: `[Mini-Quiz Preenchido]: ${nome} concluiu o formulário de captação. Respostas: ${JSON.stringify(answers)}`,
+        conteudo: `[Mini-Quiz Preenchido]: ${trimmedName} concluiu o formulário de captação.`,
       },
     });
 
     return NextResponse.json({
       success: true,
       leadId: lead.id,
-      whatsappNumber: org.whatsappNumber || "+5511999990001",
+      whatsappNumber: org.whatsappNumber || null,
     });
   } catch (error: any) {
     console.error("Erro no submit do quiz:", error);
