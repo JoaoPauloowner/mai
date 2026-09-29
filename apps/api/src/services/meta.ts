@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { fetchWithTimeout } from "./circuit-breaker.js";
 
 export interface SendWhatsAppParams {
   phoneNumberId: string;
@@ -66,7 +67,7 @@ export async function sendWhatsAppMessage({
     const cleanTo = to.replace(/\D/g, "");
     const url = `https://graph.facebook.com/v20.0/${phoneNumberId}/messages`;
 
-    const res = await fetch(url, {
+    const res = await fetchWithTimeout(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -79,7 +80,7 @@ export async function sendWhatsAppMessage({
         type: "text",
         text: { preview_url: false, body: text },
       }),
-    });
+    }, 15000);
 
     const data = await res.json();
 
@@ -104,7 +105,7 @@ export async function sendInstagramMessage({
   try {
     const url = `https://graph.facebook.com/v20.0/me/messages`;
 
-    const res = await fetch(url, {
+    const res = await fetchWithTimeout(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -114,7 +115,7 @@ export async function sendInstagramMessage({
         recipient: { id: recipientId },
         message: { text },
       }),
-    });
+    }, 15000);
 
     const data = await res.json();
 
@@ -145,7 +146,7 @@ export async function sendEvolutionWhatsAppMessage({
   const cleanPhone = to.replace(/\D/g, "");
 
   try {
-    const res = await fetch(`${evolutionUrl}/message/sendText/${instanceName}`, {
+    const res = await fetchWithTimeout(`${evolutionUrl}/message/sendText/${instanceName}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -156,7 +157,7 @@ export async function sendEvolutionWhatsAppMessage({
         text,
         delay: 1200,
       }),
-    });
+    }, 15000);
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
@@ -170,4 +171,5 @@ export async function sendEvolutionWhatsAppMessage({
     return { success: false, error: error.message };
   }
 }
+
 

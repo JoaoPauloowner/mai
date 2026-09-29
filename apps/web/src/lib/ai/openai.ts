@@ -2,6 +2,7 @@
  * OpenAI API Client
  * Suporta Chat Completion (GPT-4o / GPT-4o-mini), Transcrição de Áudio (Whisper) e Síntese de Voz (TTS).
  */
+import { fetchWithTimeout } from "./circuit-breaker";
 
 export interface OpenAiChatOptions {
   model?: string;
@@ -19,7 +20,7 @@ export async function generateWithOpenAi(
   }
 
   try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    const res = await fetchWithTimeout("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -35,7 +36,7 @@ export async function generateWithOpenAi(
         ],
         temperature: options?.temperature ?? 0.4,
       }),
-    });
+    }, 15000);
 
     if (!res.ok) {
       const err = await res.text();
@@ -71,13 +72,13 @@ export async function transcribeAudioWithWhisper(
     formData.append("model", "whisper-1");
     formData.append("language", "pt");
 
-    const res = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+    const res = await fetchWithTimeout("https://api.openai.com/v1/audio/transcriptions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },
       body: formData,
-    });
+    }, 15000);
 
     const data = await res.json();
     return data.text || "Áudio inaudível ou vazio.";
@@ -101,7 +102,7 @@ export async function synthesizeVoiceOpenAi(
   }
 
   try {
-    const res = await fetch("https://api.openai.com/v1/audio/speech", {
+    const res = await fetchWithTimeout("https://api.openai.com/v1/audio/speech", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -112,7 +113,7 @@ export async function synthesizeVoiceOpenAi(
         input: text,
         voice,
       }),
-    });
+    }, 15000);
 
     if (!res.ok) return null;
     return await res.arrayBuffer();
