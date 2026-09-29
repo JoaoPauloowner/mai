@@ -11,6 +11,7 @@ import {
   Copy,
   Zap,
   ShieldCheck,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -23,7 +24,8 @@ declare global {
 }
 
 export default function SettingsWhatsappPage() {
-  const [tab, setTab] = useState<"QR_CODE" | "META_CLOUD_API">("QR_CODE");
+  const isEvolutionEnabled = process.env.NEXT_PUBLIC_ADMIN_EVOLUTION_MODE_ENABLED === "true";
+  const [tab, setTab] = useState<"QR_CODE" | "META_CLOUD_API">("META_CLOUD_API");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [copiedField, setCopiedField] = useState("");
@@ -270,18 +272,47 @@ export default function SettingsWhatsappPage() {
 
       {/* Tabs */}
       <div className="flex gap-2 p-1 bg-[#E7EBE6] border border-[#D0D5CD] rounded-xl w-fit">
-        {(["QR_CODE", "META_CLOUD_API"] as const).map((t) => (
-          <button key={t} type="button" onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 ${tab === t ? "bg-white text-[#2C2E2A] shadow-xs" : "text-[#63695B] hover:text-[#2C2E2A]"}`}
+        <button
+          type="button"
+          onClick={() => setTab("META_CLOUD_API")}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
+            tab === "META_CLOUD_API"
+              ? "bg-white text-[#2C2E2A] shadow-xs"
+              : "text-[#63695B] hover:text-[#2C2E2A]"
+          }`}
+        >
+          <Globe className="w-4 h-4 text-[#7A8E75]" /> Meta Cloud API Oficial
+        </button>
+
+        {isEvolutionEnabled && (
+          <button
+            type="button"
+            onClick={() => setTab("QR_CODE")}
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
+              tab === "QR_CODE"
+                ? "bg-white text-[#2C2E2A] shadow-xs"
+                : "text-[#63695B] hover:text-[#2C2E2A]"
+            }`}
           >
-            {t === "QR_CODE" ? <><QrCode className="w-4 h-4 text-[#7A8E75]" /> QR Code (Evolution API)</> : <><Globe className="w-4 h-4 text-[#7A8E75]" /> Meta Cloud API Oficial</>}
+            <QrCode className="w-4 h-4 text-[#7A8E75]" /> QR Code (Evolution API)
           </button>
-        ))}
+        )}
       </div>
 
       {/* ─── QR Code ─────────────────────────────────────────────────────── */}
       {tab === "QR_CODE" && (
         <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] space-y-6 shadow-xs">
+          {/* Warning Banner */}
+          <div className="p-4 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs space-y-1.5">
+            <div className="flex items-center gap-2 font-bold text-amber-950">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>Aviso Importante: Risco de Banimento por Conexão Não-Oficial</span>
+            </div>
+            <p className="text-amber-800 leading-relaxed text-[11px]">
+              A conexão via QR Code utiliza emulação de WhatsApp Web (Evolution API). A Meta monitora ativamente conexões não-oficiais e pode aplicar banimento permanente ao número conectado. Recomendamos o uso exclusivo da <strong>Meta Cloud API Oficial</strong> para contas de clientes e operação comercial em produção.
+            </p>
+          </div>
+
           <div>
             <h3 className="text-sm font-bold">Escanear com o Celular</h3>
             <p className="text-xs text-[#63695B] mt-0.5">WhatsApp &gt; Aparelhos Conectados &gt; Conectar um Aparelho.</p>
