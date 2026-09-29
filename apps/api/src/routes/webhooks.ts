@@ -4,6 +4,7 @@ import { verifyMetaSignature, sendWhatsAppMessage, sendInstagramMessage } from "
 import { generateSDRResponse } from "../services/ai.js";
 import { findOrCreateLeadAndConversation, recordIncomingMessage, recordOutgoingMessage, getRecentHistory } from "../services/conversation.js";
 import { captureProductionError } from "../services/monitoring.js";
+import { maskPhone, maskMessage, maskEmail } from "../utils/mask.js";
 
 const processedMessagesCache = new Map<string, number>();
 
@@ -120,7 +121,7 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
 
         if (!senderPhone || !messageText) return;
 
-        console.log(`[Webhook Evolution API] Mensagem de ${senderPhone} (${contactName}): "${messageText}"`);
+        console.log(`[Webhook Evolution API] Mensagem de ${maskPhone(senderPhone)} (${contactName}): "${maskMessage(messageText)}"`);
 
         const orgSlug = instanceName.replace(/^omni_/, "");
         // S3: Resolução estrita de tenant sem fallbacks abertos
@@ -263,7 +264,7 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
         history,
       });
 
-      console.log(`[Webhook WhatsApp Meta] Resposta gerada (Tool: ${toolCalled || "none"}): "${replyText}"`);
+      console.log(`[Webhook WhatsApp Meta] Resposta gerada (Tool: ${toolCalled || "none"}): "${maskMessage(replyText)}"`);
 
       await recordOutgoingMessage({
         conversationId: conversation.id,
@@ -472,7 +473,7 @@ webhookRouter.post("/billing", async (req: Request, res: Response) => {
     const customerEmail = body?.payment?.customerEmail || body?.customer;
 
     if (process.env.NODE_ENV !== "production") {
-      console.log(`[Billing Webhook Asaas] Evento: ${event} para cliente: ${customerEmail}`);
+      console.log(`[Billing Webhook Asaas] Evento: ${event} para cliente: ${maskEmail(customerEmail)}`);
     }
 
     const org = await prisma.organization.findFirst({

@@ -12,7 +12,8 @@ async function sendWhatsAppOtp(phone: string, code: string) {
 
   if (!metaToken || !phoneId) {
     if (process.env.NODE_ENV !== "production") {
-      console.log(`[WhatsApp OTP Dev Mode] Código para ${phone}: ${code}`);
+      const { maskPhone } = await import("@/lib/mask");
+      console.log(`[WhatsApp OTP Dev Mode] Código para ${maskPhone(phone)}: ${code}`);
     }
     return { sent: false, reason: "META_ACCESS_TOKEN_NOT_CONFIGURED" };
   }

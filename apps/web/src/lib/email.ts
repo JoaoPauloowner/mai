@@ -113,8 +113,9 @@ export async function sendVerificationEmail({
   }
 
   // 2. Modo Desenvolvimento / Sem API Key configurada
+  const { maskEmail } = await import("@/lib/mask");
   console.log(`\n========================================`);
-  console.log(`[EMAIL DEV MODE] Para: ${to}`);
+  console.log(`[EMAIL DEV MODE] Para: ${maskEmail(to)}`);
   console.log(`[EMAIL DEV MODE] Código: ${code}`);
   console.log(`[EMAIL DEV MODE] Link de Ativação: ${verificationLink}`);
   console.log(`========================================\n`);
