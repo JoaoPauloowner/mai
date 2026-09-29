@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { handleApiError } from "@/lib/errors";
 
 export async function GET(
   req: Request,
@@ -34,7 +35,7 @@ export async function GET(
 
     return NextResponse.json({ lead });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao carregar detalhes do lead.");
   }
 }
 
@@ -91,7 +92,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, lead: updated });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao atualizar dados do lead.");
   }
 }
 
@@ -137,7 +138,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, message: "Lead e dados associados excluídos com sucesso." });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao excluir lead e dados associados.");
   }
 }
 

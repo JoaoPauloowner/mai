@@ -5,6 +5,7 @@ import { checkRateLimit, getTrustedClientIp } from "@/lib/rate-limit";
 import { normalizePhone } from "@/lib/compliance";
 import { validateRealEmail } from "@/lib/disposable-emails";
 import { generateEmailToken, sendVerificationEmail } from "@/lib/email";
+import { handleApiError } from "@/lib/errors";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
@@ -196,7 +197,6 @@ export async function POST(req: Request) {
       organization: { id: org.id, slug: org.slug, nome: org.nome },
     });
   } catch (error: any) {
-    console.error("Erro no registro comercial:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao registrar organização comercial.");
   }
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { analyzeImage } from "@/lib/ai/vision";
+import { handleApiError } from "@/lib/errors";
 
 export async function POST(req: Request) {
   try {
@@ -27,7 +28,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, analise: resultado });
   } catch (error: any) {
-    console.error("Erro na API de visão:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao processar análise visual por IA.");
   }
 }

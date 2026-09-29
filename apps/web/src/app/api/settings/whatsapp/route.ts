@@ -3,6 +3,7 @@ import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { normalizePhone } from "@/lib/compliance";
 import { createOrFetchInstanceQrCode } from "@/lib/evolution";
+import { handleApiError } from "@/lib/errors";
 
 export async function GET() {
   try {
@@ -34,7 +35,7 @@ export async function GET() {
       verifyToken,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao consultar configurações do WhatsApp.");
   }
 }
 
@@ -177,6 +178,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ error: "Ação não reconhecida" }, { status: 400 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao processar configuração do WhatsApp.");
   }
 }

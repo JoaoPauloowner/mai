@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { chunkText, generateEmbedding } from "@/lib/embeddings";
+import { handleApiError } from "@/lib/errors";
 
 export async function GET() {
   try {
@@ -19,7 +20,7 @@ export async function GET() {
 
     return NextResponse.json({ documents });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao listar documentos da base de conhecimento.");
   }
 }
 
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
       totalChunks: chunks.length,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao processar e salvar documento na base de conhecimento.");
   }
 }
 
@@ -119,6 +120,6 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao excluir documento da base de conhecimento.");
   }
 }

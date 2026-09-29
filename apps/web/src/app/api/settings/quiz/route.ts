@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { handleApiError } from "@/lib/errors";
 
 const DEFAULT_QUIZ_CONFIG = {
   titulo: "Diagnostico Especializado",
@@ -56,7 +57,7 @@ export async function GET() {
       quizUrl: `http://localhost:3000/quiz/${org?.slug || "omni-demo"}`,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao consultar configurações do quiz.");
   }
 }
 
@@ -78,6 +79,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, organization: updated });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao atualizar configurações do quiz.");
   }
 }

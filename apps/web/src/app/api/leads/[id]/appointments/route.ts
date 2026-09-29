@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { handleApiError } from "@/lib/errors";
 
 export async function POST(
   req: Request,
@@ -52,6 +53,6 @@ export async function POST(
 
     return NextResponse.json({ success: true, appointment });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao criar agendamento para o lead.");
   }
 }

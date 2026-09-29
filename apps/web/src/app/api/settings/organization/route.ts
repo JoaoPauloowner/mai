@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { normalizePhone } from "@/lib/compliance";
+import { handleApiError } from "@/lib/errors";
 
 export async function GET() {
   try {
@@ -27,7 +28,7 @@ export async function GET() {
 
     return NextResponse.json({ organization: org });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao consultar dados da organização.");
   }
 }
 
@@ -68,6 +69,6 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({ success: true, organization: updated });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao atualizar dados da organização.");
   }
 }

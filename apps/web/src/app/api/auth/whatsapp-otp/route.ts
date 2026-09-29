@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit, getTrustedClientIp } from "@/lib/rate-limit";
 import { normalizePhone } from "@/lib/compliance";
+import { handleApiError } from "@/lib/errors";
 import crypto from "crypto";
 
 // Envio de OTP via Meta WhatsApp Cloud API v20.0
@@ -164,6 +165,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ error: "Ação inválida." }, { status: 400 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Erro ao processar verificação de WhatsApp.");
   }
 }

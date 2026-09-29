@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { handleApiError } from "@/lib/errors";
 
 export async function POST(
   req: Request,
@@ -56,6 +57,6 @@ export async function POST(
 
     return NextResponse.json({ success: true, nota: novaNota, notas });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao salvar anotação interna do lead.");
   }
 }
