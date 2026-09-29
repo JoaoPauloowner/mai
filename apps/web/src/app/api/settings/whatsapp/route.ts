@@ -96,6 +96,20 @@ export async function POST(req: Request) {
         },
       });
 
+      // Grava AuditLog de integração (M9)
+      try {
+        await prisma.auditLog.create({
+          data: {
+            organizationId: session.organizationId,
+            userId: session.userId,
+            acao: "INTEGRATION_CONFIG_CHANGED",
+            detalhes: `WhatsApp Oficial (Meta Cloud API) conectado via Embedded Signup por ${session.nome} (PhoneNumberId: ${phoneNumberId}).`,
+          },
+        });
+      } catch (auditError) {
+        console.error("[AuditLog WhatsApp Error]", auditError);
+      }
+
       return NextResponse.json({
         success: true,
         wabaId,
@@ -119,6 +133,20 @@ export async function POST(req: Request) {
           whatsappNumber: whatsappNumber ? normalizePhone(whatsappNumber) : undefined,
         },
       });
+
+      // Grava AuditLog de alteração de credenciais de integração (M9)
+      try {
+        await prisma.auditLog.create({
+          data: {
+            organizationId: session.organizationId,
+            userId: session.userId,
+            acao: "INTEGRATION_CONFIG_CHANGED",
+            detalhes: `Credenciais Meta Cloud API (PhoneNumberId: ${metaPhoneNumberId}) atualizadas por ${session.nome}.`,
+          },
+        });
+      } catch (auditError) {
+        console.error("[AuditLog WhatsApp Error]", auditError);
+      }
 
       return NextResponse.json({ success: true, organization: updated });
     }
@@ -156,6 +184,19 @@ export async function POST(req: Request) {
             whatsappStatus: "CONNECTED",
           },
         });
+
+        try {
+          await prisma.auditLog.create({
+            data: {
+              organizationId: session.organizationId,
+              userId: session.userId,
+              acao: "INTEGRATION_CONFIG_CHANGED",
+              detalhes: `WhatsApp conectado via QR Code (${instanceName}) por ${session.nome}.`,
+            },
+          });
+        } catch (auditError) {
+          console.error("[AuditLog WhatsApp Error]", auditError);
+        }
       }
 
       return NextResponse.json({
@@ -172,6 +213,19 @@ export async function POST(req: Request) {
           whatsappStatus: "DISCONNECTED",
         },
       });
+
+      try {
+        await prisma.auditLog.create({
+          data: {
+            organizationId: session.organizationId,
+            userId: session.userId,
+            acao: "INTEGRATION_DISCONNECTED",
+            detalhes: `Canal WhatsApp desconectado por ${session.nome}.`,
+          },
+        });
+      } catch (auditError) {
+        console.error("[AuditLog WhatsApp Error]", auditError);
+      }
 
       return NextResponse.json({ success: true, organization: updated });
     }

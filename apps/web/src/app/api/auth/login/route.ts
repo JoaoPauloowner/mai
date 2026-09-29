@@ -3,6 +3,7 @@ import { getSession } from "@/lib/session";
 import { validateCredentials } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit, getTrustedClientIp } from "@/lib/rate-limit";
+import { handleApiError } from "@/lib/errors";
 
 export async function POST(req: Request) {
   try {
@@ -79,10 +80,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, user });
   } catch (error: any) {
-    console.error("Erro no login:", error);
-    return NextResponse.json(
-      { error: "Erro interno no servidor de autenticação" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Erro interno no servidor de autenticação.");
   }
 }
