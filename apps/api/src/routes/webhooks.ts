@@ -139,7 +139,7 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
           return;
         }
 
-        if (org.statusPlano === "bloqueado" || org.statusPlano === "cancelado") {
+        if (org.statusPlano === "bloqueado" || org.statusPlano === "cancelado" || org.statusPlano === "inadimplente") {
           console.warn(`[Webhook Evolution API] Organização "${org.slug}" com plano ${org.statusPlano}. Mensagem ignorada.`);
           return;
         }
@@ -229,7 +229,7 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
         return;
       }
 
-      if (org.statusPlano === "bloqueado" || org.statusPlano === "cancelado") {
+      if (org.statusPlano === "bloqueado" || org.statusPlano === "cancelado" || org.statusPlano === "inadimplente") {
         console.warn(`[Webhook WhatsApp Meta] Organização "${org.slug}" com plano ${org.statusPlano}. Resposta automática cancelada.`);
         return;
       }
@@ -469,16 +469,33 @@ webhookRouter.post("/billing", async (req: Request, res: Response) => {
     }
 
     const body = req.body;
-    const event = body?.event; // ex: PAYMENT_RECEIVED, PAYMENT_OVERDUE, PAYMENT_DELETED
-    const customerEmail = body?.payment?.customerEmail || body?.customer;
+    const event = body?.event; // ex: PAYMENT_RECEIVED, PAYMENT_OVERDUE, PAYMENT_DELETED, SUBSCRIPTION_CANCELLED
+    const externalReference = body?.payment?.externalReference || body?.externalReference;
+    const customerEmail = body?.payment?.customerEmail || body?.customerEmail || body?.payment?.email;
+    const customerId = body?.payment?.customer || body?.customer;
 
     if (process.env.NODE_ENV !== "production") {
-      console.log(`[Billing Webhook Asaas] Evento: ${event} para cliente: ${maskEmail(customerEmail)}`);
+      console.log(`[Billing Webhook Asaas] Evento: ${event} para cliente: ${maskEmail(customerEmail || customerId || "N/A")}`);
     }
 
-    const org = await prisma.organization.findFirst({
-      where: { emailNotificacoes: customerEmail },
-    });
+    let org: any = null;
+
+    if (externalReference) {
+      org = await prisma.organization.findUnique({
+        where: { id: externalReference },
+      });
+    }
+
+    if (!org && customerEmail) {
+      org = await prisma.organization.findFirst({
+        where: {
+          OR: [
+            { emailNotificacoes: customerEmail },
+            { users: { some: { email: customerEmail } } },
+          ],
+        },
+      });
+    }
 
     if (org) {
       if (event === "PAYMENT_RECEIVED" || event === "PAYMENT_CONFIRMED") {
@@ -491,10 +508,10 @@ webhookRouter.post("/billing", async (req: Request, res: Response) => {
           data: {
             organizationId: org.id,
             acao: "PAYMENT_CONFIRMED",
-            detalhes: `Pagamento recebido via Asaas. Plano ativado para a organização ${org.nome}. Evento: ${event}`,
+            detalhes: `Pagamento confirmado no Asaas. Assinatura ATIVA para ${org.nome}. Evento: ${event}`,
           },
         });
-      } else if (event === "PAYMENT_OVERDUE") {
+      } else if (event === "PAYMENT_OVERDUE" || event === "PAYMENT_BANK_SLIP_CANCELLED") {
         await prisma.organization.update({
           where: { id: org.id },
           data: { statusPlano: "inadimplente" },
@@ -504,15 +521,25 @@ webhookRouter.post("/billing", async (req: Request, res: Response) => {
           data: {
             organizationId: org.id,
             acao: "PAYMENT_OVERDUE",
-            detalhes: `Fatura vencida via Asaas. Status alterado para inadimplente para ${org.nome}.`,
+            detalhes: `Cobrança vencida no Asaas. Status atualizado para INADIMPLENTE para ${org.nome}. Evento: ${event}`,
           },
         });
-      } else if (event === "PAYMENT_DELETED" || event === "SUBSCRIPTION_CANCELLED") {
+      } else if (
+        event === "PAYMENT_DELETED" ||
+        event === "SUBSCRIPTION_CANCELLED" ||
+        event === "SUBSCRIPTION_INACTIVATED" ||
+        event === "PAYMENT_REFUNDED"
+      ) {
+        await prisma.organization.update({
+          where: { id: org.id },
+          data: { statusPlano: "cancelado" },
+        });
+
         await prisma.auditLog.create({
           data: {
             organizationId: org.id,
             acao: "BILLING_SUBSCRIPTION_CANCELLED",
-            detalhes: `Cobrança/assinatura cancelada no Asaas para ${org.nome}. Evento: ${event}`,
+            detalhes: `Assinatura cancelada/estornada no Asaas para ${org.nome}. Evento: ${event}`,
           },
         });
       }

@@ -73,6 +73,7 @@ export async function POST(req: Request) {
         value: valor,
         dueDate: new Date(Date.now() + 86400000 * 3).toISOString().split("T")[0],
         description: `Assinatura OMNAI B2B - Plano ${plano.toUpperCase()}`,
+        externalReference: org.id,
       }),
     });
 
