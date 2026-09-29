@@ -121,7 +121,7 @@ const SDR_TOOLS = [
   },
 ];
 
-// 3. Execução do pipeline de resposta com OpenAI GPT-4o-mini
+// 3. Execução do pipeline de resposta com Groq (Llama 3.3 70B) ou OpenAI GPT-4o-mini
 export async function generateSDRResponse({
   organizationId,
   leadId,
@@ -130,7 +130,17 @@ export async function generateSDRResponse({
   userMessage,
   history,
 }: SDRGenerateParams): Promise<{ replyText: string; toolCalled?: string }> {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const groqApiKey = process.env.GROQ_API_KEY;
+  const openaiApiKey = process.env.OPENAI_API_KEY;
+
+  const isGroq = Boolean(groqApiKey);
+  const apiKey = groqApiKey || openaiApiKey;
+  const apiUrl = isGroq
+    ? "https://api.groq.com/openai/v1/chat/completions"
+    : "https://api.openai.com/v1/chat/completions";
+  const model = isGroq
+    ? process.env.GROQ_MODEL || "openai/gpt-oss-120b"
+    : "gpt-4o-mini";
 
   const org = await prisma.organization.findUnique({
     where: { id: organizationId },
@@ -152,21 +162,21 @@ export async function generateSDRResponse({
   ];
 
   if (!apiKey) {
-    // Modo de demonstração / local sem chave OpenAI
+    // Modo de demonstração / local sem chave de IA
     return {
       replyText: `Olá ${sanitizeUserPrompt(leadName, 50) || ""}! Recebi sua mensagem sobre "${safeMessage}". Como posso te ajudar a agendar ou tirar dúvidas hoje?`,
     };
   }
 
   try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    const res = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model,
         messages,
         tools: SDR_TOOLS,
         tool_choice: "auto",
@@ -177,7 +187,7 @@ export async function generateSDRResponse({
 
     if (!res.ok) {
       const err = await res.text();
-      console.error("[OpenAI Error]", err);
+      console.error(`[AI Engine Error - ${isGroq ? "Groq" : "OpenAI"}]`, err);
       return { replyText: `Olá! Recebi sua mensagem. Um momento enquanto verifico com nossa equipe.` };
     }
 
