@@ -211,15 +211,20 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
 
       if (!senderPhone || !messageText || !phoneNumberId) return;
 
-      console.log(`[Webhook WhatsApp Meta] Mensagem recebida de ${senderPhone}: "${messageText}"`);
-
-      // S3: Resolução estrita de organização por phone_number_id
+      const wabaId = entry?.id;
+      // S3: Resolução de organização por phone_number_id ou WABA ID
       const org = await prisma.organization.findFirst({
-        where: { metaPhoneNumberId: phoneNumberId },
+        where: {
+          OR: [
+            { metaPhoneNumberId: phoneNumberId },
+            ...(wabaId ? [{ metaWabaId: wabaId }] : []),
+            ...(process.env.META_PHONE_NUMBER_ID ? [{ metaPhoneNumberId: process.env.META_PHONE_NUMBER_ID }] : []),
+          ],
+        },
       });
 
       if (!org) {
-        console.warn(`[Webhook WhatsApp] Nenhuma organização associada ao Phone ID ${phoneNumberId}. Evento descartado.`);
+        console.warn(`[Webhook WhatsApp] Nenhuma organização associada ao Phone ID ${phoneNumberId} ou WABA ${wabaId}. Evento descartado.`);
         return;
       }
 
