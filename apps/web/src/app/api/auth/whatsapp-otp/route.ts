@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, getTrustedClientIp } from "@/lib/rate-limit";
 import { normalizePhone } from "@/lib/compliance";
 import crypto from "crypto";
 
@@ -50,8 +50,8 @@ async function sendWhatsAppOtp(phone: string, code: string) {
 
 export async function POST(req: Request) {
   try {
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
-    const { allowed } = checkRateLimit(`otp:${ip}`, 5, 10 * 60 * 1000); // 5 requisições por 10 min por IP
+    const ip = getTrustedClientIp(req);
+    const { allowed } = await checkRateLimit(`otp:${ip}`, 5, 10 * 60 * 1000); // 5 requisições por 10 min por IP
 
     if (!allowed) {
       return NextResponse.json(

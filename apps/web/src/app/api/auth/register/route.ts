@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, getTrustedClientIp } from "@/lib/rate-limit";
 import { normalizePhone } from "@/lib/compliance";
 import { validateRealEmail } from "@/lib/disposable-emails";
 import { generateEmailToken, sendVerificationEmail } from "@/lib/email";
@@ -9,10 +9,10 @@ import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
-    const ip = req.headers.get("x-forwarded-for") || "unknown_ip";
+    const ip = getTrustedClientIp(req);
     
     // 1. Rate Limiting (3 cadastros por IP a cada 1 hora)
-    const limit = checkRateLimit(`register_${ip}`, 3, 60 * 60 * 1000);
+    const limit = await checkRateLimit(`register_${ip}`, 3, 60 * 60 * 1000);
     if (!limit.allowed) {
       return NextResponse.json(
         { error: "Limite de cadastros excedido para este IP. Tente novamente mais tarde." },

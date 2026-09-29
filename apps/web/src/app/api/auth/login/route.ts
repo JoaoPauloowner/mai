@@ -2,17 +2,17 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { validateCredentials } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, getTrustedClientIp } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
   try {
-    const ip = req.headers.get("x-forwarded-for") || "unknown_ip";
+    const ip = getTrustedClientIp(req);
     const body = await req.json();
     const { email, password } = body;
 
     // 1. Rate Limiting (5 tentativas por IP/Email em 15 minutos)
     const rateLimitKey = `login_${ip}_${email || "anon"}`;
-    const limit = checkRateLimit(rateLimitKey, 5, 15 * 60 * 1000);
+    const limit = await checkRateLimit(rateLimitKey, 5, 15 * 60 * 1000);
 
     if (!limit.allowed) {
       return NextResponse.json(
