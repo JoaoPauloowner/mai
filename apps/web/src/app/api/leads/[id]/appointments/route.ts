@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { handleApiError } from "@/lib/errors";
+import { LeadAppointmentSchema } from "@/lib/validation";
 
 export async function POST(
   req: Request,
@@ -15,14 +16,15 @@ export async function POST(
 
     const { id } = await context.params;
     const body = await req.json();
-    const { titulo, dataHorario, descricao, tipo } = body;
-
-    if (!titulo || !dataHorario) {
+    const parseResult = LeadAppointmentSchema.safeParse(body);
+    if (!parseResult.success) {
       return NextResponse.json(
-        { error: "Título e Data/Horário são obrigatórios" },
+        { error: "Dados inválidos para agendamento", details: parseResult.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+
+    const { titulo, dataHorario, descricao, tipo } = parseResult.data;
 
     const lead = await prisma.lead.findUnique({
       where: { id },

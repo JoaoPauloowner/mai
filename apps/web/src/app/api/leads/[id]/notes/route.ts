@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { handleApiError } from "@/lib/errors";
+import { LeadNoteSchema } from "@/lib/validation";
 
 export async function POST(
   req: Request,
@@ -15,11 +16,15 @@ export async function POST(
 
     const { id } = await context.params;
     const body = await req.json();
-    const { texto } = body;
-
-    if (!texto || !texto.trim()) {
-      return NextResponse.json({ error: "Texto da anotação é obrigatório" }, { status: 400 });
+    const parseResult = LeadNoteSchema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: "Texto da anotação inválido", details: parseResult.error.flatten().fieldErrors },
+        { status: 400 }
+      );
     }
+
+    const { texto } = parseResult.data;
 
     const lead = await prisma.lead.findUnique({
       where: { id },

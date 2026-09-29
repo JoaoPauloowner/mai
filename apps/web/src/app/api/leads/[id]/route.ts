@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { handleApiError } from "@/lib/errors";
+import { LeadUpdateSchema } from "@/lib/validation";
 
 export async function GET(
   req: Request,
@@ -61,6 +62,14 @@ export async function PATCH(
     }
 
     const body = await req.json();
+    const parseResult = LeadUpdateSchema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: "Dados inválidos", details: parseResult.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+
     const {
       status,
       score,
@@ -72,7 +81,7 @@ export async function PATCH(
       empresa,
       ramoInteresse,
       resumoIa,
-    } = body;
+    } = parseResult.data;
 
     const updated = await prisma.lead.update({
       where: { id },
