@@ -4,7 +4,7 @@
 **Sistema:** **OMNAI** (SaaS de Automação Omnichannel & SDR com IA)  
 **Motor de IA:** **MAI** (*Motor de Atendimento Inteligente*)  
 **Branch de Hardening:** `hardening/pre-launch`  
-**Status da Suíte de Testes:** ✅ **23 testes unitários passando em 8 arquivos (100% de sucesso)**
+**Status da Suíte de Testes:** ✅ **34 testes unitários passando em 9 arquivos (100% de sucesso)**
 
 ---
 
@@ -16,7 +16,7 @@
 | **Isolamento Multi-Tenant (Tenant Isolation)** | 🔴 Falha com bypass por `findFirst()` | 🟢 **Estrito (Zero Leak)** | **Pronto para Produção** |
 | **Motor de IA (MAI / RAG / Prompt Injection)** | ⚠️ Sem delimitação de contexto | 🟢 **Blindado (AI Guard)** | **Pronto para Produção** |
 | **Integração Meta / WhatsApp / Webhooks** | 🔴 Crash de HMAC e sem idempotência | 🟢 **Resiliente & Idempotente** | **Pronto para Produção** |
-| **Prontidão Comercial (GTM & Billing)** | ⚠️ Falta de Handoff & Dispatch | 🟢 **Funcional** | **Apto para Onboarding** |
+| **Prontidão Comercial (GTM & Billing)** | ⚠️ Falta de Handoff & Dispatch | 🟢 **100% Comercial** | **Apto para Onboarding** |
 
 ---
 
@@ -63,6 +63,11 @@
 | **P3** | **Idempotência Webhooks** | Retentativas automáticas da Meta geravam respostas de IA duplicadas para a mesma mensagem. | Cache em memória de deduplicação de mensagens (`wamid` / `mid` / `key.id`) com TTL. | `4975268` | `tests/p1_p2_p3_messaging_handoff_idempotency.test.ts` |
 | **P4** | **RAG / pgvector** | Chunks de documentos geravam apenas JSON em SQLite sem alimentar a coluna nativa `vector(1536)` do PostgreSQL. | Execução de raw query de atualização `UPDATE "KnowledgeChunk" SET embedding = $1::vector` com fallback resiliente. | `57e5f50` | `apps/web/src/app/api/knowledge/route.ts` |
 | **P5** | **Planos & Bloqueio** | Organizações canceladas ou com pagamento pendente continuavam consumindo tokens de IA via webhook. | Validação do `statusPlano` nos webhooks: suspensão imediata de processamento de IA para contas bloqueadas/canceladas. | `57e5f50` | `apps/api/src/routes/webhooks.ts` |
+| **P6** | **Feature Flags Verticais** | Todas as verticais comerciais (Auto, Seguros, Contábil, Clínica) ficavam expostas simultaneamente no sidebar sem controle de ativação. | Implementação de feature flags `NEXT_PUBLIC_VERTICAL_{AUTO,SEGUROS,CONTABIL,CLINICA}_ENABLED` no Sidebar e guardas de rota com `VerticalGuard`. | `6f1a664` | `tests/p6_to_p10_commercial_readiness.test.ts` |
+| **P7** | **WhatsApp Oficial vs Não-Oficial** | Conexão não-oficial (Evolution QR Code) aparecia como primeira opção sem aviso explícito sobre risco de banimento de número comercial pela Meta. | Meta Cloud API Oficial definida como padrão; Evolution API oculta por flag `ADMIN_EVOLUTION_MODE_ENABLED` e protegida com banner explícito de alerta de banimento. | `3d92cb3` | `tests/p6_to_p10_commercial_readiness.test.ts` |
+| **P8** | **Conformidade LGPD** | Ausência de endpoint para direito ao esquecimento (purge), exportação estruturada de dados pessoais (portabilidade Art. 18) e identificação de IA. | Endpoints `DELETE /api/leads/[id]/purge` e `GET /api/leads/[id]/export` com `AuditLog` dedicado e diretiva de transparência de IA no System Prompt. | `113de1c` | `tests/p6_to_p10_commercial_readiness.test.ts` |
+| **P9** | **Asaas & Inadimplência** | Webhook do Asaas pesquisava apenas por email exato e não bloqueava visualmente o dashboard de organizações com faturas vencidas. | Mapeamento flexível por `externalReference` (orgId) / `customerId` / email com ciclo completo (`ativo`, `inadimplente`, `cancelado`) e banner de regularização no Dashboard. | `d2a0467` | `tests/p6_to_p10_commercial_readiness.test.ts` |
+| **P10** | **Circuit Breaker & Timeouts** | Risco de custos descontrolados de OpenAI por tenant e requisições externas travadas por tempo indeterminado sem timeout. | Circuit Breaker diário por organização (`checkAndIncrementAiBudget`), timeout estrito de 15s com `AbortController` (`fetchWithTimeout`) e estimador de custos em tempo real. | `2decc63` | `tests/p6_to_p10_commercial_readiness.test.ts` |
 
 ---
 
