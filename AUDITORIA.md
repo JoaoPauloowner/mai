@@ -43,9 +43,14 @@
 | ID | Área | Descrição do Problema | Correção Aplicada | Commit | Teste Unitário |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **M1** | **Exportação CSV** | CSV Injection (fórmulas `=cmd|`, `+`, `-`, `@` executáveis no Excel). | Sanitização de todas as células no exportador de leads prefixando caracteres de controle com aspas e espaço (`'`). | `3ed6d9e` | `tests/m1_csv_injection.test.ts` |
+| **M2** | **Vazamento de Erro** | Rotas de API retornando `error.message` cru no JSON de resposta, expondo detalhes internos e stack traces ao cliente. | Criação de helper `handleApiError` que retorna mensagem genérica ao cliente e gera Correlation ID (UUID) para rastreabilidade nos logs do servidor. | `8469f15` | `apps/web/src/lib/errors.ts` |
+| **M3** | **Validação Zod** | Rotas de API recebendo `body` sem validação estrita de tipos e limites de tamanho. | Criação e aplicação de schemas Zod em rotas de leads, agendamentos, notas, membros da equipe, base de conhecimento (limite 50 docs) e visão computacional. | `b9afbfb` | `apps/web/src/lib/validation.ts` |
 | **M4** | **IA / Prompt Injection** | Mensagens de leads podiam tentar sobrescrever o System Prompt ou comandos do robô. | Criação do `ai-guard.ts` sanitizando delimitadores (`<|im_start|>`, `[INST]`, `Ignore instructions`), tags `<user_query>` e regras invariantes. | `dc68cbf` | `tests/m4_prompt_injection.test.ts` |
 | **M5** | **Quiz Público** | Endpoint aberto sem rate limiting e vulnerável a injeção de leads cruzados. | Rate limiting por IP do visitante, validação estrita do formato do telefone e exigência do `slug` da empresa. | `bad7b65` | `tests/m5_quiz_submit.test.ts` |
+| **M6** | **PII em Logs** | Console logs exibindo telefones completos, textos de mensagens e e-mails de clientes em claro. | Criação de utilitários `maskPhone`, `maskMessage`, `maskEmail`, `maskToken` mascarando dados pessoais nos logs do servidor e webhooks. | `f021e39` | `apps/api/src/utils/mask.ts` |
+| **M7** | **Dependências / Audit** | Vulnerabilidade de alta severidade no Prisma CLI (`deepmerge-ts`) reportada pelo `npm audit`. | Reestruturação do monorepo movendo CLI do Prisma para `devDependencies`; `npm audit --omit=dev` agora reporta 0 vulnerabilidades. | `ef78219` | `package.json` |
 | **M8** | **Headers HTTP** | Next.js sem CSP, HSTS, X-Frame-Options ou proteção contra Clickjacking. | Configuração completa de security headers em `apps/web/next.config.ts`. | `abb5216` | `tests/m8_security_headers.test.ts` |
+| **M9** | **Auditoria Completa** | Ausência de logs de auditoria para tentativas de login falhas, troca de organização por super admin (`DEMO_SWITCH`) e alteração de credenciais. | Implementação de `AuditLog` para `LOGIN_FAILED`, `DEMO_SWITCH` e `INTEGRATION_CONFIG_CHANGED`. | `13216fd` | `apps/web/src/app/api/` |
 
 ---
 
