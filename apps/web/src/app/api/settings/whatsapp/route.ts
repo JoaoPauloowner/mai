@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { normalizePhone } from "@/lib/compliance";
 import { createOrFetchInstanceQrCode } from "@/lib/evolution";
 import { handleApiError } from "@/lib/errors";
+import { exchangeForLongLivedToken } from "@/lib/meta";
 
 export async function GET() {
   try {
@@ -49,16 +50,19 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { action } = body;
 
-    // 1.0 Embedded Signup — recebe accessToken do FB SDK e busca WABA/PhoneNumber automaticamente
+    // 1.0 Embedded Signup — recebe accessToken do FB SDK, troca por longa duração e busca WABA/PhoneNumber
     if (action === "EMBEDDED_SIGNUP") {
       const { accessToken } = body;
       if (!accessToken) {
         return NextResponse.json({ error: "accessToken não fornecido" }, { status: 400 });
       }
 
+      // Troca o token de curta duração por um de longa duração (60 dias)
+      const { accessToken: activeToken, isLongLived } = await exchangeForLongLivedToken(accessToken);
+
       // Busca WABAs associadas ao token
       const wabaRes = await fetch(
-        `https://graph.facebook.com/v21.0/me/whatsapp_business_accounts?access_token=${accessToken}`
+        `https://graph.facebook.com/v21.0/me/whatsapp_business_accounts?access_token=${activeToken}`
       );
       const wabaData = await wabaRes.json();
 
@@ -71,7 +75,7 @@ export async function POST(req: Request) {
 
       // Busca números de telefone desta WABA
       const phonesRes = await fetch(
-        `https://graph.facebook.com/v21.0/${wabaId}/phone_numbers?access_token=${accessToken}`
+        `https://graph.facebook.com/v21.0/${wabaId}/phone_numbers?access_token=${activeToken}`
       );
       const phonesData = await phonesRes.json();
 
@@ -83,7 +87,7 @@ export async function POST(req: Request) {
       const phoneNumberId = phone.id;
       const displayPhoneNumber = phone.display_phone_number;
 
-      // Salva na organização
+      // Salva na organização o token de longa duração
       await prisma.organization.update({
         where: { id: session.organizationId },
         data: {
@@ -91,7 +95,7 @@ export async function POST(req: Request) {
           whatsappStatus: "CONNECTED",
           metaPhoneNumberId: phoneNumberId,
           metaWabaId: wabaId,
-          metaAccessToken: accessToken,
+          metaAccessToken: activeToken,
           whatsappNumber: displayPhoneNumber ? normalizePhone(displayPhoneNumber) : undefined,
         },
       });
