@@ -121,6 +121,12 @@ export default function LandingPage() {
             <ShieldCheck className="w-4 h-4 text-zinc-400" />
             <span>Infraestrutura em conformidade com a LGPD e criptografia de ponta a ponta.</span>
           </div>
+          <div className="flex items-center gap-4 text-zinc-600">
+            <Link href="/privacy" className="hover:text-zinc-900 transition underline-offset-2 hover:underline">Privacidade</Link>
+            <Link href="/terms" className="hover:text-zinc-900 transition underline-offset-2 hover:underline">Termos</Link>
+            <Link href="/data-deletion" className="hover:text-zinc-900 transition underline-offset-2 hover:underline">Exclusão de Dados</Link>
+            <Link href="/support" className="hover:text-zinc-900 transition underline-offset-2 hover:underline">Suporte</Link>
+          </div>
           <div>© {new Date().getFullYear()} OMNAI Platform. Todos os direitos reservados.</div>
         </div>
       </footer>
