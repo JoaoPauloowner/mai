@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { normalizePhone } from "@/lib/compliance";
@@ -108,6 +109,38 @@ export async function POST(req: Request) {
         console.warn("[Meta subscribed_apps Exception]", subErr);
       }
 
+      // 4. Registrar o número de telefone na Cloud API (/register)
+      let registrationSuccess = false;
+      let registrationWarning: string | undefined;
+
+      try {
+        const pin = String(crypto.randomInt(100000, 999999));
+        const regRes = await fetch(
+          `https://graph.facebook.com/v21.0/${phoneNumberId}/register`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${activeToken}`,
+            },
+            body: JSON.stringify({
+              messaging_product: "whatsapp",
+              pin,
+            }),
+          }
+        );
+        const regData = await regRes.json();
+        if (regData.success || regData.error?.code === 133010) {
+          registrationSuccess = true;
+        } else {
+          registrationWarning = regData?.error?.message || "Registro na Cloud API pendente";
+          console.warn("[Meta /register Warning]", regData);
+        }
+      } catch (regErr: any) {
+        registrationWarning = regErr.message || "Erro de rede no registro do número na Cloud API";
+        console.warn("[Meta /register Exception]", regErr);
+      }
+
       // Salva na organização o token de longa duração
       await prisma.organization.update({
         where: { id: session.organizationId },
@@ -128,7 +161,7 @@ export async function POST(req: Request) {
             organizationId: session.organizationId,
             userId: session.userId,
             acao: "INTEGRATION_CONFIG_CHANGED",
-            detalhes: `WhatsApp Oficial (Meta Cloud API) conectado via Embedded Signup por ${session.nome} (PhoneNumberId: ${phoneNumberId}, WABA: ${wabaId}, Webhook Subscribed: ${subscribedAppsSuccess}).`,
+            detalhes: `WhatsApp Oficial (Meta Cloud API) conectado via Embedded Signup por ${session.nome} (PhoneNumberId: ${phoneNumberId}, WABA: ${wabaId}, Webhook Subscribed: ${subscribedAppsSuccess}, Registrado: ${registrationSuccess}).`,
           },
         });
       } catch (auditError) {
@@ -142,6 +175,8 @@ export async function POST(req: Request) {
         displayPhoneNumber,
         subscribedAppsSuccess,
         subscribedAppsWarning,
+        registrationSuccess,
+        registrationWarning,
       });
     }
 
