@@ -341,6 +341,7 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
           accessToken: metaToken,
           to: senderPhone,
           text: replyText,
+          organizationId: org.id,
         });
         console.log(`[Webhook WhatsApp Meta] Disparo Graph API: ${sendResult.success ? "Sucesso" : "Falha: " + sendResult.error}`);
       }

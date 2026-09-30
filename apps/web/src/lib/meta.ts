@@ -66,3 +66,24 @@ export async function exchangeForLongLivedToken(shortLivedToken: string): Promis
     return { accessToken: shortLivedToken, isLongLived: false };
   }
 }
+
+/**
+ * Verifica se um erro retornado pela Graph API da Meta indica token expirado ou inválido (OAuthException / código 190).
+ */
+export function isMetaTokenExpired(errorData: any): boolean {
+  if (!errorData) return false;
+  const err = errorData?.error || errorData;
+  const code = Number(err?.code);
+  const subcode = Number(err?.error_subcode);
+  const message = String(err?.message || "");
+
+  return (
+    code === 190 ||
+    subcode === 463 ||
+    subcode === 467 ||
+    message.includes("Session has expired") ||
+    message.includes("Error validating access token") ||
+    message.includes("The access token could not be decrypted") ||
+    message.includes("Malformed access token")
+  );
+}
