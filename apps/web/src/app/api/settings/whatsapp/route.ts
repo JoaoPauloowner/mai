@@ -87,6 +87,27 @@ export async function POST(req: Request) {
       const phoneNumberId = phone.id;
       const displayPhoneNumber = phone.display_phone_number;
 
+      // 3. Assinar o App na WABA para recebimento de Webhooks (subscribed_apps)
+      let subscribedAppsSuccess = false;
+      let subscribedAppsWarning: string | undefined;
+
+      try {
+        const subRes = await fetch(
+          `https://graph.facebook.com/v21.0/${wabaId}/subscribed_apps?access_token=${activeToken}`,
+          { method: "POST" }
+        );
+        const subData = await subRes.json();
+        if (subData.success) {
+          subscribedAppsSuccess = true;
+        } else {
+          subscribedAppsWarning = subData?.error?.message || "Falha ao assinar webhooks na WABA";
+          console.warn("[Meta subscribed_apps Warning]", subData);
+        }
+      } catch (subErr: any) {
+        subscribedAppsWarning = subErr.message || "Erro de rede ao assinar webhooks na WABA";
+        console.warn("[Meta subscribed_apps Exception]", subErr);
+      }
+
       // Salva na organização o token de longa duração
       await prisma.organization.update({
         where: { id: session.organizationId },
@@ -107,7 +128,7 @@ export async function POST(req: Request) {
             organizationId: session.organizationId,
             userId: session.userId,
             acao: "INTEGRATION_CONFIG_CHANGED",
-            detalhes: `WhatsApp Oficial (Meta Cloud API) conectado via Embedded Signup por ${session.nome} (PhoneNumberId: ${phoneNumberId}).`,
+            detalhes: `WhatsApp Oficial (Meta Cloud API) conectado via Embedded Signup por ${session.nome} (PhoneNumberId: ${phoneNumberId}, WABA: ${wabaId}, Webhook Subscribed: ${subscribedAppsSuccess}).`,
           },
         });
       } catch (auditError) {
@@ -119,6 +140,8 @@ export async function POST(req: Request) {
         wabaId,
         phoneNumberId,
         displayPhoneNumber,
+        subscribedAppsSuccess,
+        subscribedAppsWarning,
       });
     }
 
