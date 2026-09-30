@@ -131,7 +131,7 @@ export default function SettingsWhatsappPage() {
         }
       },
       {
-        config_id: process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID,
+        config_id: process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID || process.env.NEXT_PUBLIC_META_CONFIG_ID || "2169508877297766",
         scope: "whatsapp_business_management,whatsapp_business_messaging,business_management,public_profile",
         extras: { feature: "whatsapp_embedded_signup", version: 2, sessionInfoVersion: 3, setup: {} },
         return_scopes: true,
