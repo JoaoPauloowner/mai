@@ -194,6 +194,67 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
       const entry = body?.entry?.[0];
       const changes = entry?.changes?.[0];
       const value = changes?.value;
+
+      // 1. Tratar eventos de status da conta (account_update)
+      if (changes?.field === "account_update") {
+        const eventType = value?.event || value?.account_update_type || "UNKNOWN_UPDATE";
+        const wabaId = entry?.id;
+        const phoneId = value?.phone_number_id || value?.metadata?.phone_number_id;
+
+        console.log(`[Webhook Meta account_update] Evento: ${eventType} (WABA: ${wabaId || "N/A"})`);
+
+        const org = await prisma.organization.findFirst({
+          where: {
+            OR: [
+              ...(wabaId ? [{ metaWabaId: wabaId }] : []),
+              ...(phoneId ? [{ metaPhoneNumberId: phoneId }] : []),
+            ],
+          },
+        });
+
+        if (org) {
+          const upperEvent = String(eventType).toUpperCase();
+          if (
+            upperEvent.includes("BANNED") ||
+            upperEvent.includes("DISABLED") ||
+            upperEvent.includes("RESTRICTED")
+          ) {
+            await prisma.organization.update({
+              where: { id: org.id },
+              data: { whatsappStatus: "RESTRICTED" },
+            });
+            try {
+              await prisma.auditLog.create({
+                data: {
+                  organizationId: org.id,
+                  acao: "WHATSAPP_STATUS_CHANGED",
+                  detalhes: `Status do WhatsApp alterado para RESTRICTED via Meta account_update: ${eventType}`,
+                },
+              });
+            } catch {}
+          } else if (
+            upperEvent.includes("CONNECTED") ||
+            upperEvent.includes("APPROVED") ||
+            upperEvent.includes("VERIFIED")
+          ) {
+            await prisma.organization.update({
+              where: { id: org.id },
+              data: { whatsappStatus: "CONNECTED" },
+            });
+            try {
+              await prisma.auditLog.create({
+                data: {
+                  organizationId: org.id,
+                  acao: "WHATSAPP_STATUS_CHANGED",
+                  detalhes: `Status do WhatsApp alterado para CONNECTED via Meta account_update: ${eventType}`,
+                },
+              });
+            } catch {}
+          }
+        }
+        return;
+      }
+
       const message = value?.messages?.[0];
 
       if (!message || message.type !== "text") {
