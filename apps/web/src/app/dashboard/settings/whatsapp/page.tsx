@@ -46,7 +46,9 @@ export default function SettingsWhatsappPage() {
 
   // ─── Carrega FB SDK ────────────────────────────────────────────────────
   useEffect(() => {
+    if (window.FB) return;
     if (document.getElementById("facebook-jssdk")) return;
+
     window.fbAsyncInit = function () {
       const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || "1448689107110156";
       window.FB.init({
@@ -57,10 +59,18 @@ export default function SettingsWhatsappPage() {
       });
       console.log("[Meta SDK] Inicializado com App ID:", appId);
     };
+
     const script = document.createElement("script");
     script.id = "facebook-jssdk";
-    script.src = "https://connect.facebook.net/en_US/sdk.js";
+    script.src = "https://connect.facebook.net/pt_BR/sdk.js";
     script.async = true;
+    script.defer = true;
+    script.crossOrigin = "anonymous";
+    script.onerror = () => {
+      console.error("[Meta SDK] Bloqueado por extensão ou CSP.");
+      setEmbeddedStatus("error");
+      setEmbeddedMsg("O Facebook SDK foi impedido de carregar. Verifique se há extensões de bloqueio de anúncios ativas (ex: AdBlock, uBlock, Brave Shields) e desative-as nesta página.");
+    };
     document.body.appendChild(script);
   }, []);
 
