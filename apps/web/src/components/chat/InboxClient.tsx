@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Send,
   Mic,
@@ -65,6 +66,7 @@ export function InboxClient({
 }: {
   initialConversations: ConversationItem[];
 }) {
+  const router = useRouter();
   const [conversations, setConversations] = useState<ConversationItem[]>(
     initialConversations
   );
@@ -79,6 +81,25 @@ export function InboxClient({
   const [channelFilter, setChannelFilter] = useState<"ALL" | "WHATSAPP" | "INSTAGRAM">("ALL");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Sincroniza estado local quando o servidor enviar novas conversas
+  useEffect(() => {
+    setConversations(initialConversations);
+    if (initialConversations.length > 0) {
+      setActiveId((currentId) => {
+        const exists = initialConversations.some((c) => c.id === currentId);
+        return exists && currentId ? currentId : initialConversations[0].id;
+      });
+    }
+  }, [initialConversations]);
+
+  // Polling leve a cada 4 segundos para buscar novas mensagens em tempo real
+  useEffect(() => {
+    const timer = setInterval(() => {
+      router.refresh();
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [router]);
 
   const whatsCount = conversations.filter((c) => c.canal === "WHATSAPP").length;
   const instaCount = conversations.filter((c) => c.canal === "INSTAGRAM").length;

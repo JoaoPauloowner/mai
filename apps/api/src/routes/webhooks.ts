@@ -275,15 +275,31 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
 
       const wabaId = entry?.id;
       // S3: Resolução de organização por phone_number_id ou WABA ID
-      const org = await prisma.organization.findFirst({
+      // Prioriza organização com whatsappStatus: "CONNECTED" e mais recente
+      let org = await prisma.organization.findFirst({
         where: {
+          whatsappStatus: "CONNECTED",
           OR: [
             { metaPhoneNumberId: phoneNumberId },
             ...(wabaId ? [{ metaWabaId: wabaId }] : []),
             ...(process.env.META_PHONE_NUMBER_ID ? [{ metaPhoneNumberId: process.env.META_PHONE_NUMBER_ID }] : []),
           ],
         },
+        orderBy: { updatedAt: "desc" },
       });
+
+      if (!org) {
+        org = await prisma.organization.findFirst({
+          where: {
+            OR: [
+              { metaPhoneNumberId: phoneNumberId },
+              ...(wabaId ? [{ metaWabaId: wabaId }] : []),
+              ...(process.env.META_PHONE_NUMBER_ID ? [{ metaPhoneNumberId: process.env.META_PHONE_NUMBER_ID }] : []),
+            ],
+          },
+          orderBy: { updatedAt: "desc" },
+        });
+      }
 
       if (!org) {
         console.warn(`[Webhook WhatsApp] Nenhuma organização associada ao Phone ID ${phoneNumberId} ou WABA ${wabaId}. Evento descartado.`);
