@@ -110,6 +110,9 @@ export async function sendWhatsAppMessage({
 
     if (!res.ok) {
       console.error("[Meta API WhatsApp] Erro no envio:", data);
+      if (data?.error?.code === 131030) {
+        console.warn(`[Meta API Sandbox] Destinatário ${cleanTo} não está na lista de permissão do número de teste Meta (código 131030). Adicione-o em Meta Developers > WhatsApp > API Setup > To.`);
+      }
       const tokenExpired = isMetaTokenExpired(data);
 
       if (tokenExpired) {
