@@ -118,7 +118,7 @@ export default function SettingsWhatsappPage() {
 
     try {
       window.FB.login(
-        async (response: any) => {
+        (response: any) => {
           clearTimeout(popupTimeout);
           console.log("[Meta SDK] FB.login retorno:", response);
           if (!response || !response.authResponse) {
@@ -129,37 +129,39 @@ export default function SettingsWhatsappPage() {
           const { accessToken, code } = response.authResponse;
           setSaving(true);
           setEmbeddedMsg("Salvando credenciais e consultando conta WhatsApp Business...");
-          try {
-            const res = await fetch("/api/settings/whatsapp", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ action: "EMBEDDED_SIGNUP", accessToken: accessToken || code }),
-            });
-            const data = await res.json();
-            if (data.success) {
-              setStatus("CONNECTED");
-              setMetaPhoneNumberId(data.phoneNumberId || "");
-              setMetaWabaId(data.wabaId || "");
-              setMetaAccessToken("••••••••••••••••");
-              setEmbeddedStatus("success");
-              setEmbeddedMsg(`✅ WhatsApp conectado! Número: ${data.displayPhoneNumber || data.phoneNumberId}`);
-            } else {
+
+          fetch("/api/settings/whatsapp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "EMBEDDED_SIGNUP", accessToken: accessToken || code }),
+          })
+            .then(async (res) => {
+              const data = await res.json();
+              if (data.success) {
+                setStatus("CONNECTED");
+                setMetaPhoneNumberId(data.phoneNumberId || "");
+                setMetaWabaId(data.wabaId || "");
+                setMetaAccessToken("••••••••••••••••");
+                setEmbeddedStatus("success");
+                setEmbeddedMsg(`✅ WhatsApp conectado! Número: ${data.displayPhoneNumber || data.phoneNumberId}`);
+              } else {
+                setEmbeddedStatus("error");
+                setEmbeddedMsg(data.error || "Erro ao salvar credenciais.");
+              }
+            })
+            .catch(() => {
               setEmbeddedStatus("error");
-              setEmbeddedMsg(data.error || "Erro ao salvar credenciais.");
-            }
-          } catch {
-            setEmbeddedStatus("error");
-            setEmbeddedMsg("Erro de rede ao salvar. Verifique sua conexão.");
-          } finally {
-            setSaving(false);
-          }
+              setEmbeddedMsg("Erro de rede ao salvar. Verifique sua conexão.");
+            })
+            .finally(() => {
+              setSaving(false);
+            });
         },
         {
           config_id: configId,
-          scope: "whatsapp_business_management,whatsapp_business_messaging,business_management,public_profile",
+          response_type: "code",
+          override_default_response_type: true,
           extras: { feature: "whatsapp_embedded_signup", version: 2, sessionInfoVersion: 3, setup: {} },
-          return_scopes: true,
-          enable_profile_selector: true,
         }
       );
     } catch (err: any) {
