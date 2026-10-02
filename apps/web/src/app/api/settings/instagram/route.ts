@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { handleApiError } from "@/lib/errors";
 
 export async function GET() {
   try {
@@ -38,7 +39,7 @@ export async function GET() {
       verifyToken: process.env.META_WEBHOOK_VERIFY_TOKEN || "",
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao consultar configurações do Instagram.");
   }
 }
 
@@ -89,6 +90,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ error: "Ação não reconhecida" }, { status: 400 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao salvar configurações do Instagram.");
   }
 }

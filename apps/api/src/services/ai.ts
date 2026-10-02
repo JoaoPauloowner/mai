@@ -1,5 +1,10 @@
 import { prisma } from "@omni/database";
 import { sanitizeUserPrompt, buildSecureSystemPrompt } from "./ai-guard.js";
+import {
+  fetchWithTimeout,
+  checkAndIncrementAiBudget,
+  estimateAiCost,
+} from "./circuit-breaker.js";
 
 export interface SDRMessageHistory {
   role: "user" | "assistant" | "system";
@@ -24,7 +29,7 @@ export async function searchRAGContext(organizationId: string, userMessage: stri
   let queryEmbedding: number[] = [];
   if (apiKey && safeMessage) {
     try {
-      const res = await fetch("https://api.openai.com/v1/embeddings", {
+      const res = await fetchWithTimeout("https://api.openai.com/v1/embeddings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,7 +39,7 @@ export async function searchRAGContext(organizationId: string, userMessage: stri
           input: safeMessage.slice(0, 4000),
           model: "text-embedding-3-small",
         }),
-      });
+      }, 15000);
 
       if (res.ok) {
         const data = await res.json();
@@ -168,8 +173,18 @@ export async function generateSDRResponse({
     };
   }
 
+  // P10: Circuit Breaker e controle diário de orçamento por organização
+  const estimatedCost = isGroq ? 0 : 0.001; // ~350 tokens gpt-4o-mini
+  const budgetCheck = checkAndIncrementAiBudget(organizationId, estimatedCost);
+  if (!budgetCheck.allowed) {
+    console.warn(`[AI Circuit Breaker] Organização ${organizationId}: ${budgetCheck.reason}`);
+    return {
+      replyText: "Olá! Nosso volume de atendimentos automáticos hoje atingiu a capacidade diária máxima. Em instantes um operador humano continuará seu atendimento.",
+    };
+  }
+
   try {
-    const res = await fetch(apiUrl, {
+    const res = await fetchWithTimeout(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -183,7 +198,7 @@ export async function generateSDRResponse({
         temperature: 0.5,
         max_tokens: 350,
       }),
-    });
+    }, 15000);
 
     if (!res.ok) {
       const err = await res.text();
@@ -192,6 +207,12 @@ export async function generateSDRResponse({
     }
 
     const data = await res.json();
+    if (data.usage && !isGroq) {
+      const cost = estimateAiCost(model, data.usage.prompt_tokens, data.usage.completion_tokens);
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`[AI Cost] Tokens: ${data.usage.total_tokens}, Custo Estimado: $${cost.toFixed(5)} USD`);
+      }
+    }
     const choice = data.choices[0].message;
 
     // Verificar se a IA chamou alguma ferramenta (Function Calling)

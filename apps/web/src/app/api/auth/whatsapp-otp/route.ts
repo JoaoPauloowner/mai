@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, getTrustedClientIp } from "@/lib/rate-limit";
 import { normalizePhone } from "@/lib/compliance";
+import { handleApiError } from "@/lib/errors";
 import crypto from "crypto";
 
 // Envio de OTP via Meta WhatsApp Cloud API v20.0
@@ -11,7 +12,8 @@ async function sendWhatsAppOtp(phone: string, code: string) {
 
   if (!metaToken || !phoneId) {
     if (process.env.NODE_ENV !== "production") {
-      console.log(`[WhatsApp OTP Dev Mode] Código para ${phone}: ${code}`);
+      const { maskPhone } = await import("@/lib/mask");
+      console.log(`[WhatsApp OTP Dev Mode] Código para ${maskPhone(phone)}: ${code}`);
     }
     return { sent: false, reason: "META_ACCESS_TOKEN_NOT_CONFIGURED" };
   }
@@ -50,8 +52,8 @@ async function sendWhatsAppOtp(phone: string, code: string) {
 
 export async function POST(req: Request) {
   try {
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
-    const { allowed } = checkRateLimit(`otp:${ip}`, 5, 10 * 60 * 1000); // 5 requisições por 10 min por IP
+    const ip = getTrustedClientIp(req);
+    const { allowed } = await checkRateLimit(`otp:${ip}`, 5, 10 * 60 * 1000); // 5 requisições por 10 min por IP
 
     if (!allowed) {
       return NextResponse.json(
@@ -164,6 +166,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ error: "Ação inválida." }, { status: 400 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Erro ao processar verificação de WhatsApp.");
   }
 }

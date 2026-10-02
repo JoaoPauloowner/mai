@@ -50,6 +50,11 @@ export function Sidebar({ segmento, orgNome }: SidebarProps) {
     settings: false,
   });
 
+  const isAutoEnabled = process.env.NEXT_PUBLIC_VERTICAL_AUTO_ENABLED !== "false";
+  const isSegurosEnabled = process.env.NEXT_PUBLIC_VERTICAL_SEGUROS_ENABLED !== "false";
+  const isContabilEnabled = process.env.NEXT_PUBLIC_VERTICAL_CONTABIL_ENABLED !== "false";
+  const isClinicaEnabled = process.env.NEXT_PUBLIC_VERTICAL_CLINICA_ENABLED !== "false";
+
   // Load persistence preference
   useEffect(() => {
     try {
@@ -177,7 +182,7 @@ export function Sidebar({ segmento, orgNome }: SidebarProps) {
         </div>
 
         {/* Vertical Auto */}
-        {(segmento === "AUTO" || segmento === "GERAL") && (
+        {isAutoEnabled && (segmento === "AUTO" || segmento === "GERAL") && (
           <div className="space-y-1">
             {!isCollapsed ? (
               <button
@@ -211,7 +216,7 @@ export function Sidebar({ segmento, orgNome }: SidebarProps) {
         )}
 
         {/* Vertical Seguros */}
-        {(segmento === "SEGUROS" || segmento === "GERAL") && (
+        {isSegurosEnabled && (segmento === "SEGUROS" || segmento === "GERAL") && (
           <div className="space-y-1">
             {!isCollapsed ? (
               <button
@@ -245,7 +250,7 @@ export function Sidebar({ segmento, orgNome }: SidebarProps) {
         )}
 
         {/* Vertical Contabil */}
-        {(segmento === "CONTABIL" || segmento === "GERAL") && (
+        {isContabilEnabled && (segmento === "CONTABIL" || segmento === "GERAL") && (
           <div className="space-y-1">
             {!isCollapsed ? (
               <button
@@ -279,7 +284,7 @@ export function Sidebar({ segmento, orgNome }: SidebarProps) {
         )}
 
         {/* Vertical Clinica */}
-        {(segmento === "CLINICA" || segmento === "GERAL") && (
+        {isClinicaEnabled && (segmento === "CLINICA" || segmento === "GERAL") && (
           <div className="space-y-1">
             {!isCollapsed ? (
               <button

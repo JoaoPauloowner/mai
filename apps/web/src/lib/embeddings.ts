@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { fetchWithTimeout } from "@/lib/ai/circuit-breaker";
 
 // Função para calcular similaridade de cosseno entre dois vetores numéricos
 export function cosineSimilarity(vecA: number[], vecB: number[]): number {
@@ -50,7 +51,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 
   if (apiKey) {
     try {
-      const res = await fetch("https://api.openai.com/v1/embeddings", {
+      const res = await fetchWithTimeout("https://api.openai.com/v1/embeddings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -60,7 +61,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
           input: text.slice(0, 8000),
           model: "text-embedding-3-small",
         }),
-      });
+      }, 15000);
 
       if (res.ok) {
         const data = await res.json();

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { handleApiError } from "@/lib/errors";
 
 export async function POST(req: Request) {
   try {
@@ -83,7 +84,6 @@ export async function POST(req: Request) {
       },
     });
   } catch (error: any) {
-    console.error("[Verify Email Error]", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Erro ao processar ativação de e-mail.");
   }
 }

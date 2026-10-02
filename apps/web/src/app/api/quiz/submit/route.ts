@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   try {
     // 1. Rate limiting por IP do cliente
     const clientIp = getTrustedClientIp(req);
-    const rateLimit = checkRateLimit(`quiz_submit:${clientIp}`, 10, 15 * 60 * 1000);
+    const rateLimit = await checkRateLimit(`quiz_submit:${clientIp}`, 10, 15 * 60 * 1000);
     if (!rateLimit.allowed) {
       return NextResponse.json(
         { error: "Limite de submissões excedido. Aguarde alguns minutos." },

@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { chunkText, generateEmbedding } from "@/lib/embeddings";
+import { handleApiError } from "@/lib/errors";
+import { KnowledgeDocSchema } from "@/lib/validation";
+
+const MAX_DOCS_PER_ORGANIZATION = 50;
 
 export async function GET() {
   try {
@@ -19,7 +23,7 @@ export async function GET() {
 
     return NextResponse.json({ documents });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao listar documentos da base de conhecimento.");
   }
 }
 
@@ -27,11 +31,26 @@ export async function POST(request: NextRequest) {
   try {
     const session = await requireAuth();
     const body = await request.json();
-    const { titulo, tipo = "MANUAL", conteudoTexto } = body;
-
-    if (!titulo || !conteudoTexto || conteudoTexto.trim().length === 0) {
+    const parseResult = KnowledgeDocSchema.safeParse(body);
+    if (!parseResult.success) {
       return NextResponse.json(
-        { error: "Título e conteúdo do documento são obrigatórios" },
+        { error: "Dados inválidos para documento", details: parseResult.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+
+    const { titulo, tipo, conteudoTexto } = parseResult.data;
+
+    // Limite de segurança: máximo de 50 documentos por organização
+    const currentDocCount = await prisma.knowledgeDocument.count({
+      where: { organizationId: session.organizationId },
+    });
+
+    if (currentDocCount >= MAX_DOCS_PER_ORGANIZATION) {
+      return NextResponse.json(
+        {
+          error: `Limite de ${MAX_DOCS_PER_ORGANIZATION} documentos na base de conhecimento atingido para sua organização.`,
+        },
         { status: 400 }
       );
     }
@@ -40,7 +59,7 @@ export async function POST(request: NextRequest) {
     const document = await prisma.knowledgeDocument.create({
       data: {
         organizationId: session.organizationId,
-        titulo,
+        titulo: titulo.trim(),
         tipo,
         tamanhoBytes: Buffer.byteLength(conteudoTexto, "utf8"),
       },
@@ -91,7 +110,7 @@ export async function POST(request: NextRequest) {
       totalChunks: chunks.length,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao processar e salvar documento na base de conhecimento.");
   }
 }
 
@@ -119,6 +138,6 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao excluir documento da base de conhecimento.");
   }
 }

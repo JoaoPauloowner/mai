@@ -1,0 +1,47 @@
+name: CI - Hardening & Quality Gate
+
+on:
+  push:
+    branches: [main, "hardening/*", "feat/*", "fix/*"]
+  pull_request:
+    branches: [main, "hardening/*"]
+
+jobs:
+  verify:
+    name: Build, Lint, Typecheck & Tests
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      SESSION_SECRET: "test_ci_session_secret_at_least_32_bytes_long"
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run db:generate
+
+      - name: Typecheck - Apps/Web
+        run: npx tsc --noEmit -p apps/web/tsconfig.json
+
+      - name: Typecheck - Apps/API
+        run: npx tsc --noEmit -p apps/api/tsconfig.json
+
+      - name: Typecheck - Apps/Landing
+        run: npx tsc --noEmit -p apps/landing/tsconfig.json
+
+      - name: Run Unit & Integration Tests
+        run: npm test
+
+      - name: Security Dependency Audit (Production)
+        run: npm audit --omit=dev --audit-level=high

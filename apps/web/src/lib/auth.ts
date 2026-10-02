@@ -1,3 +1,6 @@
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
+
 const DUMMY_HASH = "$2a$10$e8wZ3o.OcvG5zYm1K/8oGuH7Hn4C7x3q3rP7.g4OQjXbFhA5z7R8K";
 
 export async function validateCredentials(email: string, passwordPlain: string) {

@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { normalizePhone } from "@/lib/compliance";
 import { createOrFetchInstanceQrCode } from "@/lib/evolution";
+import { handleApiError } from "@/lib/errors";
+import { exchangeForLongLivedToken } from "@/lib/meta";
 
 export async function GET() {
   try {
@@ -23,9 +26,10 @@ export async function GET() {
       },
     });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const webhookUrl = `${appUrl}/api/webhooks/whatsapp`;
-    const verifyToken = process.env.META_WEBHOOK_VERIFY_TOKEN || "";
+    const webhookUrl =
+      process.env.META_WEBHOOK_URL ||
+      (process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api/webhooks/whatsapp` : "https://mai-production-e8ef.up.railway.app/api/webhooks/whatsapp");
+    const verifyToken = process.env.META_WEBHOOK_VERIFY_TOKEN || "omni_verify_token_2026";
 
     return NextResponse.json({
       config: org,
@@ -33,7 +37,7 @@ export async function GET() {
       verifyToken,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao consultar configurações do WhatsApp.");
   }
 }
 
@@ -47,16 +51,19 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { action } = body;
 
-    // 1.0 Embedded Signup — recebe accessToken do FB SDK e busca WABA/PhoneNumber automaticamente
+    // 1.0 Embedded Signup — recebe accessToken do FB SDK, troca por longa duração e busca WABA/PhoneNumber
     if (action === "EMBEDDED_SIGNUP") {
       const { accessToken } = body;
       if (!accessToken) {
         return NextResponse.json({ error: "accessToken não fornecido" }, { status: 400 });
       }
 
+      // Troca o token de curta duração por um de longa duração (60 dias)
+      const { accessToken: activeToken, isLongLived } = await exchangeForLongLivedToken(accessToken);
+
       // Busca WABAs associadas ao token
       const wabaRes = await fetch(
-        `https://graph.facebook.com/v21.0/me/whatsapp_business_accounts?access_token=${accessToken}`
+        `https://graph.facebook.com/v21.0/me/whatsapp_business_accounts?access_token=${activeToken}`
       );
       const wabaData = await wabaRes.json();
 
@@ -69,7 +76,7 @@ export async function POST(req: Request) {
 
       // Busca números de telefone desta WABA
       const phonesRes = await fetch(
-        `https://graph.facebook.com/v21.0/${wabaId}/phone_numbers?access_token=${accessToken}`
+        `https://graph.facebook.com/v21.0/${wabaId}/phone_numbers?access_token=${activeToken}`
       );
       const phonesData = await phonesRes.json();
 
@@ -81,7 +88,60 @@ export async function POST(req: Request) {
       const phoneNumberId = phone.id;
       const displayPhoneNumber = phone.display_phone_number;
 
-      // Salva na organização
+      // 3. Assinar o App na WABA para recebimento de Webhooks (subscribed_apps)
+      let subscribedAppsSuccess = false;
+      let subscribedAppsWarning: string | undefined;
+
+      try {
+        const subRes = await fetch(
+          `https://graph.facebook.com/v21.0/${wabaId}/subscribed_apps?access_token=${activeToken}`,
+          { method: "POST" }
+        );
+        const subData = await subRes.json();
+        if (subData.success) {
+          subscribedAppsSuccess = true;
+        } else {
+          subscribedAppsWarning = subData?.error?.message || "Falha ao assinar webhooks na WABA";
+          console.warn("[Meta subscribed_apps Warning]", subData);
+        }
+      } catch (subErr: any) {
+        subscribedAppsWarning = subErr.message || "Erro de rede ao assinar webhooks na WABA";
+        console.warn("[Meta subscribed_apps Exception]", subErr);
+      }
+
+      // 4. Registrar o número de telefone na Cloud API (/register)
+      let registrationSuccess = false;
+      let registrationWarning: string | undefined;
+
+      try {
+        const pin = String(crypto.randomInt(100000, 999999));
+        const regRes = await fetch(
+          `https://graph.facebook.com/v21.0/${phoneNumberId}/register`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${activeToken}`,
+            },
+            body: JSON.stringify({
+              messaging_product: "whatsapp",
+              pin,
+            }),
+          }
+        );
+        const regData = await regRes.json();
+        if (regData.success || regData.error?.code === 133010) {
+          registrationSuccess = true;
+        } else {
+          registrationWarning = regData?.error?.message || "Registro na Cloud API pendente";
+          console.warn("[Meta /register Warning]", regData);
+        }
+      } catch (regErr: any) {
+        registrationWarning = regErr.message || "Erro de rede no registro do número na Cloud API";
+        console.warn("[Meta /register Exception]", regErr);
+      }
+
+      // Salva na organização o token de longa duração
       await prisma.organization.update({
         where: { id: session.organizationId },
         data: {
@@ -89,16 +149,34 @@ export async function POST(req: Request) {
           whatsappStatus: "CONNECTED",
           metaPhoneNumberId: phoneNumberId,
           metaWabaId: wabaId,
-          metaAccessToken: accessToken,
+          metaAccessToken: activeToken,
           whatsappNumber: displayPhoneNumber ? normalizePhone(displayPhoneNumber) : undefined,
         },
       });
+
+      // Grava AuditLog de integração (M9)
+      try {
+        await prisma.auditLog.create({
+          data: {
+            organizationId: session.organizationId,
+            userId: session.userId,
+            acao: "INTEGRATION_CONFIG_CHANGED",
+            detalhes: `WhatsApp Oficial (Meta Cloud API) conectado via Embedded Signup por ${session.nome} (PhoneNumberId: ${phoneNumberId}, WABA: ${wabaId}, Webhook Subscribed: ${subscribedAppsSuccess}, Registrado: ${registrationSuccess}).`,
+          },
+        });
+      } catch (auditError) {
+        console.error("[AuditLog WhatsApp Error]", auditError);
+      }
 
       return NextResponse.json({
         success: true,
         wabaId,
         phoneNumberId,
         displayPhoneNumber,
+        subscribedAppsSuccess,
+        subscribedAppsWarning,
+        registrationSuccess,
+        registrationWarning,
       });
     }
 
@@ -117,6 +195,20 @@ export async function POST(req: Request) {
           whatsappNumber: whatsappNumber ? normalizePhone(whatsappNumber) : undefined,
         },
       });
+
+      // Grava AuditLog de alteração de credenciais de integração (M9)
+      try {
+        await prisma.auditLog.create({
+          data: {
+            organizationId: session.organizationId,
+            userId: session.userId,
+            acao: "INTEGRATION_CONFIG_CHANGED",
+            detalhes: `Credenciais Meta Cloud API (PhoneNumberId: ${metaPhoneNumberId}) atualizadas por ${session.nome}.`,
+          },
+        });
+      } catch (auditError) {
+        console.error("[AuditLog WhatsApp Error]", auditError);
+      }
 
       return NextResponse.json({ success: true, organization: updated });
     }
@@ -154,6 +246,19 @@ export async function POST(req: Request) {
             whatsappStatus: "CONNECTED",
           },
         });
+
+        try {
+          await prisma.auditLog.create({
+            data: {
+              organizationId: session.organizationId,
+              userId: session.userId,
+              acao: "INTEGRATION_CONFIG_CHANGED",
+              detalhes: `WhatsApp conectado via QR Code (${instanceName}) por ${session.nome}.`,
+            },
+          });
+        } catch (auditError) {
+          console.error("[AuditLog WhatsApp Error]", auditError);
+        }
       }
 
       return NextResponse.json({
@@ -171,11 +276,24 @@ export async function POST(req: Request) {
         },
       });
 
+      try {
+        await prisma.auditLog.create({
+          data: {
+            organizationId: session.organizationId,
+            userId: session.userId,
+            acao: "INTEGRATION_DISCONNECTED",
+            detalhes: `Canal WhatsApp desconectado por ${session.nome}.`,
+          },
+        });
+      } catch (auditError) {
+        console.error("[AuditLog WhatsApp Error]", auditError);
+      }
+
       return NextResponse.json({ success: true, organization: updated });
     }
 
     return NextResponse.json({ error: "Ação não reconhecida" }, { status: 400 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao processar configuração do WhatsApp.");
   }
 }

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
+import { isMetaTokenExpired } from "@/lib/meta";
+
 export async function POST(
   req: Request,
   context: { params: Promise<{ id: string }> }
@@ -71,7 +73,7 @@ export async function POST(
       const metaToken = org.metaAccessToken || process.env.META_ACCESS_TOKEN;
       const metaPhoneId = org.metaPhoneNumberId || process.env.META_PHONE_NUMBER_ID;
 
-      if (org.whatsappTipoConexao === "OFICIAL_META" && metaToken && metaPhoneId) {
+      if ((org.whatsappTipoConexao === "OFICIAL_META" || org.whatsappTipoConexao === "META_CLOUD_API") && metaToken && metaPhoneId) {
         try {
           const res = await fetch(`https://graph.facebook.com/v20.0/${metaPhoneId}/messages`, {
             method: "POST",
@@ -92,6 +94,24 @@ export async function POST(
             const errData = await res.json().catch(() => ({}));
             sendSuccess = false;
             externalError = errData?.error?.message || "Erro no envio Meta Graph API";
+
+            if (isMetaTokenExpired(errData)) {
+              console.warn(`[Meta API Token Expired] Token inválido/expirado para org ${org.id}. Atualizando whatsappStatus para DISCONNECTED.`);
+              await prisma.organization.update({
+                where: { id: org.id },
+                data: { whatsappStatus: "DISCONNECTED" },
+              });
+              try {
+                await prisma.auditLog.create({
+                  data: {
+                    organizationId: org.id,
+                    userId: session.userId,
+                    acao: "WHATSAPP_TOKEN_EXPIRED",
+                    detalhes: "Token da Meta Graph API expirado/inválido (código 190). Canal WhatsApp marcado como DISCONNECTED no painel.",
+                  },
+                });
+              } catch {}
+            }
           }
         } catch (err: any) {
           sendSuccess = false;

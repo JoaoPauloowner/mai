@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { normalizePhone } from "@/lib/compliance";
+import { handleApiError } from "@/lib/errors";
+import { OrganizationUpdateSchema } from "@/lib/validation";
 
 export async function GET() {
   try {
@@ -27,7 +29,7 @@ export async function GET() {
 
     return NextResponse.json({ organization: org });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao consultar dados da organização.");
   }
 }
 
@@ -39,6 +41,14 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json();
+    const parseResult = OrganizationUpdateSchema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: "Dados inválidos para organização", details: parseResult.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+
     const {
       nome,
       telefoneComercial,
@@ -46,17 +56,17 @@ export async function PATCH(req: Request) {
       cnpj,
       emailNotificacoes,
       instagramHandle,
-    } = body;
+    } = parseResult.data;
 
     const updated = await prisma.organization.update({
       where: { id: session.organizationId },
       data: {
-        ...(nome ? { nome } : {}),
-        ...(telefoneComercial ? { telefoneComercial: normalizePhone(telefoneComercial) } : {}),
-        ...(whatsappNumber ? { whatsappNumber: normalizePhone(whatsappNumber) } : {}),
-        ...(cnpj ? { cnpj } : {}),
-        ...(emailNotificacoes ? { emailNotificacoes } : {}),
-        ...(instagramHandle ? { instagramHandle } : {}),
+        ...(nome ? { nome: nome.trim() } : {}),
+        ...(telefoneComercial !== undefined ? { telefoneComercial: telefoneComercial ? normalizePhone(telefoneComercial) : null } : {}),
+        ...(whatsappNumber !== undefined ? { whatsappNumber: whatsappNumber ? normalizePhone(whatsappNumber) : null } : {}),
+        ...(cnpj !== undefined ? { cnpj } : {}),
+        ...(emailNotificacoes !== undefined ? { emailNotificacoes: emailNotificacoes || null } : {}),
+        ...(instagramHandle !== undefined ? { instagramHandle } : {}),
       },
     });
 
@@ -68,6 +78,6 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({ success: true, organization: updated });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao atualizar dados da organização.");
   }
 }

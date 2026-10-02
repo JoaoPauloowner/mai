@@ -28,8 +28,19 @@ async function main() {
   await prisma.auditLog.deleteMany();
   await prisma.organization.deleteMany();
 
-  const adminPass = process.env.SEED_ADMIN_PASSWORD || "admin123";
-  const userPass = process.env.SEED_USER_PASSWORD || "user123";
+  let adminPass = process.env.SEED_ADMIN_PASSWORD;
+  let userPass = process.env.SEED_USER_PASSWORD;
+  let adminPassGenerated = false;
+  let userPassGenerated = false;
+
+  if (!adminPass) {
+    adminPass = crypto.randomBytes(12).toString("base64url");
+    adminPassGenerated = true;
+  }
+  if (!userPass) {
+    userPass = crypto.randomBytes(12).toString("base64url");
+    userPassGenerated = true;
+  }
 
   const passwordHash = await bcrypt.hash(adminPass, 10);
   const userPasswordHash = await bcrypt.hash(userPass, 10);
@@ -366,11 +377,17 @@ async function main() {
 
   console.log("✅ Seed finalizado com sucesso!");
   console.log("-----------------------------------------");
-  console.log("🔐 Credenciais de Acesso de Teste:");
-  console.log("👤 Super Admin: admin@omni.com.br / admin123");
-  console.log("🚗 Setor Automotivo: auto@omni.com.br / user123");
-  console.log("🛡️ Setor Seguros: seguros@omni.com.br / user123");
-  console.log("📊 Setor Contábil: contabil@omni.com.br / user123");
+  console.log("🔐 Credenciais de Acesso:");
+  if (adminPassGenerated || userPassGenerated) {
+    console.log("⚠️ Senhas geradas aleatoriamente (SEED_ADMIN_PASSWORD / SEED_USER_PASSWORD não definidos):");
+    if (adminPassGenerated) console.log(`👤 Super Admin (admin@omni.com.br): ${adminPass}`);
+    if (userPassGenerated) {
+      console.log(`🚗 Auto (auto@omni.com.br): ${userPass}`);
+      console.log(`🛡️ Seguros (seguros@omni.com.br): ${userPass}`);
+    }
+  } else {
+    console.log("Seed concluído. Senhas definidas via variáveis de ambiente SEED_ADMIN_PASSWORD e SEED_USER_PASSWORD.");
+  }
   console.log("-----------------------------------------");
 }
 

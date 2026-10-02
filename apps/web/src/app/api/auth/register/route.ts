@@ -1,18 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, getTrustedClientIp } from "@/lib/rate-limit";
 import { normalizePhone } from "@/lib/compliance";
 import { validateRealEmail } from "@/lib/disposable-emails";
 import { generateEmailToken, sendVerificationEmail } from "@/lib/email";
+import { handleApiError } from "@/lib/errors";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
-    const ip = req.headers.get("x-forwarded-for") || "unknown_ip";
+    const ip = getTrustedClientIp(req);
     
     // 1. Rate Limiting (3 cadastros por IP a cada 1 hora)
-    const limit = checkRateLimit(`register_${ip}`, 3, 60 * 60 * 1000);
+    const limit = await checkRateLimit(`register_${ip}`, 3, 60 * 60 * 1000);
     if (!limit.allowed) {
       return NextResponse.json(
         { error: "Limite de cadastros excedido para este IP. Tente novamente mais tarde." },
@@ -36,11 +37,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: emailCheck.reason }, { status: 400 });
     }
 
-    // Validação de OTP caso fornecido
-    if (telefone && codigoOtp) {
-      const normalizedWithPlus = normalizePhone(telefone);
+    // Validação estrita de OTP se telefone for fornecido
+    const trimmedPhone = typeof telefone === "string" ? telefone.trim() : "";
+    if (trimmedPhone) {
+      if (!codigoOtp || typeof codigoOtp !== "string" || !codigoOtp.trim()) {
+        return NextResponse.json(
+          { error: "Código de confirmação do WhatsApp (OTP) é obrigatório ao informar telefone." },
+          { status: 400 }
+        );
+      }
+
+      const normalizedWithPlus = normalizePhone(trimmedPhone);
       const cleanPhone = normalizedWithPlus.replace(/\D/g, "");
-      const rawDigits = telefone.replace(/\D/g, "");
+      const rawDigits = trimmedPhone.replace(/\D/g, "");
 
       const stored = await prisma.otpVerification.findFirst({
         where: {
@@ -51,26 +60,38 @@ export async function POST(req: Request) {
         },
       });
 
-      if (stored) {
-        if (new Date() > stored.expiresAt) {
-          return NextResponse.json(
-            { error: "Código expirado. Solicite um novo código." },
-            { status: 400 }
-          );
-        }
-        if (stored.code !== codigoOtp.trim()) {
-          return NextResponse.json(
-            { error: "Código de confirmação incorreto." },
-            { status: 400 }
-          );
-        }
-        // Remove o OTP utilizado
+      if (!stored) {
+        return NextResponse.json(
+          { error: "Nenhum código de verificação ativo encontrado para este telefone. Solicite um novo código." },
+          { status: 400 }
+        );
+      }
+
+      if (new Date() > stored.expiresAt) {
         await prisma.otpVerification.deleteMany({
           where: {
             OR: [{ telefone: cleanPhone }, { telefone: rawDigits }],
           },
         });
+        return NextResponse.json(
+          { error: "Código expirado. Solicite um novo código." },
+          { status: 400 }
+        );
       }
+
+      if (stored.code !== codigoOtp.trim()) {
+        return NextResponse.json(
+          { error: "Código de confirmação incorreto." },
+          { status: 400 }
+        );
+      }
+
+      // Remove o OTP utilizado após validação bem-sucedida
+      await prisma.otpVerification.deleteMany({
+        where: {
+          OR: [{ telefone: cleanPhone }, { telefone: rawDigits }],
+        },
+      });
     }
 
     const cleanEmail = email.trim().toLowerCase();
@@ -176,7 +197,6 @@ export async function POST(req: Request) {
       organization: { id: org.id, slug: org.slug, nome: org.nome },
     });
   } catch (error: any) {
-    console.error("Erro no registro comercial:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao registrar organização comercial.");
   }
 }

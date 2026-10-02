@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, getTrustedClientIp } from "@/lib/rate-limit";
 import { validateRealEmail } from "@/lib/disposable-emails";
 import { generateEmailToken, sendVerificationEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
-    const { allowed } = checkRateLimit(`email_verify:${ip}`, 5, 10 * 60 * 1000); // 5 disparos a cada 10 min por IP
+    const ip = getTrustedClientIp(req);
+    const { allowed } = await checkRateLimit(`email_verify:${ip}`, 5, 10 * 60 * 1000); // 5 disparos a cada 10 min por IP
 
     if (!allowed) {
       return NextResponse.json(
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    const emailLimit = checkRateLimit(`email_verify_target:${cleanEmail}`, 3, 10 * 60 * 1000);
+    const emailLimit = await checkRateLimit(`email_verify_target:${cleanEmail}`, 3, 10 * 60 * 1000);
     if (!emailLimit.allowed) {
       return NextResponse.json(
         { error: "Muitas solicitações para este e-mail. Aguarde 10 minutos." },

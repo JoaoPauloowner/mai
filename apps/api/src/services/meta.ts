@@ -1,10 +1,13 @@
 import crypto from "crypto";
+import { prisma } from "@omni/database";
+import { fetchWithTimeout } from "./circuit-breaker.js";
 
 export interface SendWhatsAppParams {
   phoneNumberId: string;
   accessToken: string;
   to: string;
   text: string;
+  organizationId?: string;
 }
 
 export interface SendInstagramParams {
@@ -12,6 +15,27 @@ export interface SendInstagramParams {
   accessToken: string;
   recipientId: string;
   text: string;
+}
+
+/**
+ * Verifica se um erro retornado pela Graph API da Meta indica token expirado ou inválido (código 190 / OAuthException).
+ */
+export function isMetaTokenExpired(errorData: any): boolean {
+  if (!errorData) return false;
+  const err = errorData?.error || errorData;
+  const code = Number(err?.code);
+  const subcode = Number(err?.error_subcode);
+  const message = String(err?.message || "");
+
+  return (
+    code === 190 ||
+    subcode === 463 ||
+    subcode === 467 ||
+    message.includes("Session has expired") ||
+    message.includes("Error validating access token") ||
+    message.includes("The access token could not be decrypted") ||
+    message.includes("Malformed access token")
+  );
 }
 
 // 1. Validação de HMAC SHA-256 no Header X-Hub-Signature-256
@@ -61,12 +85,13 @@ export async function sendWhatsAppMessage({
   accessToken,
   to,
   text,
-}: SendWhatsAppParams): Promise<{ success: boolean; data?: any; error?: string }> {
+  organizationId,
+}: SendWhatsAppParams): Promise<{ success: boolean; data?: any; error?: string; isTokenExpired?: boolean }> {
   try {
     const cleanTo = to.replace(/\D/g, "");
     const url = `https://graph.facebook.com/v20.0/${phoneNumberId}/messages`;
 
-    const res = await fetch(url, {
+    const res = await fetchWithTimeout(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -79,13 +104,58 @@ export async function sendWhatsAppMessage({
         type: "text",
         text: { preview_url: false, body: text },
       }),
-    });
+    }, 15000);
 
     const data = await res.json();
 
     if (!res.ok) {
       console.error("[Meta API WhatsApp] Erro no envio:", data);
-      return { success: false, error: data?.error?.message || "Erro desconhecido da Meta API" };
+      const tokenExpired = isMetaTokenExpired(data);
+
+      if (tokenExpired) {
+        console.warn(`[Meta API Token Expired] Token inválido ou expirado para Phone ID ${phoneNumberId}. Atualizando status para DISCONNECTED.`);
+        try {
+          if (organizationId) {
+            await prisma.organization.update({
+              where: { id: organizationId },
+              data: { whatsappStatus: "DISCONNECTED" },
+            });
+            await prisma.auditLog.create({
+              data: {
+                organizationId,
+                acao: "WHATSAPP_TOKEN_EXPIRED",
+                detalhes: `Token da Meta Graph API expirado/inválido (código 190). Canal WhatsApp marcado como DISCONNECTED.`,
+              },
+            });
+          } else if (phoneNumberId) {
+            const orgs = await prisma.organization.findMany({
+              where: { metaPhoneNumberId: phoneNumberId },
+              select: { id: true },
+            });
+            for (const org of orgs) {
+              await prisma.organization.update({
+                where: { id: org.id },
+                data: { whatsappStatus: "DISCONNECTED" },
+              });
+              await prisma.auditLog.create({
+                data: {
+                  organizationId: org.id,
+                  acao: "WHATSAPP_TOKEN_EXPIRED",
+                  detalhes: `Token da Meta Graph API expirado/inválido (código 190) para Phone ID ${phoneNumberId}. Canal WhatsApp marcado como DISCONNECTED.`,
+                },
+              });
+            }
+          }
+        } catch (dbErr) {
+          console.error("[Meta API WhatsApp] Falha ao persistir status DISCONNECTED no banco:", dbErr);
+        }
+      }
+
+      return {
+        success: false,
+        error: data?.error?.message || "Erro desconhecido da Meta API",
+        isTokenExpired: tokenExpired,
+      };
     }
 
     return { success: true, data };
@@ -104,7 +174,7 @@ export async function sendInstagramMessage({
   try {
     const url = `https://graph.facebook.com/v20.0/me/messages`;
 
-    const res = await fetch(url, {
+    const res = await fetchWithTimeout(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -114,7 +184,7 @@ export async function sendInstagramMessage({
         recipient: { id: recipientId },
         message: { text },
       }),
-    });
+    }, 15000);
 
     const data = await res.json();
 
@@ -145,7 +215,7 @@ export async function sendEvolutionWhatsAppMessage({
   const cleanPhone = to.replace(/\D/g, "");
 
   try {
-    const res = await fetch(`${evolutionUrl}/message/sendText/${instanceName}`, {
+    const res = await fetchWithTimeout(`${evolutionUrl}/message/sendText/${instanceName}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -156,7 +226,7 @@ export async function sendEvolutionWhatsAppMessage({
         text,
         delay: 1200,
       }),
-    });
+    }, 15000);
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
@@ -170,4 +240,5 @@ export async function sendEvolutionWhatsAppMessage({
     return { success: false, error: error.message };
   }
 }
+
 

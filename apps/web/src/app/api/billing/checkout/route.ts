@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { handleApiError } from "@/lib/errors";
 
 export async function POST(req: Request) {
   try {
@@ -72,6 +73,7 @@ export async function POST(req: Request) {
         value: valor,
         dueDate: new Date(Date.now() + 86400000 * 3).toISOString().split("T")[0],
         description: `Assinatura OMNAI B2B - Plano ${plano.toUpperCase()}`,
+        externalReference: org.id,
       }),
     });
 
@@ -95,8 +97,7 @@ export async function POST(req: Request) {
       pixQrCode: paymentData.pixQrCodeUrl,
     });
   } catch (error: any) {
-    console.error("[Asaas Checkout Error]", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleApiError(error, "Falha ao processar checkout de assinatura.");
   }
 }
 

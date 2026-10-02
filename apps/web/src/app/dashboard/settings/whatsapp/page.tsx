@@ -11,6 +11,7 @@ import {
   Copy,
   Zap,
   ShieldCheck,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -23,7 +24,8 @@ declare global {
 }
 
 export default function SettingsWhatsappPage() {
-  const [tab, setTab] = useState<"QR_CODE" | "META_CLOUD_API">("QR_CODE");
+  const isEvolutionEnabled = process.env.NEXT_PUBLIC_ADMIN_EVOLUTION_MODE_ENABLED === "true";
+  const [tab, setTab] = useState<"QR_CODE" | "META_CLOUD_API">("META_CLOUD_API");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [copiedField, setCopiedField] = useState("");
@@ -46,12 +48,14 @@ export default function SettingsWhatsappPage() {
   useEffect(() => {
     if (document.getElementById("facebook-jssdk")) return;
     window.fbAsyncInit = function () {
+      const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || "1448689107110156";
       window.FB.init({
-        appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID,
+        appId,
         autoLogAppEvents: true,
         xfbml: true,
         version: "v21.0",
       });
+      console.log("[Meta SDK] Inicializado com App ID:", appId);
     };
     const script = document.createElement("script");
     script.id = "facebook-jssdk";
@@ -93,48 +97,66 @@ export default function SettingsWhatsappPage() {
     setEmbeddedStatus("loading");
     setEmbeddedMsg("Aguardando autorização no popup da Meta...");
 
-    window.FB.login(
-      async (response: any) => {
-        if (!response.authResponse) {
-          setEmbeddedStatus("error");
-          setEmbeddedMsg("Autorização cancelada ou recusada.");
-          return;
-        }
-        const { accessToken, code } = response.authResponse;
-        setSaving(true);
-        setEmbeddedMsg("Salvando credenciais e consultando conta WhatsApp Business...");
-        try {
-          const res = await fetch("/api/settings/whatsapp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "EMBEDDED_SIGNUP", accessToken: accessToken || code }),
-          });
-          const data = await res.json();
-          if (data.success) {
-            setStatus("CONNECTED");
-            setMetaPhoneNumberId(data.phoneNumberId || "");
-            setMetaWabaId(data.wabaId || "");
-            setMetaAccessToken("••••••••••••••••");
-            setEmbeddedStatus("success");
-            setEmbeddedMsg(`✅ WhatsApp conectado! Número: ${data.displayPhoneNumber || data.phoneNumberId}`);
-          } else {
+    const configId = process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID || process.env.NEXT_PUBLIC_META_CONFIG_ID || "2169508877297766";
+    console.log("[Meta SDK] Iniciando FB.login com config_id:", configId);
+
+    // Timeout de 45 segundos caso o navegador bloqueie o popup silenciosamente
+    const popupTimeout = setTimeout(() => {
+      setEmbeddedStatus("error");
+      setEmbeddedMsg("O popup demorou para responder. Verifique se o seu navegador bloqueou a janela pop-up (ícone no canto direito da barra de endereços) ou se a janela abriu atrás do navegador.");
+    }, 45000);
+
+    try {
+      window.FB.login(
+        async (response: any) => {
+          clearTimeout(popupTimeout);
+          console.log("[Meta SDK] FB.login retorno:", response);
+          if (!response || !response.authResponse) {
             setEmbeddedStatus("error");
-            setEmbeddedMsg(data.error || "Erro ao salvar credenciais.");
+            setEmbeddedMsg("Autorização cancelada ou recusada no popup da Meta.");
+            return;
           }
-        } catch {
-          setEmbeddedStatus("error");
-          setEmbeddedMsg("Erro de rede ao salvar. Verifique sua conexão.");
-        } finally {
-          setSaving(false);
+          const { accessToken, code } = response.authResponse;
+          setSaving(true);
+          setEmbeddedMsg("Salvando credenciais e consultando conta WhatsApp Business...");
+          try {
+            const res = await fetch("/api/settings/whatsapp", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ action: "EMBEDDED_SIGNUP", accessToken: accessToken || code }),
+            });
+            const data = await res.json();
+            if (data.success) {
+              setStatus("CONNECTED");
+              setMetaPhoneNumberId(data.phoneNumberId || "");
+              setMetaWabaId(data.wabaId || "");
+              setMetaAccessToken("••••••••••••••••");
+              setEmbeddedStatus("success");
+              setEmbeddedMsg(`✅ WhatsApp conectado! Número: ${data.displayPhoneNumber || data.phoneNumberId}`);
+            } else {
+              setEmbeddedStatus("error");
+              setEmbeddedMsg(data.error || "Erro ao salvar credenciais.");
+            }
+          } catch {
+            setEmbeddedStatus("error");
+            setEmbeddedMsg("Erro de rede ao salvar. Verifique sua conexão.");
+          } finally {
+            setSaving(false);
+          }
+        },
+        {
+          config_id: configId,
+          scope: "whatsapp_business_management,whatsapp_business_messaging,business_management,public_profile",
+          extras: { feature: "whatsapp_embedded_signup", version: 2, sessionInfoVersion: 3, setup: {} },
+          return_scopes: true,
+          enable_profile_selector: true,
         }
-      },
-      {
-        scope: "whatsapp_business_management,whatsapp_business_messaging,business_management,public_profile",
-        extras: { feature: "whatsapp_embedded_signup", version: 2, sessionInfoVersion: 3, setup: {} },
-        return_scopes: true,
-        enable_profile_selector: true,
-      }
-    );
+      );
+    } catch (err: any) {
+      clearTimeout(popupTimeout);
+      setEmbeddedStatus("error");
+      setEmbeddedMsg(`Erro ao iniciar popup: ${err?.message || err}`);
+    }
   }, []);
 
   const fetchQr = async () => {
@@ -270,18 +292,47 @@ export default function SettingsWhatsappPage() {
 
       {/* Tabs */}
       <div className="flex gap-2 p-1 bg-[#E7EBE6] border border-[#D0D5CD] rounded-xl w-fit">
-        {(["QR_CODE", "META_CLOUD_API"] as const).map((t) => (
-          <button key={t} type="button" onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 ${tab === t ? "bg-white text-[#2C2E2A] shadow-xs" : "text-[#63695B] hover:text-[#2C2E2A]"}`}
+        <button
+          type="button"
+          onClick={() => setTab("META_CLOUD_API")}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
+            tab === "META_CLOUD_API"
+              ? "bg-white text-[#2C2E2A] shadow-xs"
+              : "text-[#63695B] hover:text-[#2C2E2A]"
+          }`}
+        >
+          <Globe className="w-4 h-4 text-[#7A8E75]" /> Meta Cloud API Oficial
+        </button>
+
+        {isEvolutionEnabled && (
+          <button
+            type="button"
+            onClick={() => setTab("QR_CODE")}
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
+              tab === "QR_CODE"
+                ? "bg-white text-[#2C2E2A] shadow-xs"
+                : "text-[#63695B] hover:text-[#2C2E2A]"
+            }`}
           >
-            {t === "QR_CODE" ? <><QrCode className="w-4 h-4 text-[#7A8E75]" /> QR Code (Evolution API)</> : <><Globe className="w-4 h-4 text-[#7A8E75]" /> Meta Cloud API Oficial</>}
+            <QrCode className="w-4 h-4 text-[#7A8E75]" /> QR Code (Evolution API)
           </button>
-        ))}
+        )}
       </div>
 
       {/* ─── QR Code ─────────────────────────────────────────────────────── */}
       {tab === "QR_CODE" && (
         <div className="p-6 rounded-2xl bg-white border border-[#E0E3DE] space-y-6 shadow-xs">
+          {/* Warning Banner */}
+          <div className="p-4 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs space-y-1.5">
+            <div className="flex items-center gap-2 font-bold text-amber-950">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>Aviso Importante: Risco de Banimento por Conexão Não-Oficial</span>
+            </div>
+            <p className="text-amber-800 leading-relaxed text-[11px]">
+              A conexão via QR Code utiliza emulação de WhatsApp Web (Evolution API). A Meta monitora ativamente conexões não-oficiais e pode aplicar banimento permanente ao número conectado. Recomendamos o uso exclusivo da <strong>Meta Cloud API Oficial</strong> para contas de clientes e operação comercial em produção.
+            </p>
+          </div>
+
           <div>
             <h3 className="text-sm font-bold">Escanear com o Celular</h3>
             <p className="text-xs text-[#63695B] mt-0.5">WhatsApp &gt; Aparelhos Conectados &gt; Conectar um Aparelho.</p>

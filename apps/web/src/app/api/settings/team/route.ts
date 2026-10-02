@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { handleApiError } from "@/lib/errors";
+import { TeamInviteSchema, TeamRoleUpdateSchema } from "@/lib/validation";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
@@ -52,25 +54,19 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { nome, email, telefone, role, senha } = body;
-
-    if (!nome || !email) {
+    const parseResult = TeamInviteSchema.safeParse(body);
+    if (!parseResult.success) {
       return NextResponse.json(
-        { error: "Nome e e-mail são obrigatórios." },
+        { error: "Dados inválidos para convite de membro", details: parseResult.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
 
+    const { nome, email, role, senha } = parseResult.data;
     const cleanEmail = email.trim().toLowerCase();
 
     // S1: Allowlist estrita de roles (SUPER_ADMIN NUNCA atribuível via API de tenant)
-    const targetRole: AllowedRole = role && ALLOWED_ROLES.includes(role) ? role : "VENDEDOR";
-    if (role && !ALLOWED_ROLES.includes(role)) {
-      return NextResponse.json(
-        { error: "Função não permitida para gestão de equipe no tenant." },
-        { status: 400 }
-      );
-    }
+    const targetRole: AllowedRole = role && ALLOWED_ROLES.includes(role as AllowedRole) ? (role as AllowedRole) : "VENDEDOR";
 
     // S1: Verifica se o e-mail já existe com normalização
     const existing = await prisma.user.findUnique({
@@ -86,14 +82,7 @@ export async function POST(req: Request) {
 
     // S1: Validação de senha segura ou geração de senha temporária criptograficamente aleatória
     let passwordToHash = senha;
-    if (passwordToHash) {
-      if (passwordToHash.length < 8) {
-        return NextResponse.json(
-          { error: "A senha deve conter no mínimo 8 caracteres." },
-          { status: 400 }
-        );
-      }
-    } else {
+    if (!passwordToHash) {
       passwordToHash = crypto.randomBytes(8).toString("hex") + "A1!";
     }
 
@@ -132,7 +121,7 @@ export async function POST(req: Request) {
       inviteLink,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: "Erro ao convidar membro da equipe." }, { status: 500 });
+    return handleApiError(error, "Erro ao convidar membro da equipe.");
   }
 }
 
@@ -149,11 +138,15 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json();
-    const { targetUserId, newRole } = body;
-
-    if (!targetUserId || !newRole) {
-      return NextResponse.json({ error: "ID do usuário e nova função são obrigatórios." }, { status: 400 });
+    const parseResult = TeamRoleUpdateSchema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: "Dados inválidos para alteração de função", details: parseResult.error.flatten().fieldErrors },
+        { status: 400 }
+      );
     }
+
+    const { targetUserId, newRole } = parseResult.data;
 
     // S1: Impede alterar a própria função (auto-promoção ou auto-rebaixamento)
     if (targetUserId === session.userId) {
@@ -211,7 +204,7 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({ success: true, user: updated });
   } catch (error: any) {
-    return NextResponse.json({ error: "Erro ao atualizar permissão." }, { status: 500 });
+    return handleApiError(error, "Erro ao atualizar permissão.");
   }
 }
 
@@ -273,7 +266,7 @@ export async function DELETE(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: "Erro ao remover usuário." }, { status: 500 });
+    return handleApiError(error, "Erro ao remover usuário da organização.");
   }
 }
 

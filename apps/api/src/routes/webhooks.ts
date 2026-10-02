@@ -4,6 +4,7 @@ import { verifyMetaSignature, sendWhatsAppMessage, sendInstagramMessage } from "
 import { generateSDRResponse } from "../services/ai.js";
 import { findOrCreateLeadAndConversation, recordIncomingMessage, recordOutgoingMessage, getRecentHistory } from "../services/conversation.js";
 import { captureProductionError } from "../services/monitoring.js";
+import { maskPhone, maskMessage, maskEmail } from "../utils/mask.js";
 
 const processedMessagesCache = new Map<string, number>();
 
@@ -120,7 +121,7 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
 
         if (!senderPhone || !messageText) return;
 
-        console.log(`[Webhook Evolution API] Mensagem de ${senderPhone} (${contactName}): "${messageText}"`);
+        console.log(`[Webhook Evolution API] Mensagem de ${maskPhone(senderPhone)} (${contactName}): "${maskMessage(messageText)}"`);
 
         const orgSlug = instanceName.replace(/^omni_/, "");
         // S3: Resolução estrita de tenant sem fallbacks abertos
@@ -138,7 +139,7 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
           return;
         }
 
-        if (org.statusPlano === "bloqueado" || org.statusPlano === "cancelado") {
+        if (org.statusPlano === "bloqueado" || org.statusPlano === "cancelado" || org.statusPlano === "inadimplente") {
           console.warn(`[Webhook Evolution API] Organização "${org.slug}" com plano ${org.statusPlano}. Mensagem ignorada.`);
           return;
         }
@@ -193,6 +194,67 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
       const entry = body?.entry?.[0];
       const changes = entry?.changes?.[0];
       const value = changes?.value;
+
+      // 1. Tratar eventos de status da conta (account_update)
+      if (changes?.field === "account_update") {
+        const eventType = value?.event || value?.account_update_type || "UNKNOWN_UPDATE";
+        const wabaId = entry?.id;
+        const phoneId = value?.phone_number_id || value?.metadata?.phone_number_id;
+
+        console.log(`[Webhook Meta account_update] Evento: ${eventType} (WABA: ${wabaId || "N/A"})`);
+
+        const org = await prisma.organization.findFirst({
+          where: {
+            OR: [
+              ...(wabaId ? [{ metaWabaId: wabaId }] : []),
+              ...(phoneId ? [{ metaPhoneNumberId: phoneId }] : []),
+            ],
+          },
+        });
+
+        if (org) {
+          const upperEvent = String(eventType).toUpperCase();
+          if (
+            upperEvent.includes("BANNED") ||
+            upperEvent.includes("DISABLED") ||
+            upperEvent.includes("RESTRICTED")
+          ) {
+            await prisma.organization.update({
+              where: { id: org.id },
+              data: { whatsappStatus: "RESTRICTED" },
+            });
+            try {
+              await prisma.auditLog.create({
+                data: {
+                  organizationId: org.id,
+                  acao: "WHATSAPP_STATUS_CHANGED",
+                  detalhes: `Status do WhatsApp alterado para RESTRICTED via Meta account_update: ${eventType}`,
+                },
+              });
+            } catch {}
+          } else if (
+            upperEvent.includes("CONNECTED") ||
+            upperEvent.includes("APPROVED") ||
+            upperEvent.includes("VERIFIED")
+          ) {
+            await prisma.organization.update({
+              where: { id: org.id },
+              data: { whatsappStatus: "CONNECTED" },
+            });
+            try {
+              await prisma.auditLog.create({
+                data: {
+                  organizationId: org.id,
+                  acao: "WHATSAPP_STATUS_CHANGED",
+                  detalhes: `Status do WhatsApp alterado para CONNECTED via Meta account_update: ${eventType}`,
+                },
+              });
+            } catch {}
+          }
+        }
+        return;
+      }
+
       const message = value?.messages?.[0];
 
       if (!message || message.type !== "text") {
@@ -228,7 +290,7 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
         return;
       }
 
-      if (org.statusPlano === "bloqueado" || org.statusPlano === "cancelado") {
+      if (org.statusPlano === "bloqueado" || org.statusPlano === "cancelado" || org.statusPlano === "inadimplente") {
         console.warn(`[Webhook WhatsApp Meta] Organização "${org.slug}" com plano ${org.statusPlano}. Resposta automática cancelada.`);
         return;
       }
@@ -263,7 +325,7 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
         history,
       });
 
-      console.log(`[Webhook WhatsApp Meta] Resposta gerada (Tool: ${toolCalled || "none"}): "${replyText}"`);
+      console.log(`[Webhook WhatsApp Meta] Resposta gerada (Tool: ${toolCalled || "none"}): "${maskMessage(replyText)}"`);
 
       await recordOutgoingMessage({
         conversationId: conversation.id,
@@ -279,6 +341,7 @@ webhookRouter.post("/whatsapp", async (req: Request, res: Response) => {
           accessToken: metaToken,
           to: senderPhone,
           text: replyText,
+          organizationId: org.id,
         });
         console.log(`[Webhook WhatsApp Meta] Disparo Graph API: ${sendResult.success ? "Sucesso" : "Falha: " + sendResult.error}`);
       }
@@ -468,16 +531,33 @@ webhookRouter.post("/billing", async (req: Request, res: Response) => {
     }
 
     const body = req.body;
-    const event = body?.event; // ex: PAYMENT_RECEIVED, PAYMENT_OVERDUE, PAYMENT_DELETED
-    const customerEmail = body?.payment?.customerEmail || body?.customer;
+    const event = body?.event; // ex: PAYMENT_RECEIVED, PAYMENT_OVERDUE, PAYMENT_DELETED, SUBSCRIPTION_CANCELLED
+    const externalReference = body?.payment?.externalReference || body?.externalReference;
+    const customerEmail = body?.payment?.customerEmail || body?.customerEmail || body?.payment?.email;
+    const customerId = body?.payment?.customer || body?.customer;
 
     if (process.env.NODE_ENV !== "production") {
-      console.log(`[Billing Webhook Asaas] Evento: ${event} para cliente: ${customerEmail}`);
+      console.log(`[Billing Webhook Asaas] Evento: ${event} para cliente: ${maskEmail(customerEmail || customerId || "N/A")}`);
     }
 
-    const org = await prisma.organization.findFirst({
-      where: { emailNotificacoes: customerEmail },
-    });
+    let org: any = null;
+
+    if (externalReference) {
+      org = await prisma.organization.findUnique({
+        where: { id: externalReference },
+      });
+    }
+
+    if (!org && customerEmail) {
+      org = await prisma.organization.findFirst({
+        where: {
+          OR: [
+            { emailNotificacoes: customerEmail },
+            { users: { some: { email: customerEmail } } },
+          ],
+        },
+      });
+    }
 
     if (org) {
       if (event === "PAYMENT_RECEIVED" || event === "PAYMENT_CONFIRMED") {
@@ -490,10 +570,10 @@ webhookRouter.post("/billing", async (req: Request, res: Response) => {
           data: {
             organizationId: org.id,
             acao: "PAYMENT_CONFIRMED",
-            detalhes: `Pagamento recebido via Asaas. Plano ativado para a organização ${org.nome}. Evento: ${event}`,
+            detalhes: `Pagamento confirmado no Asaas. Assinatura ATIVA para ${org.nome}. Evento: ${event}`,
           },
         });
-      } else if (event === "PAYMENT_OVERDUE") {
+      } else if (event === "PAYMENT_OVERDUE" || event === "PAYMENT_BANK_SLIP_CANCELLED") {
         await prisma.organization.update({
           where: { id: org.id },
           data: { statusPlano: "inadimplente" },
@@ -503,15 +583,25 @@ webhookRouter.post("/billing", async (req: Request, res: Response) => {
           data: {
             organizationId: org.id,
             acao: "PAYMENT_OVERDUE",
-            detalhes: `Fatura vencida via Asaas. Status alterado para inadimplente para ${org.nome}.`,
+            detalhes: `Cobrança vencida no Asaas. Status atualizado para INADIMPLENTE para ${org.nome}. Evento: ${event}`,
           },
         });
-      } else if (event === "PAYMENT_DELETED" || event === "SUBSCRIPTION_CANCELLED") {
+      } else if (
+        event === "PAYMENT_DELETED" ||
+        event === "SUBSCRIPTION_CANCELLED" ||
+        event === "SUBSCRIPTION_INACTIVATED" ||
+        event === "PAYMENT_REFUNDED"
+      ) {
+        await prisma.organization.update({
+          where: { id: org.id },
+          data: { statusPlano: "cancelado" },
+        });
+
         await prisma.auditLog.create({
           data: {
             organizationId: org.id,
             acao: "BILLING_SUBSCRIPTION_CANCELLED",
-            detalhes: `Cobrança/assinatura cancelada no Asaas para ${org.nome}. Evento: ${event}`,
+            detalhes: `Assinatura cancelada/estornada no Asaas para ${org.nome}. Evento: ${event}`,
           },
         });
       }
