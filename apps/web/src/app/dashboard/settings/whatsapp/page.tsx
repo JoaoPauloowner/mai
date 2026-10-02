@@ -24,7 +24,7 @@ declare global {
 }
 
 export default function SettingsWhatsappPage() {
-  const isEvolutionEnabled = process.env.NEXT_PUBLIC_ADMIN_EVOLUTION_MODE_ENABLED !== "false";
+  const isEvolutionEnabled = process.env.NEXT_PUBLIC_ADMIN_EVOLUTION_MODE_ENABLED === "true";
   const [tab, setTab] = useState<"QR_CODE" | "META_CLOUD_API">("META_CLOUD_API");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
