@@ -48,12 +48,14 @@ export default function SettingsWhatsappPage() {
   useEffect(() => {
     if (document.getElementById("facebook-jssdk")) return;
     window.fbAsyncInit = function () {
+      const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || "1448689107110156";
       window.FB.init({
-        appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID,
+        appId,
         autoLogAppEvents: true,
         xfbml: true,
         version: "v21.0",
       });
+      console.log("[Meta SDK] Inicializado com App ID:", appId);
     };
     const script = document.createElement("script");
     script.id = "facebook-jssdk";
@@ -95,49 +97,66 @@ export default function SettingsWhatsappPage() {
     setEmbeddedStatus("loading");
     setEmbeddedMsg("Aguardando autorização no popup da Meta...");
 
-    window.FB.login(
-      async (response: any) => {
-        if (!response.authResponse) {
-          setEmbeddedStatus("error");
-          setEmbeddedMsg("Autorização cancelada ou recusada.");
-          return;
-        }
-        const { accessToken, code } = response.authResponse;
-        setSaving(true);
-        setEmbeddedMsg("Salvando credenciais e consultando conta WhatsApp Business...");
-        try {
-          const res = await fetch("/api/settings/whatsapp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "EMBEDDED_SIGNUP", accessToken: accessToken || code }),
-          });
-          const data = await res.json();
-          if (data.success) {
-            setStatus("CONNECTED");
-            setMetaPhoneNumberId(data.phoneNumberId || "");
-            setMetaWabaId(data.wabaId || "");
-            setMetaAccessToken("••••••••••••••••");
-            setEmbeddedStatus("success");
-            setEmbeddedMsg(`✅ WhatsApp conectado! Número: ${data.displayPhoneNumber || data.phoneNumberId}`);
-          } else {
+    const configId = process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID || process.env.NEXT_PUBLIC_META_CONFIG_ID || "2169508877297766";
+    console.log("[Meta SDK] Iniciando FB.login com config_id:", configId);
+
+    // Timeout de 45 segundos caso o navegador bloqueie o popup silenciosamente
+    const popupTimeout = setTimeout(() => {
+      setEmbeddedStatus("error");
+      setEmbeddedMsg("O popup demorou para responder. Verifique se o seu navegador bloqueou a janela pop-up (ícone no canto direito da barra de endereços) ou se a janela abriu atrás do navegador.");
+    }, 45000);
+
+    try {
+      window.FB.login(
+        async (response: any) => {
+          clearTimeout(popupTimeout);
+          console.log("[Meta SDK] FB.login retorno:", response);
+          if (!response || !response.authResponse) {
             setEmbeddedStatus("error");
-            setEmbeddedMsg(data.error || "Erro ao salvar credenciais.");
+            setEmbeddedMsg("Autorização cancelada ou recusada no popup da Meta.");
+            return;
           }
-        } catch {
-          setEmbeddedStatus("error");
-          setEmbeddedMsg("Erro de rede ao salvar. Verifique sua conexão.");
-        } finally {
-          setSaving(false);
+          const { accessToken, code } = response.authResponse;
+          setSaving(true);
+          setEmbeddedMsg("Salvando credenciais e consultando conta WhatsApp Business...");
+          try {
+            const res = await fetch("/api/settings/whatsapp", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ action: "EMBEDDED_SIGNUP", accessToken: accessToken || code }),
+            });
+            const data = await res.json();
+            if (data.success) {
+              setStatus("CONNECTED");
+              setMetaPhoneNumberId(data.phoneNumberId || "");
+              setMetaWabaId(data.wabaId || "");
+              setMetaAccessToken("••••••••••••••••");
+              setEmbeddedStatus("success");
+              setEmbeddedMsg(`✅ WhatsApp conectado! Número: ${data.displayPhoneNumber || data.phoneNumberId}`);
+            } else {
+              setEmbeddedStatus("error");
+              setEmbeddedMsg(data.error || "Erro ao salvar credenciais.");
+            }
+          } catch {
+            setEmbeddedStatus("error");
+            setEmbeddedMsg("Erro de rede ao salvar. Verifique sua conexão.");
+          } finally {
+            setSaving(false);
+          }
+        },
+        {
+          config_id: configId,
+          scope: "whatsapp_business_management,whatsapp_business_messaging,business_management,public_profile",
+          extras: { feature: "whatsapp_embedded_signup", version: 2, sessionInfoVersion: 3, setup: {} },
+          return_scopes: true,
+          enable_profile_selector: true,
         }
-      },
-      {
-        config_id: process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID || process.env.NEXT_PUBLIC_META_CONFIG_ID || "2169508877297766",
-        scope: "whatsapp_business_management,whatsapp_business_messaging,business_management,public_profile",
-        extras: { feature: "whatsapp_embedded_signup", version: 2, sessionInfoVersion: 3, setup: {} },
-        return_scopes: true,
-        enable_profile_selector: true,
-      }
-    );
+      );
+    } catch (err: any) {
+      clearTimeout(popupTimeout);
+      setEmbeddedStatus("error");
+      setEmbeddedMsg(`Erro ao iniciar popup: ${err?.message || err}`);
+    }
   }, []);
 
   const fetchQr = async () => {
