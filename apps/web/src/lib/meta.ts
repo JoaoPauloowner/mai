@@ -87,3 +87,33 @@ export function isMetaTokenExpired(errorData: any): boolean {
     message.includes("Malformed access token")
   );
 }
+
+/**
+ * Utilitário para resolver variações de formato de telefone WhatsApp (especialmente a regra do 9º dígito no Brasil).
+ */
+export function formatWhatsAppRecipientCandidates(phone: string): string[] {
+  const clean = phone.replace(/\D/g, "");
+
+  // Regra do 9º dígito do Brasil (+55 + 2 dígitos DDD + 8 dígitos móvel => prioriza +55 + DDD + 9 + 8 dígitos)
+  if (clean.startsWith("55") && clean.length === 12) {
+    const ddd = clean.slice(2, 4);
+    const rest = clean.slice(4);
+    if (["6", "7", "8", "9"].includes(rest[0])) {
+      const withNine = `55${ddd}9${rest}`;
+      return [withNine, clean];
+    }
+  }
+
+  // Se já tem 13 dígitos no Brasil (55 + DDD + 9 + 8 dígitos)
+  if (clean.startsWith("55") && clean.length === 13) {
+    const ddd = clean.slice(2, 4);
+    const ninth = clean[4];
+    const rest = clean.slice(5);
+    if (ninth === "9") {
+      const withoutNine = `55${ddd}${rest}`;
+      return [clean, withoutNine];
+    }
+  }
+
+  return [clean];
+}

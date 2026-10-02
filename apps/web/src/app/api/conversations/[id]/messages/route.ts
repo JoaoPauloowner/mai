@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
-import { isMetaTokenExpired } from "@/lib/meta";
+import { isMetaTokenExpired, formatWhatsAppRecipientCandidates } from "@/lib/meta";
 
 export async function POST(
   req: Request,
@@ -75,23 +75,37 @@ export async function POST(
 
       if ((org.whatsappTipoConexao === "OFICIAL_META" || org.whatsappTipoConexao === "META_CLOUD_API") && metaToken && metaPhoneId) {
         try {
-          const res = await fetch(`https://graph.facebook.com/v20.0/${metaPhoneId}/messages`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${metaToken}`,
-            },
-            body: JSON.stringify({
-              messaging_product: "whatsapp",
-              recipient_type: "individual",
-              to: leadPhone,
-              type: "text",
-              text: { preview_url: false, body: trimmedContent },
-            }),
-          });
+          const candidates = formatWhatsAppRecipientCandidates(leadPhone);
+          let sentOk = false;
+          let lastErrData: any = null;
 
-          if (!res.ok) {
-            const errData = await res.json().catch(() => ({}));
+          for (const targetPhone of candidates) {
+            const res = await fetch(`https://graph.facebook.com/v20.0/${metaPhoneId}/messages`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${metaToken}`,
+              },
+              body: JSON.stringify({
+                messaging_product: "whatsapp",
+                recipient_type: "individual",
+                to: targetPhone,
+                type: "text",
+                text: { preview_url: false, body: trimmedContent },
+              }),
+            });
+
+            if (res.ok) {
+              sentOk = true;
+              sendSuccess = true;
+              break;
+            } else {
+              lastErrData = await res.json().catch(() => ({}));
+            }
+          }
+
+          if (!sentOk) {
+            const errData = lastErrData || {};
             sendSuccess = false;
             externalError = errData?.error?.message || "Erro no envio Meta Graph API";
 

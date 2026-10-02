@@ -79,6 +79,34 @@ export function verifyMetaSignature(
   }
 }
 
+// Utilitário para resolver variações de formato de telefone WhatsApp (especialmente a regra do 9º dígito no Brasil)
+export function formatWhatsAppRecipientCandidates(phone: string): string[] {
+  const clean = phone.replace(/\D/g, "");
+
+  // Regra do 9º dígito do Brasil (+55 + 2 dígitos DDD + 8 dígitos móvel => prioriza +55 + DDD + 9 + 8 dígitos)
+  if (clean.startsWith("55") && clean.length === 12) {
+    const ddd = clean.slice(2, 4);
+    const rest = clean.slice(4);
+    if (["6", "7", "8", "9"].includes(rest[0])) {
+      const withNine = `55${ddd}9${rest}`;
+      return [withNine, clean];
+    }
+  }
+
+  // Se já tem 13 dígitos no Brasil (55 + DDD + 9 + 8 dígitos)
+  if (clean.startsWith("55") && clean.length === 13) {
+    const ddd = clean.slice(2, 4);
+    const ninth = clean[4];
+    const rest = clean.slice(5);
+    if (ninth === "9") {
+      const withoutNine = `55${ddd}${rest}`;
+      return [clean, withoutNine];
+    }
+  }
+
+  return [clean];
+}
+
 // 2. Envio de mensagem de texto via Meta WhatsApp Cloud API v20.0
 export async function sendWhatsAppMessage({
   phoneNumberId,
@@ -88,32 +116,43 @@ export async function sendWhatsAppMessage({
   organizationId,
 }: SendWhatsAppParams): Promise<{ success: boolean; data?: any; error?: string; isTokenExpired?: boolean }> {
   try {
-    const cleanTo = to.replace(/\D/g, "");
+    const candidates = formatWhatsAppRecipientCandidates(to);
     const url = `https://graph.facebook.com/v20.0/${phoneNumberId}/messages`;
+    let lastData: any = null;
+    let success = false;
 
-    const res = await fetchWithTimeout(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({
-        messaging_product: "whatsapp",
-        recipient_type: "individual",
-        to: cleanTo,
-        type: "text",
-        text: { preview_url: false, body: text },
-      }),
-    }, 15000);
+    for (const targetPhone of candidates) {
+      const res = await fetchWithTimeout(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          recipient_type: "individual",
+          to: targetPhone,
+          type: "text",
+          text: { preview_url: false, body: text },
+        }),
+      }, 15000);
 
-    const data = await res.json();
+      const data = await res.json();
+      lastData = data;
 
-    if (!res.ok) {
-      console.error("[Meta API WhatsApp] Erro no envio:", data);
-      if (data?.error?.code === 131030) {
-        console.warn(`[Meta API Sandbox] Destinatário ${cleanTo} não está na lista de permissão do número de teste Meta (código 131030). Adicione-o em Meta Developers > WhatsApp > API Setup > To.`);
+      if (res.ok) {
+        success = true;
+        return { success: true, data };
       }
-      const tokenExpired = isMetaTokenExpired(data);
+
+      console.error(`[Meta API WhatsApp] Erro no envio para ${targetPhone}:`, data);
+      if (data?.error?.code === 131030) {
+        console.warn(`[Meta API Sandbox] Destinatário ${targetPhone} não está na lista de permissão. Tentando próximo formato se houver...`);
+      }
+    }
+
+    const data = lastData;
+    const tokenExpired = isMetaTokenExpired(data);
 
       if (tokenExpired) {
         console.warn(`[Meta API Token Expired] Token inválido ou expirado para Phone ID ${phoneNumberId}. Atualizando status para DISCONNECTED.`);
@@ -154,14 +193,11 @@ export async function sendWhatsAppMessage({
         }
       }
 
-      return {
-        success: false,
-        error: data?.error?.message || "Erro desconhecido da Meta API",
-        isTokenExpired: tokenExpired,
-      };
-    }
-
-    return { success: true, data };
+    return {
+      success: false,
+      error: data?.error?.message || "Erro desconhecido da Meta API",
+      isTokenExpired: tokenExpired,
+    };
   } catch (error: any) {
     console.error("[Meta API WhatsApp] Falha na requisição:", error);
     return { success: false, error: error.message };
